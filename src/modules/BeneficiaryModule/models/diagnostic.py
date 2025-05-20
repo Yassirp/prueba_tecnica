@@ -1,0 +1,55 @@
+from sqlalchemy import Column, BigInteger, Integer, String, Text, Date, TIMESTAMP
+from database.base import Base
+from datetime import datetime
+
+class BeneficiaryIntegralDiagnostic(Base):
+    __tablename__ = "beneficiary_integral_diagnostic"
+
+    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    beneficiary_id = Column(BigInteger, nullable=False)
+    radication_date = Column(Date)
+    consecutive_number_home = Column(String(255))
+    suscription_date = Column(Date)
+    department = Column(BigInteger)
+    municipality = Column(BigInteger)
+    sidewalk = Column(String(255))
+    sector_zone = Column(String(255))
+    modality = Column(String(255))
+    productive_activity = Column(String(255))
+    productive_activity_confirm_description = Column(Text)
+    education_level = Column(String(255))
+    quantity_members_family = Column(String(255))
+    quantity_home_families = Column(String(255))
+    quantity_rooms_sleeping = Column(String(255))
+    rooms_for_sleeping = Column(String(255))
+    property_acreditation_description = Column(Text)
+    location_zone = Column(String(255))
+    location_zone_wather = Column(String(255))
+    location_zone_growth = Column(String(255))
+    property_not_comply_description = Column(Text)
+    enable = Column(Integer)
+    observation = Column(String(590))
+    revisedtocontrac = Column(Integer)
+    legal_representative = Column(String(255))
+    document_legal_representative = Column(String(255))
+    numbers_persons_x_house = Column("NumbersPersonsXHouse", String(255))
+    neighborhood = Column(String(255))
+    address = Column(String(255))
+    real_estate_registration = Column(String(255))
+    cadastral_record = Column(String(255))
+    healthy_possession_document = Column(String(255))
+    disability_condition_members = Column(String(255))
+    community_home = Column(String(255))
+    description_discapacidad = Column(Text)
+    kitchen = Column(String(255))
+    laundry = Column(String(255))
+    bathroom = Column(String(255))
+    hall = Column(String(255))
+    bedroom = Column(String(255))
+    patio = Column(String(255))
+    created_at = Column(TIMESTAMP, default=datetime.utcnow)
+    updated_at = Column(TIMESTAMP, default=datetime.utcnow, onupdate=datetime.utcnow)
+    deleted_at = Column(TIMESTAMP, nullable=True)
+
+
+    

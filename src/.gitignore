@@ -1,0 +1,80 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+.venv/
+venv/
+ENV/
+env/
+
+# Environment variables
+.env
+
+# VSCode / PyCharm / IDE settings
+.vscode/
+.idea/
+
+# Distribution / packaging
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+
+# Pytest
+.pytest_cache/
+
+# Database files
+*.db
+*.db_dev
+*.sqlite3
+
+# Docker-related
+*.pid
+*.log
+docker-compose.override.yml
+
+# MacOS & Linux metadata
+.DS_Store
+*.swp
+*.swo
+
+# Migrations (optional, if auto-generated and re-creatable)
+migrations/__pycache__/
+migrations/*.pyc
+
+# Custom folders
+querys/__pycache__/
+routes/__pycache__/
+services/__pycache__/
+schemas/__pycache__/
+views/__pycache__/
+models/__pycache__/
+utils/__pycache__/
+database/__pycache__/
+test/__pycache__/
+src/__pycache__/
