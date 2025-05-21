@@ -1,5 +1,5 @@
 from functools import wraps
-from fastapi import status
+from fastapi import status, HTTPException
 from typing import Callable, Any
 from ..shared.utils.request_utils import http_response
 from ..shared.constants.messages import GlobalMessages
@@ -22,6 +22,12 @@ def handle_route_responses(success_message: str, error_message: str, not_found_m
                     message=success_message,
                     data=result,
                     status=status.HTTP_200_OK
+                )
+            except HTTPException as http_ex:
+                return http_response(
+                    message=error_message,
+                    errors=[str(http_ex.detail)],
+                    status=http_ex.status_code
                 )
             except Exception as e:
                 return http_response(
