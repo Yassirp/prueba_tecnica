@@ -1,6 +1,6 @@
 from fastapi import HTTPException, Request
 from starlette.middleware.base import BaseHTTPMiddleware
-from shared.constants.settings import Settings
+from ..shared.constants.settings import Settings
 
 class APIKeyMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):

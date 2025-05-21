@@ -1,4 +1,4 @@
-from app.shared.bases.base_model import Base
+from ....shared.bases.base_model import Base
 from sqlalchemy import (
     Column, BigInteger, TinyInteger, String, DateTime
 )

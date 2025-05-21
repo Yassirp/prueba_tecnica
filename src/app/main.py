@@ -1,8 +1,8 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
-from shared.constants.settings import Settings
-from middleware.api_key import APIKeyMiddleware
+from fastapi.responses import FileResponse, JSONResponse
+from src.app.shared.constants.settings import Settings
+from src.app.middleware.api_key import APIKeyMiddleware
 import os
 
 app = FastAPI(
@@ -11,28 +11,32 @@ app = FastAPI(
     version=Settings.APP_VERSION
 )
 
-# Configure CORS
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=Settings.ALLOWED_ORIGINS.split(","),
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-# Add API Key middleware
-app.add_middleware(APIKeyMiddleware)
+#app.add_middleware(
+#    CORSMiddleware,
+#    allow_origins=["*"],
+#    allow_credentials=True,
+#    allow_methods=["*"],
+#    allow_headers=["*"],
+#)
+#app.add_middleware(APIKeyMiddleware)
 
 @app.get("/")
 async def root():
     image_path = os.path.join("src", "app", "static", "status.svg")
     return FileResponse(image_path, media_type="image/svg+xml")
 
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    return JSONResponse(
+        status_code=500,
+        content={"detail": str(exc)}
+    )
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(
-        "main:app",
+        app,
         host=Settings.HOST,
         port=Settings.PORT,
-        reload=bool(Settings.DEBUG)
+        reload=Settings.DEBUG
     )

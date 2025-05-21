@@ -1,5 +1,5 @@
 from typing import Type, TypeVar, List, Optional, Dict, Any
-from app.shared.bases.base_repository import BaseRepository
+from .base_repository import BaseRepository
 from pydantic import ValidationError
 from fastapi import HTTPException
 

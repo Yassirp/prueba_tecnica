@@ -1,8 +1,8 @@
 from typing import AsyncSession
-from app.shared.bases.base_service import BaseService
-from app.modules.ProjectsModule.models.projects import Project
-from app.modules.ProjectsModule.repositories.projects_repository import ProjectRepository
-from app.modules.ProjectsModule.schemas.projects_schemas import ProjectCreate, ProjectUpdate
+from ....shared.bases.base_service import BaseService
+from ..models.projects import Project
+from ..repositories.projects_repository import ProjectRepository
+from ..schemas.projects_schemas import ProjectCreate, ProjectUpdate
 
 class ProjectService(BaseService):
     def __init__(self, db_session: AsyncSession):

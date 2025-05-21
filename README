@@ -4,7 +4,12 @@ Este es un microservicio para la Gestión Documental de todos los proyectos de N
 
 ## Configuración del Proyecto
 
-1. Ejecutar docker compose:
+- Ejecutar proyecto en local:
+```bash
+uvicorn src.app.main:app --reload
+```
+
+- Ejecutar docker compose:
 ```bash
 docker compose up -d --build
 ```

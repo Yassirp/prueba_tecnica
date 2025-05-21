@@ -2,10 +2,10 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List, Optional
 
-from app.modules.projects_module.services.projects_service import ProjectService
-from app.modules.projects_module.schemas.projects_schemas import ProjectCreate, ProjectUpdate, ProjectOut
-from app.config.database.session import get_db
-from app.shared.utils.request_utils import paginated_response
+from ....config.database.session import get_db
+from ..services.projects_service import ProjectService
+from ..schemas.projects_schemas import ProjectCreate, ProjectUpdate, ProjectOut
+from ....shared.utils.request_utils import paginated_response
 
 router = APIRouter(prefix="/projects", tags=["Projects"])
 
