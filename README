@@ -4,6 +4,24 @@ Este es un microservicio para la Gestión Documental de todos los proyectos de N
 
 ## Configuración del Proyecto
 
+Version de Python requerida: Python 3.12.x
+
+- Crear Base de Datos: master-documents
+
+- Ejecutar migracion inicial:
+Es necesario ejecutar el comando desde el contenedor del 
+api en el docker, sobre la carpeta src
+```bash
+alembic revision --autogenerate -m "initial migration"
+```
+
+- Aplicar cambios de la migracion en la DB:
+Es necesario ejecutar el comando desde el contenedor del 
+api en el docker, sobre la carpeta src
+```bash
+alembic upgrade head
+```
+
 - Ejecutar proyecto en local:
 ```bash
 uvicorn src.app.main:app --reload

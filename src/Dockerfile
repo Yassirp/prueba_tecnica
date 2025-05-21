@@ -9,4 +9,4 @@ RUN apt-get update && apt-get install -y python3-distutils libpq-dev gcc && \
 
 COPY . .
 
-CMD ["sh", "-c", "uvicorn src.app.main:app --host ${HOST_IP:-0.0.0.0} --port ${HOST_PORT:-8080} --reload"]
+CMD ["sh", "-c", "uvicorn src.app.main:app --host ${HOST_IP:-0.0.0.0} --port ${HOST_PORT:-8000} --reload"]

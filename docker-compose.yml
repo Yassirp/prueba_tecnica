@@ -6,7 +6,7 @@ services:
     env_file:
       - ./src/.env
     ports:
-      - "5000:5000"
+      - "5001:8000"
     volumes:
       - .:/src
     depends_on:

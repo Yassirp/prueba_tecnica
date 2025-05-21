@@ -1,7 +1,7 @@
 from typing import TypeVar, Generic, Type, Optional, List, Tuple, Any
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from utils.query_utils import apply_filters, apply_order_by
+from ..utils.query_utils import apply_filters, apply_order_by
 
 T = TypeVar("T")  # Modelo SQLAlchemy
 

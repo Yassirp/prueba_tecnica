@@ -1,9 +1,14 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
+from fastapi.templating import Jinja2Templates
+from fastapi.staticfiles import StaticFiles
+from fastapi.exceptions import RequestValidationError
 from src.app.shared.constants.settings import Settings
 from src.app.middleware.api_key import APIKeyMiddleware
-import os
+from src.app.routes import router as main_router
+from src.app.shared.utils.request_utils import http_response, get_errors_validations
+from src.app.shared.constants.messages import GlobalMessages
 
 app = FastAPI(
     title=Settings.APP_NAME,
@@ -11,6 +16,28 @@ app = FastAPI(
     version=Settings.APP_VERSION
 )
 
+# TEMPLATES
+templates = Jinja2Templates(directory="src/app/templates")
+
+# STATIC FILES
+app.mount("/static", StaticFiles(directory="src/app/static"), name="static")
+
+# MAIN ROUTERS
+app.include_router(main_router)
+
+@app.get("/", include_in_schema=False, response_class=HTMLResponse)
+async def root(request: Request):
+    return templates.TemplateResponse(
+        "index.html",
+        {
+            "request": request,
+            "version": Settings.APP_VERSION,
+            "app_name": Settings.APP_NAME,
+            "app_description": Settings.APP_DESCRIPTION
+        }
+    )
+
+# MIDDLEWARES
 #app.add_middleware(
 #    CORSMiddleware,
 #    allow_origins=["*"],
@@ -20,18 +47,25 @@ app = FastAPI(
 #)
 #app.add_middleware(APIKeyMiddleware)
 
-@app.get("/")
-async def root():
-    image_path = os.path.join("src", "app", "static", "status.svg")
-    return FileResponse(image_path, media_type="image/svg+xml")
+# MANEJO DE ERRORES GLOBALES
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    error_messages = [f"'{error['field']}': {error['message']}" for error in get_errors_validations(exc)]
+    return http_response(
+        message=GlobalMessages.ERROR_UNPROCESSABLE_ENTITY_VALIDATION,
+        errors=error_messages,
+        status=status.HTTP_422_UNPROCESSABLE_ENTITY
+    )
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
-    return JSONResponse(
-        status_code=500,
-        content={"detail": str(exc)}
+    return http_response(
+        message=GlobalMessages.ERROR_INTERNAL,
+        errors=[str(exc)],
+        status=status.HTTP_500_INTERNAL_SERVER_ERROR
     )
 
+# ARRANQUE DE LA APLICACION
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(

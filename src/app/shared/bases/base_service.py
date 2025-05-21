@@ -1,25 +1,21 @@
-from typing import Type, TypeVar, List, Optional, Dict, Any
+from typing import Type, TypeVar, List, Optional, Dict, Any, Generic, Tuple
 from .base_repository import BaseRepository
-from pydantic import ValidationError
-from fastapi import HTTPException
+from pydantic import BaseModel
 
 Model = TypeVar("Model")
-CreateSchema = TypeVar("CreateSchema")
-UpdateSchema = TypeVar("UpdateSchema")
+OutSchema = TypeVar("OutSchema", bound=BaseModel)
 
-class BaseService:
+class BaseService(Generic[Model, OutSchema]):
     def __init__(
         self,
         model: Type[Model],
         repository_cls: Type[BaseRepository],
-        create_schema: Type[CreateSchema],
-        update_schema: Type[UpdateSchema],
-        db_session
+        db_session,
+        out_schema: Type[OutSchema]
     ):
         self.model = model
         self.repo = repository_cls(db_session)
-        self.create_schema = create_schema
-        self.update_schema = update_schema
+        self.out_schema = out_schema
 
     async def get_all(
         self,
@@ -27,27 +23,26 @@ class BaseService:
         offset: Optional[int] = None,
         order_by: Optional[str] = None,
         filters: Optional[Dict[str, Any]] = None
-    ) -> List[Model]:
-        return await self.repo.get_all(limit, offset, order_by, filters)
+    ) -> Tuple[List[Dict], int]:
+        items, total = await self.repo.get_all(limit, offset, order_by, filters)
+        serialized_items = [self.out_schema.model_validate(item).model_dump() for item in items]
+        return serialized_items, total
     
-    async def get_by_id(self, entity_id: int) -> Optional[Model]:
-        return await self.repo.get_by_id(entity_id)
+    async def get_by_id(self, entity_id: int) -> Optional[Dict]:
+        item = await self.repo.get_by_id(entity_id)
+        if not item:
+            return None
+        return self.out_schema.model_validate(item).model_dump()
 
-    async def create(self, data: dict) -> Model:
-        try:
-            validated_data = self.create_schema.model_validate(data, context={'db': self.repo.db})
-        except ValidationError as ve:
-            raise HTTPException(status_code=422, detail=ve.errors())
+    async def create(self, data: dict) -> Dict:
+        item = await self.repo.create(data)
+        return self.out_schema.model_validate(item).model_dump()
 
-        return await self.repo.create(validated_data.model_dump())
-
-    async def update(self, entity_id: int, data: dict) -> Model:
-        try:
-            validated_data = self.update_schema.model_validate(data, context={'db': self.repo.db, 'id': entity_id})
-        except ValidationError as ve:
-            raise HTTPException(status_code=422, detail=ve.errors())
-
-        return await self.repo.update(entity_id, validated_data.model_dump(exclude_unset=True))
+    async def update(self, entity_id: int, data: dict) -> Optional[Dict]:
+        item = await self.repo.update(entity_id, data)
+        if not item:
+            return None
+        return self.out_schema.model_validate(item).model_dump()
 
     async def delete(self, entity_id: int) -> bool:
         entity = await self.repo.get_by_id(entity_id)
@@ -55,3 +50,9 @@ class BaseService:
             return False
         await self.repo.delete(entity.id)
         return True
+
+    def _serialize_model(self, model: Model) -> dict:
+        """Convierte un modelo SQLAlchemy a un diccionario"""
+        if hasattr(model, '__dict__'):
+            return {k: v for k, v in model.__dict__.items() if not k.startswith('_')}
+        return {}
