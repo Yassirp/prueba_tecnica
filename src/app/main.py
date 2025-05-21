@@ -13,7 +13,8 @@ from src.app.shared.constants.messages import GlobalMessages
 app = FastAPI(
     title=Settings.APP_NAME,
     description=Settings.APP_DESCRIPTION,
-    version=Settings.APP_VERSION
+    version=Settings.APP_VERSION,
+    swagger_ui_parameters={"displayRequestDuration": True}
 )
 
 # TEMPLATES

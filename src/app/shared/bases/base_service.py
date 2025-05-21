@@ -47,7 +47,7 @@ class BaseService(Generic[Model, OutSchema]):
     async def delete(self, entity_id: int) -> bool:
         entity = await self.repo.get_by_id(entity_id)
         if not entity:
-            return False
+            return None
         await self.repo.delete(entity.id)
         return True
 

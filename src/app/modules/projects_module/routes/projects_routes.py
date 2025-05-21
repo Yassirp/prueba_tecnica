@@ -21,7 +21,7 @@ async def get_all_projects(
     limit: int = Query(50, ge=1, le=100, description="Número de elementos por página"),
     offset: int = Query(0, ge=0, description="Número de elementos a omitir"),
     order_by: Optional[str] = Query(None, description="Campo para ordenar (ej: 'id:asc' o 'name:desc')"),
-    filters: Optional[str] = Query(None, description="Criterios de filtrado en formato JSON (ej: {name: '%john%', state: 0})")
+    filters: Optional[str] = Query(None, description="Criterios de filtrado en formato JSON (ej: {'name': '%john%', 'state': 0})")
 ):
     service = ProjectService(db)
     projects, total = await service.get_all(limit=limit, offset=offset, order_by=order_by, filters=filters)

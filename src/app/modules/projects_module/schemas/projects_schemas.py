@@ -1,9 +1,9 @@
-from pydantic import Field
+from pydantic import Field, BaseModel
 from typing import Optional
 from datetime import datetime
 from ....shared.bases.base_schema import BaseOutSchema
 
-class ProjectBase(BaseOutSchema):
+class ProjectBase(BaseModel):
     name: str = Field(max_length=200)
     state: int
 
@@ -13,7 +13,7 @@ class ProjectCreate(ProjectBase):
 class ProjectUpdate(ProjectBase):
     pass
 
-class ProjectOut(ProjectBase):
+class ProjectOut(ProjectBase, BaseOutSchema):
     id: int
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
