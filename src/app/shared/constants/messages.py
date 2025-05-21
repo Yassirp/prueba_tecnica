@@ -21,3 +21,11 @@ class ProjectsMessages(GlobalMessages):
     OK_UPDATED = "Proyecto actualizado correctamente"
     OK_DELETED = "Proyecto eliminado correctamente"
     ERROR_NOT_FOUND = "Proyecto no encontrado"
+
+class EntityTypesMessages(GlobalMessages):
+    OK_GET_ALL = "Tipos de entidad obtenidos correctamente"
+    OK_GET = "Tipo de entidad obtenido correctamente"
+    OK_CREATED = "Tipo de entidad creado correctamente"
+    OK_UPDATED = "Tipo de entidad actualizado correctamente"
+    OK_DELETED = "Tipo de entidad eliminado correctamente"
+    ERROR_NOT_FOUND = "Tipo de entidad no encontrado"
