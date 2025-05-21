@@ -1,14 +1,7 @@
 services:
 
-  redis:
-    image: redis:alpine
-    ports:
-      - "6379:6379"
-    networks:
-      - api_network
-
-  backend:
-    container_name: backend
+  micro_documents_api:
+    container_name: micro_documents_api
     build: ./src/
     env_file:
       - ./src/.env
@@ -17,35 +10,20 @@ services:
     volumes:
       - .:/src
     depends_on:
-      - db
+      - micro_documents_db
     restart: always
     networks:
       - api_network
 
-  mysql:
-    image: mysql:8.0
-    container_name: mysql
-    ports:
-      - "3307:3306"
-    environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: mydatabase
-      MYSQL_USER: myuser
-      MYSQL_PASSWORD: mypassword
-    volumes:
-      - mysql_data:/var/lib/mysql
-    networks:
-      - api_network
-
-  db:
-    image: docker.io/bitnami/postgresql:15
-    container_name: db
+  micro_documents_db:
+    image: docker.io/bitnami/postgresql:16
+    container_name: micro_documents_db
     ports:
       - "5434:5432"
     env_file:
       - ./src/.env
     volumes:
-      - db_data:/var/lib/postgresql
+      - db-micro-documents-volume:/var/lib/postgresql
     networks:
       - api_network
 
@@ -54,6 +32,4 @@ networks:
     driver: bridge
     
 volumes:
-  db_data:
-  mysql_data:
-  
+  db-micro-documents-volume:

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <!-- Background circle -->
+    <circle cx="100" cy="100" r="90" fill="#f0f0f0" stroke="#ddd" stroke-width="2"/>
+    
+    <!-- Status indicator -->
+    <circle cx="100" cy="100" r="60" fill="#4CAF50" stroke="#388E3C" stroke-width="2"/>
+    
+    <!-- Checkmark -->
+    <path d="M70 100 L90 120 L130 80" 
+          stroke="white" 
+          stroke-width="8" 
+          fill="none" 
+          stroke-linecap="round" 
+          stroke-linejoin="round"/>
+    
+    <!-- Text -->
+    <text x="100" y="170" 
+          font-family="Arial" 
+          font-size="24" 
+          text-anchor="middle" 
+          fill="#333">
+        API Online
+    </text>
+</svg> 

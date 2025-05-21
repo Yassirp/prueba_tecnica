@@ -1,0 +1,10 @@
+## Microservicio Documentos
+
+Este es un microservicio para la Gestión Documental de todos los proyectos de Naowee
+
+## Configuración del Proyecto
+
+1. Ejecutar docker compose:
+```bash
+docker compose up -d --build
+```
