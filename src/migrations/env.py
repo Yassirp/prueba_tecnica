@@ -9,8 +9,8 @@ from alembic import context
 from dotenv import load_dotenv
 from typing import Any, Dict
 
-# Agregar el directorio src al path de Python
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# Agregar el directorio raíz del proyecto al path de Python
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 # Cargar variables de entorno
 load_dotenv()
@@ -26,8 +26,9 @@ if config.config_file_name is not None:
 
 # add your model's MetaData object here
 # for 'autogenerate' support
-from src.app.models import Base  # Esto importará todos los modelos automáticamente
-target_metadata = Base.metadata
+from src.app.shared.bases.base_model import BaseModel
+from src.app.models import *  # Esto importará todos los modelos automáticamente
+target_metadata = BaseModel.metadata
 
 def get_url() -> str:
     user = os.getenv("PG_USER")
