@@ -32,11 +32,15 @@ async def get_all_projects(
         description="Criterios de filtrado en formato JSON (ej: {'name': '%john%', 'state': 0})",
     ),
 ) -> Dict[str, Any]:
-    service = ProjectService(db)
-    projects, total = await service.get_all(
-        limit=limit, offset=offset, order_by=order_by, filters=filters
-    )
-    return paginated_response(projects, total, limit, offset)
+    try:
+        service = ProjectService(db)
+        projects, total = await service.get_all(
+            limit=limit, offset=offset, order_by=order_by, filters=filters
+        )
+        return paginated_response(projects, total, limit, offset)
+    except Exception as e:
+        raise e
+
 
 
 @router.get("/get-by-id/{project_id}", response_model=ProjectOut)
@@ -48,8 +52,12 @@ async def get_all_projects(
 async def get_project_by_id(
     project_id: int, db: AsyncSession = Depends(get_db)
 ) -> Dict[str, Any]:
-    service = ProjectService(db)
-    return await service.get_by_id(project_id)
+    try:
+        service = ProjectService(db)
+        return await service.get_by_id(project_id)
+    except Exception as e:
+        raise e
+
 
 
 @router.post("/create", response_model=ProjectOut, status_code=status.HTTP_201_CREATED)
@@ -73,8 +81,12 @@ async def create_project(
 async def update_project(
     project_id: int, data: ProjectUpdate, db: AsyncSession = Depends(get_db)
 ) -> Dict[str, Any]:
-    service = ProjectService(db)
-    return await service.update(project_id, data.model_dump(exclude_unset=True))
+    try:
+        service = ProjectService(db)
+        return await service.update(project_id, data.model_dump(exclude_unset=True))
+    except Exception as e:
+        raise e
+
 
 
 @router.delete("/delete/{project_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -84,5 +96,9 @@ async def update_project(
     not_found_message=ProjectsMessages.ERROR_NOT_FOUND,
 )
 async def delete_project(project_id: int, db: AsyncSession = Depends(get_db)) -> None:
-    service = ProjectService(db)
-    return await service.delete(project_id)
+    try:
+        service = ProjectService(db)
+        return await service.delete(project_id)
+    except Exception as e:
+        raise e
+

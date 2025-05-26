@@ -20,27 +20,38 @@ class EntityTypeService(BaseService[EntityType, EntityTypeOut]):
         self.project_service = ProjectService(db_session)
 
     async def _validate_project_exists(self, project_id: int) -> None:
-        project = await self.project_service.get_by_id(project_id)
-        if not project:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"No se encontró el proyecto con el id '{project_id}'",
+        try: 
+            project = await self.project_service.get_by_id(project_id)
+            if not project:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"No se encontró el proyecto con el id '{project_id}'",
             )
+        except Exception as e:
+            raise e
+
 
     async def create(self, data: Dict[str, Any]) -> Dict[str, Any]:
-        project_id = cast(int, data.get("project_id"))
-        await self._validate_project_exists(project_id)
+        try:
+            project_id = cast(int, data.get("project_id"))
+            await self._validate_project_exists(project_id)
 
-        item = await self.repo.create(data)
-        return self.out_schema.model_validate(item).model_dump()
+            item = await self.repo.create(data)
+            return self.out_schema.model_validate(item).model_dump()
+        except Exception as e:
+            raise e
 
     async def update(
         self, entity_id: int, data: Dict[str, Any]
     ) -> Optional[Dict[str, Any]]:
-        project_id = cast(int, data.get("project_id"))
-        await self._validate_project_exists(project_id)
+        try:
+            project_id = cast(int, data.get("project_id"))
+            await self._validate_project_exists(project_id)
 
-        item = await self.repo.update(entity_id, data)
-        if not item:
-            return None
-        return self.out_schema.model_validate(item).model_dump()
+            item = await self.repo.update(entity_id, data)
+            if not item:
+                return None
+            return self.out_schema.model_validate(item).model_dump()
+        except Exception as e:
+            raise e
+

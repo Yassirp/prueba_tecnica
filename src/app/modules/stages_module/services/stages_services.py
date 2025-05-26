@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Dict, Optional, Any, cast
 from fastapi import HTTPException, status
-from src.app.modules.projects_module.models.projects import Project
+from src.app.modules.projects_module.services.projects_service import ProjectService
 from src.app.modules.stages_module.models.stages import Stage
 from src.app.shared.bases.base_service import BaseService
 from src.app.modules.stages_module.repositories.stages_repositories import (
@@ -18,11 +18,11 @@ class StageService(BaseService[Stage, StageOut]):
             db_session=db_session,
             out_schema=StageOut,
         )
-        self.db_session = db_session
+        self.project_service = ProjectService(db_session)
 
     async def _validate_project_exists(self, project_id: int) -> None:
         try:
-            project = await self.db_session.get(Project, project_id)
+            project = await self.project_service.get_by_id(project_id)
             if not project:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,

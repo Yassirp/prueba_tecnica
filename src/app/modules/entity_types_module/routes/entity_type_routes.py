@@ -38,11 +38,15 @@ async def get_all_entity_types(
         description="Criterios de filtrado en formato JSON (ej: {'name': '%john%', 'state': 0})",
     ),
 ) -> Dict[str, Any]:
-    service = EntityTypeService(db)
-    entity_types, total = await service.get_all(
+    try:
+        service = EntityTypeService(db)
+        entity_types, total = await service.get_all(
         limit=limit, offset=offset, order_by=order_by, filters=filters
-    )
-    return paginated_response(entity_types, total, limit, offset)
+        )
+        return paginated_response(entity_types, total, limit, offset)
+    except Exception as e:
+        raise e
+
 
 
 @router.get("/get-by-id/{entity_type_id}", response_model=EntityTypeOut)
@@ -54,8 +58,12 @@ async def get_all_entity_types(
 async def get_entity_type_by_id(
     entity_type_id: int, db: AsyncSession = Depends(get_db)
 ) -> Dict[str, Any]:
-    service = EntityTypeService(db)
-    return await service.get_by_id(entity_type_id)
+    try:
+        service = EntityTypeService(db)
+        return await service.get_by_id(entity_type_id)
+    except Exception as e:
+        raise e
+
 
 
 @router.post("/create", response_model=EntityTypeOut, status_code=status.HTTP_201_CREATED)
@@ -66,8 +74,12 @@ async def get_entity_type_by_id(
 async def create_entity_type(
     data: EntityTypeCreate, db: AsyncSession = Depends(get_db)
 ) -> Dict[str, Any]:
-    service = EntityTypeService(db)
-    return await service.create(data.model_dump())
+    try:    
+        service = EntityTypeService(db)
+        return await service.create(data.model_dump())
+    except Exception as e:
+        raise e
+
 
 
 @router.put("/update/{entity_type_id}", response_model=EntityTypeOut)
@@ -79,8 +91,12 @@ async def create_entity_type(
 async def update_entity_type(
     entity_type_id: int, data: EntityTypeUpdate, db: AsyncSession = Depends(get_db)
 ) -> Dict[str, Any]:
-    service = EntityTypeService(db)
-    return await service.update(entity_type_id, data.model_dump(exclude_unset=True))
+    try:
+        service = EntityTypeService(db)
+        return await service.update(entity_type_id, data.model_dump(exclude_unset=True))
+    except Exception as e:
+        raise e
+
 
 
 @router.delete("/delete/{entity_type_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -92,5 +108,9 @@ async def update_entity_type(
 async def delete_entity_type(
     entity_type_id: int, db: AsyncSession = Depends(get_db)
 ) -> None:
-    service = EntityTypeService(db)
-    return await service.delete(entity_type_id)
+    try:
+        service = EntityTypeService(db)
+        return await service.delete(entity_type_id)
+    except Exception as e: 
+        raise e
+

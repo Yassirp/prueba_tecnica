@@ -2,11 +2,16 @@
 
 Este es un microservicio para la Gestión Documental de todos los proyectos de Naowee
 
-## Configuración del Proyecto
+## 🚀 Configuración del Proyecto
 
 Version de Python requerida: Python 3.12.x
 
-- Crear Base de Datos: master-documents
+- Ejecutar docker compose:
+```bash
+docker compose up -d --build
+```
+
+## 🧩 Crear Base de Datos: master-documents
 
 - Ejecutar migracion inicial:
 Es necesario ejecutar el comando desde el contenedor del 
@@ -22,17 +27,50 @@ api en el docker, sobre la carpeta src
 alembic upgrade head
 ```
 
+## 🚀 Iniciar proyecto sin docker 
 - Ejecutar proyecto en local:
 ```bash
 uvicorn src.app.main:app --reload
-```
-
-- Ejecutar docker compose:
-```bash
-docker compose up -d --build
 ```
 
 - Ejecutar analisis de codigo:
 ```bash
 ./check_quality.sh
 ```
+
+
+## 🧩 Migraciones con Alembic
+- Crear migracion en DB:
+Genera un archivo de migración dentro del directorio alembic/versions/.
+
+✅ Alembic compara el modelo actual (definido en tus clases SQLAlchemy) con la estructura actual de la base de datos. Si encuentra diferencias (por ejemplo, una nueva clase Stage), genera SQL para crear la tabla correspondiente.
+
+```bash
+alembic revision --autogenerate -m "create NAME table"
+```
+    ## 📦 Aplicar los cambios a la base de datos
+    - Bajar cambios a la DB:
+    Ejecuta todas las migraciones pendientes hasta la última versión (head).
+
+    ✅ Aplica los cambios definidos (crear tablas, modificar columnas, etc).
+
+    📌 ¿Cuándo se usa?
+    Después de crear una migración con revision, debes aplicar los cambios a la base de     datos con upgrade.
+
+    COMANDO A EJECUTAR:
+    - alembic upgrade head
+
+## 🛠️ Agregar un nuevo campo a un modelo existente
+- Nuveo campo a la DB: Detecta que agregaste un nuevo campo (por ejemplo, description = Column(String) en Stage) en tu modelo.
+
+✅ Genera una migración con una instrucción ALTER TABLE para agregar esa columna.
+
+```bash
+alembic revision --autogenerate -m "add description column to stage"
+```
+    ## 📦 Aplicar los cambios tras agregar una columna
+
+    - ✅ Ejecuta el script de migración generado y aplica el ALTER TABLE a la base de   datos.
+
+    COMANDO A EJECUTAR:
+    - alembic upgrade head
