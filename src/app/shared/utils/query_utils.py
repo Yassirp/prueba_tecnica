@@ -1,26 +1,29 @@
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, TypeVar, Union
 from sqlalchemy.sql import Select
-from sqlalchemy.orm import InstrumentedAttribute
-from sqlalchemy import asc, desc
+from sqlalchemy import and_
 import json
-from fastapi import HTTPException, status
+from fastapi import HTTPException
 
-def apply_filters(stmt: Select, model, filters: Dict[str, Any]) -> Select:
+T = TypeVar("T")
+
+def apply_filters(
+    query: Select, model: Any, filters: Union[Dict[str, Any], str]
+) -> Select:
     """
     Ejemplo de uso:
-    
+
     # Filtro exacto
     filters = {
         "name": "John",
         "age": 25
     }
-    
+
     # Filtro con LIKE
     filters = {
         "name": "%john%",  # Busca nombres que contengan "john"
         "email": "john%"   # Busca emails que empiecen con "john"
     }
-    
+
     # Combinación de filtros
     filters = {
         "name": "%john%",
@@ -33,36 +36,46 @@ def apply_filters(stmt: Select, model, filters: Dict[str, Any]) -> Select:
             filters = json.loads(filters)
         except json.JSONDecodeError:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail="El formato de los filtros no es válido. Debe ser un JSON válido."
+                status_code=400, detail="Invalid JSON in filters parameter"
             )
-    
-    for attr_name, value in filters.items():
-        column = getattr(model, attr_name, None)
-        if column is not None and value is not None:
-            if isinstance(value, str) and "%" in value:
-                stmt = stmt.where(column.ilike(value))
-            else:
-                stmt = stmt.where(column == value)
-    return stmt
 
-def apply_order_by(stmt: Select, model, order_by: Optional[str]) -> Select:
+    if not isinstance(filters, dict):
+        return query
+
+    conditions = []
+    for key, value in filters.items():
+        if hasattr(model, key):
+            column = getattr(model, key)
+            if isinstance(value, str) and "%" in value:
+                conditions.append(column.ilike(value))
+            else:
+                conditions.append(column == value)
+
+    if conditions:
+        query = query.where(and_(*conditions))
+    return query
+
+
+def apply_order_by(query: Select, model: Any, order_by: Optional[str]) -> Select:
     """
     Ejemplo de uso:
-    
+
     order_by = "id:asc"
     order_by = "name:desc"
     order_by = "created_at:asc"
     """
     if not order_by:
-        return stmt
+        return query
 
     try:
         field, direction = order_by.split(":")
-        column: InstrumentedAttribute = getattr(model, field, None)
-        if column is not None:
-            stmt = stmt.order_by(desc(column) if direction.lower() == "desc" else asc(column))
+        if hasattr(model, field):
+            column = getattr(model, field)
+            if direction.lower() == "desc":
+                query = query.order_by(column.desc())
+            else:
+                query = query.order_by(column.asc())
     except ValueError:
-        pass  # orden malformado, ignoramos
+        pass
 
-    return stmt
+    return query

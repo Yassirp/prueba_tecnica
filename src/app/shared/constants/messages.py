@@ -12,7 +12,10 @@ class GlobalMessages:
     ERROR_METHOD_NOT_ALLOWED = "Método no permitido"
     ERROR_CONFLICT = "Conflicto"
     ERROR_TOO_MANY_REQUESTS = "Demasiadas solicitudes"
-    ERROR_UNPROCESSABLE_ENTITY_VALIDATION = "Error de validación en los datos de entrada"
+    ERROR_UNPROCESSABLE_ENTITY_VALIDATION = (
+        "Error de validación en los datos de entrada"
+    )
+
 
 class ProjectsMessages(GlobalMessages):
     OK_GET_ALL = "Proyectos obtenidos correctamente"
@@ -21,6 +24,7 @@ class ProjectsMessages(GlobalMessages):
     OK_UPDATED = "Proyecto actualizado correctamente"
     OK_DELETED = "Proyecto eliminado correctamente"
     ERROR_NOT_FOUND = "Proyecto no encontrado"
+
 
 class EntityTypesMessages(GlobalMessages):
     OK_GET_ALL = "Tipos de entidad obtenidos correctamente"

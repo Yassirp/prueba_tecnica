@@ -1,19 +1,17 @@
-from datetime import datetime
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, SmallInteger, BigInteger
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, func
 from sqlalchemy.orm import relationship
-from ....shared.bases.base_model import Base
+from src.app.shared.bases.base_model import BaseModel
 
-class EntityType(Base):
-    __tablename__ = "m_entity_types"
+class EntityType(BaseModel):
+    __tablename__ = "entity_types"
 
-    id = Column(BigInteger, primary_key=True, index=True, autoincrement=True)
-    project_id = Column(BigInteger, ForeignKey("m_projects.id"))
-    name = Column(String(100))
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(100), nullable=False)
     description = Column(String(200), nullable=True)
-    state = Column(SmallInteger)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    deleted_at = Column(DateTime, nullable=True)
+    state = Column(Integer, nullable=False, default=0)
+    project_id = Column(Integer, ForeignKey("projects.id"), nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    deleted_at = Column(DateTime(timezone=True), nullable=True)
 
-    # Relationship with Project
-    project = relationship("Project", back_populates="entity_types") 
+    project = relationship("Project", back_populates="entity_types")

@@ -31,3 +31,8 @@ uvicorn src.app.main:app --reload
 ```bash
 docker compose up -d --build
 ```
+
+- Ejecutar analisis de codigo:
+```bash
+./check_quality.sh
+```

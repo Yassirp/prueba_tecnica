@@ -7,6 +7,7 @@ from sqlalchemy import pool
 from sqlalchemy.ext.asyncio import AsyncEngine
 from alembic import context
 from dotenv import load_dotenv
+from typing import Any, Dict
 
 # Agregar el directorio src al path de Python
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -25,10 +26,10 @@ if config.config_file_name is not None:
 
 # add your model's MetaData object here
 # for 'autogenerate' support
-from app.models import Base  # Esto importará todos los modelos automáticamente
+from src.app.models import Base  # Esto importará todos los modelos automáticamente
 target_metadata = Base.metadata
 
-def get_url():
+def get_url() -> str:
     user = os.getenv("PG_USER")
     password = os.getenv("PG_PASSWORD")
     host = os.getenv("PG_HOST")
@@ -36,7 +37,7 @@ def get_url():
     db = os.getenv("PG_NAME")
     return f"postgresql+asyncpg://{user}:{password}@{host}:{port}/{db}"
 
-def do_run_migrations(connection):
+def do_run_migrations(connection: Any) -> None:
     context.configure(
         connection=connection,
         target_metadata=target_metadata
@@ -45,11 +46,11 @@ def do_run_migrations(connection):
     with context.begin_transaction():
         context.run_migrations()
 
-async def run_async_migrations():
+async def run_async_migrations() -> None:
     """In this scenario we need to create an Engine
     and associate a connection with the context.
     """
-    configuration = config.get_section(config.config_ini_section)
+    configuration = config.get_section(config.config_ini_section) or {}
     configuration["sqlalchemy.url"] = get_url()
     connectable = AsyncEngine(
         engine_from_config(
