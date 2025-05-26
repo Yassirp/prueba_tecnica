@@ -25,9 +25,12 @@ class BaseRepository(Generic[T]):
         self.db_session = db_session
 
     async def get_by_id(self, id: Any) -> Optional[T]:
-        query = select(self.model).where(self.model.id == id)
-        result = await self.db_session.execute(query)
-        return result.scalar_one_or_none()
+        try:
+            query = select(self.model).where(self.model.id == id)
+            result = await self.db_session.execute(query)
+            return result.scalar_one_or_none()
+        except Exception as e:
+            raise e
 
     async def get_all(
         self,
@@ -36,41 +39,53 @@ class BaseRepository(Generic[T]):
         order_by: Optional[str] = None,
         filters: Optional[Dict[str, Any]] = None,
     ) -> Tuple[Sequence[T], int]:
-        stmt = select(self.model)
+        try:
+            stmt = select(self.model)
 
-        if filters:
-            stmt = apply_filters(stmt, self.model, filters)
+            if filters:
+                stmt = apply_filters(stmt, self.model, filters)
 
-        if order_by:
-            stmt = apply_order_by(stmt, self.model, order_by)
+            if order_by:
+                stmt = apply_order_by(stmt, self.model, order_by)
 
-        count_stmt = stmt.with_only_columns(self.model.id).order_by(None)
-        count_result = await self.db_session.execute(count_stmt)
-        total = len(count_result.scalars().all())
+            count_stmt = stmt.with_only_columns(self.model.id).order_by(None)
+            count_result = await self.db_session.execute(count_stmt)
+            total = len(count_result.scalars().all())
 
-        if offset is not None:
-            stmt = stmt.offset(offset)
-        if limit is not None:
-            stmt = stmt.limit(limit)
+            if offset is not None:
+                stmt = stmt.offset(offset)
+            if limit is not None:
+                stmt = stmt.limit(limit)
 
-        result = await self.db_session.execute(stmt)
-        return result.scalars().all(), total
+            result = await self.db_session.execute(stmt)
+            return result.scalars().all(), total
+        except Exception as e:
+            raise e
 
     async def create(self, data: Dict[str, Any]) -> T:
-        instance = self.model(**data)
-        self.db_session.add(instance)
-        await self.db_session.commit()
-        await self.db_session.refresh(instance)
-        return instance
+        try:
+            instance = self.model(**data)
+            self.db_session.add(instance)
+            await self.db_session.commit()
+            await self.db_session.refresh(instance)
+            return instance
+        except Exception as e:
+            raise e
 
     async def update(self, id: Any, data: Dict[str, Any]) -> Optional[T]:
-        query = update(self.model).where(self.model.id == id).values(**data)
-        await self.db_session.execute(query)
-        await self.db_session.commit()
-        return await self.get_by_id(id)
+        try:
+            query = update(self.model).where(self.model.id == id).values(**data)
+            await self.db_session.execute(query)
+            await self.db_session.commit()
+            return await self.get_by_id(id)
+        except Exception as e:
+            raise e
 
     async def delete(self, id: Any) -> bool:
-        query = delete(self.model).where(self.model.id == id)
-        result = await self.db_session.execute(query)
-        await self.db_session.commit()
-        return result.rowcount > 0
+        try:
+            query = delete(self.model).where(self.model.id == id)
+            result = await self.db_session.execute(query)
+            await self.db_session.commit()
+            return result.rowcount > 0
+        except Exception as e:
+            raise e
