@@ -1,6 +1,7 @@
 from fastapi.responses import JSONResponse
 from typing import Any, Dict, List, Optional, Callable, TypeVar, Sequence, Union
 from pydantic import ValidationError
+from fastapi.encoders import jsonable_encoder
 
 T = TypeVar("T")
 
@@ -11,12 +12,13 @@ def paginated_response(
     offset: Optional[int] = None,
     serialize_fn: Optional[Callable[[T], Any]] = None,
 ) -> Dict[str, Any]:
-    return {
+    response = {
         "total": total,
         "limit": limit,
         "offset": offset,
         "items": [serialize_fn(item) for item in items] if serialize_fn else items,
     }
+    return response
 
 
 def get_errors_validations(e: ValidationError) -> List[Dict[str, str]]:
@@ -41,7 +43,7 @@ def http_response(
     response_data = {"message": message, "status": status, "status_ok": status < 400}
 
     if data is not None:
-        response_data["data"] = data
+        response_data["data"] = jsonable_encoder(data)
 
     if errors is not None:
         response_data["errors"] = errors

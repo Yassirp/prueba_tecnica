@@ -6,7 +6,7 @@ from src.app.modules.entity_types_module.models.entity_types import EntityType
 from src.app.modules.entity_types_module.repositories.entity_types_repository import (
     EntityTypeRepository,
 )
-from src.app.modules.entity_types_module.schemas.entity_type import EntityTypeOut
+from src.app.modules.entity_types_module.schemas.entity_types_schemas import EntityTypeOut
 from src.app.modules.projects_module.services.projects_service import ProjectService
 
 class EntityTypeService(BaseService[EntityType, EntityTypeOut]):

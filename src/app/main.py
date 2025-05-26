@@ -48,7 +48,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-app.add_middleware(APIKeyMiddleware)
+# app.add_middleware(APIKeyMiddleware)
 
 # MANEJO DE ERRORES GLOBALES
 @app.exception_handler(RequestValidationError)

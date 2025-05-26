@@ -5,7 +5,7 @@ from src.app.config.database.session import get_db
 from src.app.modules.entity_types_module.services.entity_type_service import (
     EntityTypeService,
 )
-from src.app.modules.entity_types_module.schemas.entity_type import (
+from src.app.modules.entity_types_module.schemas.entity_types_schemas import (
     EntityTypeCreate,
     EntityTypeUpdate,
     EntityTypeOut,
