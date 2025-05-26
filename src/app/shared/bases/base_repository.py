@@ -13,6 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update, delete
 from src.app.shared.utils.query_utils import apply_filters, apply_order_by
 from src.app.shared.bases.base_model import BaseModel
+from datetime import datetime
 
 T = TypeVar("T", bound=BaseModel)
 
@@ -83,7 +84,14 @@ class BaseRepository(Generic[T]):
 
     async def delete(self, id: Any) -> bool:
         try:
-            query = delete(self.model).where(self.model.id == id)
+            query = (
+            update(self.model)
+            .where(self.model.id == id)
+            .values(
+                deleted_at=datetime.utcnow(),
+                state=0
+            )
+            )
             result = await self.db_session.execute(query)
             await self.db_session.commit()
             return result.rowcount > 0
