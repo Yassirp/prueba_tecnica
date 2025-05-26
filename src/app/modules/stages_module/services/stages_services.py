@@ -4,7 +4,7 @@ from fastapi import HTTPException, status
 from src.app.modules.projects_module.services.projects_service import ProjectService
 from src.app.modules.stages_module.models.stages import Stage
 from src.app.shared.bases.base_service import BaseService
-from src.app.modules.stages_module.repositories.stages_repositories import (
+from src.app.modules.stages_module.repositories.stages_repository import (
     StageRepository
 )
 from src.app.modules.stages_module.schemas.stages_schemas import StageOut

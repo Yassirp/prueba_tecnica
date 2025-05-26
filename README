@@ -74,3 +74,15 @@ alembic revision --autogenerate -m "add description column to stage"
 
     COMANDO A EJECUTAR:
     - alembic upgrade head
+
+
+## 📁 Estructura generada para modulos
+- Este comando ejecuta el script generate_module.py y crea automáticamente la estructura de carpetas y archivos para un nuevo módulo llamado vehicles, siguiendo una convención predefinida para proyectos modulares en Python (como FastAPI, Flask, etc.).
+
+```bash
+python3 generate_module.py vehicles vehicles
+```
+- 🔁 Alternativa: Si python3 no funciona en tu entorno, prueba con:
+```bash
+python generate_module.py vehicles vehicles
+```
