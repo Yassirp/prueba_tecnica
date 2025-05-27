@@ -41,3 +41,20 @@ class StagesMessages(GlobalMessages):
     OK_CREATED = "Etapa creada correctamente"
     OK_UPDATED = "Etapa actualizado correctamente"
     OK_DELETED = "Etapa eliminado correctamente"
+
+
+# Parametros 
+class ParameterMessages(GlobalMessages):
+    OK_GET_ALL = "Parametros obtenidos correctamente"
+    OK_GET     = "Parametros obtenidos correctamente"
+    OK_CREATED = "Parametro creada correctamente"
+    OK_UPDATED = "Parametro actualizado correctamente"
+    OK_DELETED = "Parametro eliminado correctamente"
+
+# Atributo
+class AttributeMessages(GlobalMessages):
+    OK_GET_ALL = "Atributos obtenidos correctamente"
+    OK_GET     = "Atributos obtenidos correctamente"
+    OK_CREATED = "Atributo creada correctamente"
+    OK_UPDATED = "Atributo actualizado correctamente"
+    OK_DELETED = "Atributo eliminado correctamente"

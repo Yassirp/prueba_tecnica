@@ -9,7 +9,7 @@ class Stage(BaseModel):
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(100), nullable=False)
-    state = Column(Integer, nullable=False, default=0)
+    state = Column(Integer, nullable=False, default=1)
     description = Column(String(100), nullable=True)
     project_id = Column(Integer, ForeignKey("m_projects.id"), nullable=False)
     created_at = Column(DateTime(timezone=True), default=datetime.now(pytz.timezone('America/Bogota')))
