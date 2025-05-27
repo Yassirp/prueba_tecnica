@@ -105,33 +105,3 @@ async def delete_parameter(
         return await service.delete(parameter_id)
     except Exception as e: 
         raise e
-    
-@router.get("/get-all-attribute", response_model=List[ParameterOut])
-@handle_route_responses(
-    success_message=AttributeMessages.OK_GET_ALL,
-    error_message=AttributeMessages.ERROR_GET_ALL,
-)
-async def get_all_attribute(
-    db: AsyncSession = Depends(get_db),
-    limit: Optional[int] = Query(
-        None, ge=1, le=100, description="Número de elementos por página"
-    ),
-    offset: Optional[int] = Query(
-        None, ge=0, description="Número de elementos a omitir"
-    ),
-    order_by: Optional[str] = Query(
-        None, description="Campo para ordenar (ej: 'id:asc' o 'name:desc')"
-    ),
-    filters: Optional[str] = Query(
-        None,
-        description="Criterios de filtrado en formato JSON (ej: {'name': '%john%', 'state': 0})",
-    ),
-) -> Dict[str, Any]:
-    try:
-        service = ParameterService(db)
-        attribiute, total = await service.get_all_attribute(
-        limit=limit, offset=offset, order_by=order_by, filters=filters
-        )
-        return paginated_response(attribiute, total, limit, offset)
-    except Exception as e:
-        raise e

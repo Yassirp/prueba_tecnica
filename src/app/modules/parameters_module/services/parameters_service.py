@@ -1,11 +1,7 @@
-from sqlalchemy import select
-from sqlalchemy.orm import selectinload
-from typing import Type, TypeVar, List, Optional, Dict, Any, Generic, Tuple
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.app.modules.parameters_module.models.parameters import Attribute, Parameter
-from src.app.modules.parameters_module.repositories.attribute_repository import AttributeRepository
+from src.app.modules.parameters_module.models.parameters import Parameter
 from src.app.modules.parameters_module.repositories.parameters_repository import ParameterRepository
-from src.app.modules.parameters_module.schemas.parameters_schemas import AttributeOut, ParameterOut
+from src.app.modules.parameters_module.schemas.parameters_schemas import ParameterOut
 from src.app.shared.bases.base_service import BaseService
 
 class ParameterService(BaseService[Parameter, ParameterOut]):
