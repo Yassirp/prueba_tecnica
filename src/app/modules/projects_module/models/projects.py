@@ -15,3 +15,4 @@ class Project(BaseModel):
     deleted_at = Column(DateTime(timezone=True), nullable=True)
 
     entity_types = relationship("EntityType", back_populates="project")
+    document_rule = relationship("DocumentRule", back_populates="project")

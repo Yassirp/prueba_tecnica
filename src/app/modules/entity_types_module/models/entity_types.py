@@ -17,3 +17,4 @@ class EntityType(BaseModel):
     deleted_at = Column(DateTime(timezone=True), nullable=True)
 
     project = relationship("Project", back_populates="entity_types")
+    document_rule = relationship("DocumentRule", back_populates="entity_type")

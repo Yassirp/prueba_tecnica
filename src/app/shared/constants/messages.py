@@ -43,6 +43,7 @@ class ParameterMessages(GlobalMessages):
     OK_UPDATED = "Parametro actualizado correctamente"
     OK_DELETED = "Parametro eliminado correctamente"
 
+
 # Atributo
 class AttributeMessages(GlobalMessages):
     OK_GET_ALL = "Atributos obtenidos correctamente"
@@ -50,3 +51,12 @@ class AttributeMessages(GlobalMessages):
     OK_CREATED = "Atributo creada correctamente"
     OK_UPDATED = "Atributo actualizado correctamente"
     OK_DELETED = "Atributo eliminado correctamente"
+
+
+# Reglas de documentos 
+class DocumentRuleMessages(GlobalMessages):
+    OK_GET_ALL = "Reglas de documentos obtenidos correctamente"
+    OK_GET     = "Reglas de documentos obtenidos correctamente"
+    OK_CREATED = "Reglas de documento creada correctamente"
+    OK_UPDATED = "Reglas de documento actualizada correctamente"
+    OK_DELETED = "Reglas de documento eliminada correctamente"
