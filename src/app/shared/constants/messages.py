@@ -34,14 +34,6 @@ class EntityTypesMessages(GlobalMessages):
     OK_DELETED = "Tipo de entidad eliminado correctamente"
     ERROR_NOT_FOUND = "Tipo de entidad no encontrado"
 
-# Etapas
-class StagesMessages(GlobalMessages):
-    OK_GET_ALL = "Etapas obtenidos correctamente"
-    OK_GET     = "Etapas obtenidos correctamente"
-    OK_CREATED = "Etapa creada correctamente"
-    OK_UPDATED = "Etapa actualizado correctamente"
-    OK_DELETED = "Etapa eliminado correctamente"
-
 
 # Parametros 
 class ParameterMessages(GlobalMessages):

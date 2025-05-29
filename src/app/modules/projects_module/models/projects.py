@@ -15,4 +15,3 @@ class Project(BaseModel):
     deleted_at = Column(DateTime(timezone=True), nullable=True)
 
     entity_types = relationship("EntityType", back_populates="project")
-    stages = relationship("Stage", back_populates="project")
