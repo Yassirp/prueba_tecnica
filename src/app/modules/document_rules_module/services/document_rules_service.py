@@ -7,10 +7,12 @@ from src.app.modules.document_rules_module.repositories.document_rules_repositor
 from src.app.modules.document_rules_module.schemas.document_rules_schemas import DocumentRuleOut
 from src.app.modules.entity_types_module.services.entity_type_service import EntityTypeService
 from src.app.modules.projects_module.services.projects_service import ProjectService
+from src.app.shared.constants.attribute_and_parameter import ParameterIds
 from src.app.shared.bases.base_service import BaseService
 from typing import List, Optional, Dict, Any,Tuple
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
+from sqlalchemy import and_
 
 class DocumentRuleService(BaseService[DocumentRule, DocumentRuleOut]):
     def __init__(self, db_session: AsyncSession):
@@ -31,15 +33,46 @@ class DocumentRuleService(BaseService[DocumentRule, DocumentRuleOut]):
         offset: Optional[int] = None,
         order_by: Optional[str] = None,
         filters: Optional[Dict[str, Any]] = None,
+        entity_type_id: Optional[int] = None,
+        document_type_id: Optional[int] = None,
+        stage_id: Optional[int] = None,
+        project_id: Optional[int] = None,
+        id: Optional[int] = None,
     ) -> Tuple[List[Dict[str, Any]], int]:
         try:
             stmt = select(self.model).options(
                 selectinload(self.model.project),
-                selectinload(self.model.document_type),
-                selectinload(self.model.stage),
-                selectinload(self.model.entity_type),
+                selectinload(self.model.document_types),
+                selectinload(self.model.stages),
+                selectinload(self.model.entity_types),
                 )
+            conditions = []
+            
+            # filtramos por el id
+            if id:
+                conditions.append(self.model.id == id)
 
+            # Filtramos por el tipo de entidad
+            if entity_type_id:
+                conditions.append(self.model.entity_type_id == entity_type_id)
+            
+            # Filtramos por tipo de documento
+            if document_type_id:
+                conditions.append(self.model.document_type_id == document_type_id)
+            
+            # Filtramos por etapa
+            if stage_id: 
+                conditions.append(self.model.stage_id == stage_id)
+
+            # Filtramos por proyecto
+            if project_id:
+                conditions.append(self.model.project_id == project_id)
+
+            # Filtramos por el tipo de documentop¡
+            # Aplicar condiciones al query
+            if conditions:
+                stmt = stmt.where(and_(*conditions))
+             
             # Aquí puedes aplicar filtros, orden y paginación si los necesitas.
             if order_by:
                 stmt = stmt.order_by(order_by)
@@ -60,24 +93,60 @@ class DocumentRuleService(BaseService[DocumentRule, DocumentRuleOut]):
         except Exception as e:
             raise e
         
-    async def _validate_data(self, data):
+
+    async def _validate_data(self, data, is_update=False, document_rule_id=None):
         try:
             project_id = data.get("project_id")
             entity_type_id = data.get("entity_type_id")
             document_type_id = data.get("document_type_id")
+            stage_id = data.get("stage_id")
+
             project = await self.project_service.get_by_id(project_id)
             if not project:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
-                    detail=f"No se encontró el proyecto con el id '{project_id}'",
+                    detail=f"No se encontró el proyecto con el id '{project_id}'.",
             )
             
+            # Validamos el tipo de entidad
             entity_type = await self.entity_type_service.get_by_id(entity_type_id)
             if not entity_type:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
-                    detail=f"No se encontró el tipo de entidad con el id '{entity_type_id}'",
+                    detail=f"No se encontró el tipo de entidad con el id '{entity_type_id}'.",
             )
+
+            # Validamos el tipo de documento
+            data, document_type = await self.attribute_service.get_all(id=document_type_id, parameter_id=ParameterIds.DOCUMENT_STATUS.value)
+            if not document_type:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"No se encontró el tipo de documento con el id '{document_type_id}'.",
+            )
+            
+            # Validamos la etapa
+            data, stage = await self.attribute_service.get_all(id=stage_id, parameter_id=ParameterIds.STAGES.value)
+            if not stage:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"No se encontró la etapa con el id '{stage_id}'.",
+            )  
+
+            # Validamos si la regla ya existe con estos parametros
+            data, validate_rules = await self.get_all(stage_id=stage_id, project_id=project_id, entity_type_id=entity_type_id, document_type_id=document_type_id, limit=1)
+            if is_update and document_rule_id:
+                for rule in data:
+                    if rule.id != document_rule_id:
+                        raise HTTPException(
+                            status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f"Ya existe una regla con estos parametros.",
+                    )
+            else:
+                if validate_rules:
+                    raise HTTPException(
+                        status_code=status.HTTP_404_NOT_FOUND,
+                        detail=f"Ya existe una regla con estos parametros.",
+                ) 
 
             return True
         except Exception as e:
@@ -88,6 +157,19 @@ class DocumentRuleService(BaseService[DocumentRule, DocumentRuleOut]):
         try:
             await self._validate_data(data)
             item = await self.repo.create(data)
+            return self.out_schema.model_validate(item).model_dump()
+        except Exception as e:
+            raise e
+        
+    
+    async def update(
+        self, document_rule_id: int, data: Dict[str, Any]
+    ) -> Optional[Dict[str, Any]]:
+        try:
+            await self._validate_data(data, True, document_rule_id)
+
+            item = await self.repo.update(document_rule_id, data)
+            if not item: return None
             return self.out_schema.model_validate(item).model_dump()
         except Exception as e:
             raise e

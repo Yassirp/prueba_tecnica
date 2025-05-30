@@ -17,7 +17,7 @@ class Attribute(BaseModel):
     updated_at = Column(DateTime(timezone=True), onupdate=datetime.now(pytz.timezone('America/Bogota')))
     deleted_at = Column(DateTime(timezone=True), nullable=True)
 
-    #Relaciones a con otros modelos
+    #Relaciones a con otros modelos 
     parameter = relationship("Parameter", back_populates="attributes")
-    document_type = relationship("DocumentRule", foreign_keys="[DocumentRule.document_type_id]", back_populates="document_type")
-    stage = relationship("DocumentRule", foreign_keys="[DocumentRule.stage_id]", back_populates="stage")
+    document_types = relationship("DocumentRule", back_populates="document_types", foreign_keys="[DocumentRule.document_type_id]")
+    stages = relationship("DocumentRule", back_populates="stages", foreign_keys="[DocumentRule.stage_id]")
