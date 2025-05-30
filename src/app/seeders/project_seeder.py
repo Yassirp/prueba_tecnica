@@ -10,7 +10,7 @@ class ProjectSeeder:
         try:
             # Crear un proyecto
             project = [
-                Project(id = Projectds.COMITE.value, name="Comite",  state=1),
+                Project(name="Comite",  state=1),
             ]
             session.add_all(project)
             await session.commit()  # await aquí

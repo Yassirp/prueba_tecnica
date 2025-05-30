@@ -117,7 +117,7 @@ class DocumentRuleService(BaseService[DocumentRule, DocumentRuleOut]):
             )
 
             # Validamos el tipo de documento
-            data, document_type = await self.attribute_service.get_all(id=document_type_id, parameter_id=ParameterIds.DOCUMENT_STATUS.value)
+            data, document_type = await self.attribute_service.get_all(id=document_type_id, parameter_id=ParameterIds.TYPE_DOCUMENT.value)
             if not document_type:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,

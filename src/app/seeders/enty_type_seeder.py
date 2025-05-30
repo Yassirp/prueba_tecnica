@@ -13,8 +13,8 @@ class EntityTypeSeeder:
         try:
             # Crear un proyecto
             entity_types = [
-                EntityType(id = EntityTypeds.SPORTSWOMAN.value, name=EntityTypeName.SPORTSWOMAN.value, project_id=Projectds.COMITE.value ,state=1),
-                EntityType(id = EntityTypeds.SUPPORT_STAFF.value, name=EntityTypeName.SUPPORT_STAFF.value, project_id=Projectds.COMITE.value, state=1),
+                EntityType(name=EntityTypeName.SPORTSWOMAN.value, project_id=Projectds.COMITE.value ,state=1),
+                EntityType(name=EntityTypeName.SUPPORT_STAFF.value, project_id=Projectds.COMITE.value, state=1),
             ]
             session.add_all(entity_types)
             await session.commit()  # await aquí
