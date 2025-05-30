@@ -25,6 +25,6 @@ class DocumentRule(BaseModel):
 
     # Relaciones con otros modelos
     project = relationship("Project", back_populates="document_rule")
-    document_type = relationship("Attribute", foreign_keys=[document_type_id], back_populates="document_type")
-    stage = relationship("Attribute", foreign_keys=[stage_id], back_populates="stage")
-    entity_type = relationship("EntityType", back_populates="document_rule")
+    document_types = relationship("Attribute", foreign_keys=[document_type_id], back_populates="document_types")
+    stages = relationship("Attribute", foreign_keys=[stage_id], back_populates="stages")
+    entity_types = relationship("EntityType", back_populates="document_rules")

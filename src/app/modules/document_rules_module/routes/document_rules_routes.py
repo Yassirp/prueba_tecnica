@@ -36,11 +36,16 @@ async def get_all_document_rule(
         None,
         description="Criterios de filtrado en formato JSON (ej: {'name': '%john%', 'state': 0})",
     ),
+    entity_type_id: Optional[int] = Query(None),
+    document_type_id: Optional[int] = Query(None),
+    stage_id: Optional[int] = Query(None),
+    id: Optional[int] = Query(None),
 ) -> Dict[str, Any]:
     try:
         service = DocumentRuleService(db)
         attributes, total = await service.get_all(
-        limit=limit, offset=offset, order_by=order_by, filters=filters
+        limit=limit, offset=offset, order_by=order_by, filters=filters, entity_type_id=entity_type_id, 
+        document_type_id=document_type_id, stage_id=stage_id, id=id
         )
         return paginated_response(attributes, total, limit, offset)
     except Exception as e:

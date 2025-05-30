@@ -35,11 +35,13 @@ async def get_all_attribute(
         None,
         description="Criterios de filtrado en formato JSON (ej: {'name': '%john%', 'state': 0})",
     ),
+    id: Optional[int] = Query(None),
+    parameter_id: Optional[int] = Query(None),
 ) -> Dict[str, Any]:
     try:
         service = AttributeService(db)
         attributes, total = await service.get_all(
-        limit=limit, offset=offset, order_by=order_by, filters=filters
+        limit=limit, offset=offset, order_by=order_by, filters=filters,id=id,parameter_id=parameter_id
         )
         return paginated_response(attributes, total, limit, offset)
     except Exception as e:
