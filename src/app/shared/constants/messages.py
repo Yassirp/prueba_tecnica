@@ -60,3 +60,14 @@ class DocumentRuleMessages(GlobalMessages):
     OK_CREATED = "Reglas de documento creada correctamente"
     OK_UPDATED = "Reglas de documento actualizada correctamente"
     OK_DELETED = "Reglas de documento eliminada correctamente"
+
+
+# Logs de documentos 
+class EntityDocumentLogMessages(GlobalMessages):
+    OK_GET_ALL = "Logs de documentos obtenidos correctamente"
+    OK_GET     = "Log de documento obtenido correctamente"
+    OK_CREATED = "Log de documento creado correctamente"
+    OK_UPDATED = "Log de documento actualizado correctamente"
+    OK_DELETED = "Log de documento eliminado correctamente"
+    ERROR_NOT_FOUND = "Log de documento no encontrado"
+    

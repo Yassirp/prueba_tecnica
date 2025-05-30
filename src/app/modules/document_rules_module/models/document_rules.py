@@ -28,3 +28,4 @@ class DocumentRule(BaseModel):
     document_type = relationship("Attribute", foreign_keys=[document_type_id], back_populates="document_type")
     stage = relationship("Attribute", foreign_keys=[stage_id], back_populates="stage")
     entity_type = relationship("EntityType", back_populates="document_rule")
+    

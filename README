@@ -61,7 +61,7 @@ alembic revision --autogenerate -m "create NAME table"
     - alembic upgrade head
 
 ## 🛠️ Agregar un nuevo campo a un modelo existente
-- Nuveo campo a la DB: Detecta que agregaste un nuevo campo (por ejemplo, description = Column(String) en Stage) en tu modelo.
+- Nuevo campo a la DB: Detecta que agregaste un nuevo campo (por ejemplo, description = Column(String) en Stage) en tu modelo.
 
 ✅ Genera una migración con una instrucción ALTER TABLE para agregar esa columna.
 
