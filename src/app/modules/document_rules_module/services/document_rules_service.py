@@ -7,7 +7,7 @@ from src.app.modules.document_rules_module.repositories.document_rules_repositor
 from src.app.modules.document_rules_module.schemas.document_rules_schemas import DocumentRuleOut
 from src.app.modules.entity_types_module.services.entity_type_service import EntityTypeService
 from src.app.modules.projects_module.services.projects_service import ProjectService
-from src.app.shared.constants.attribute_and_parameter import ParameterIds
+from src.app.shared.constants.attribute_and_parameter_enum import ParameterIds
 from src.app.shared.bases.base_service import BaseService
 from typing import List, Optional, Dict, Any,Tuple
 from sqlalchemy.future import select
