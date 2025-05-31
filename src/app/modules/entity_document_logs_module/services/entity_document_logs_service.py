@@ -17,7 +17,13 @@ from src.app.shared.constants.messages import EntityDocumentLogMessages
 
 class EntityDocumentLogsService(BaseService[EntityDocumentLog, EntityDocumentLogOut]):
     def __init__(self, db_session: AsyncSession):
-        super().__init__(EntityDocumentLogsRepository(EntityDocumentLog, db_session))
+        super().__init__(
+            model=EntityDocumentLog,
+            repository_cls=EntityDocumentLogsRepository,
+            db_session=db_session,
+            out_schema=EntityDocumentLogOut,
+        )
+        self.db_session=db_session
 
 
     # Obtener todos los logs de documentos
@@ -68,7 +74,7 @@ class EntityDocumentLogsService(BaseService[EntityDocumentLog, EntityDocumentLog
             raise e
         
     # Crear un nuevo log de documento
-    async def create(self, entity_document_log: EntityDocumentLogCreate) -> EntityDocumentLogOut:
+    async def create(self, entity_document_log: dict) -> EntityDocumentLogOut:
         try:        
             item = await self.repo.create(entity_document_log)
             return item
@@ -76,19 +82,13 @@ class EntityDocumentLogsService(BaseService[EntityDocumentLog, EntityDocumentLog
             raise e
 
     # Actualizar un log de documento
-    async def update(self, entity_document_log_id: int, entity_document_log: EntityDocumentLogUpdate) -> EntityDocumentLogOut:
+    async def update(self, entity_document_log_id: int, entity_document_log: dict) -> EntityDocumentLogOut:
         try:
             item = await self.repo.update(entity_document_log_id, entity_document_log)
             return item
         except Exception as e:
             raise e
 
-    # Eliminar un log de documento
-    async def delete(self, entity_document_log_id: int) -> None:
-        try:
-            await self.repo.delete(entity_document_log_id)
-        except Exception as e:
-            raise e 
         
 
 

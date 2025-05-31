@@ -71,3 +71,12 @@ class EntityDocumentLogMessages(GlobalMessages):
     OK_DELETED = "Log de documento eliminado correctamente"
     ERROR_NOT_FOUND = "Log de documento no encontrado"
     
+
+# Notificaciones
+class NotificationMessages(GlobalMessages):
+    OK_GET_ALL = "Notificaciones obtenidas correctamente"
+    OK_GET     = "Notificación obtenida correctamente"
+    OK_CREATED = "Notificación creada correctamente"
+    OK_UPDATED = "Notificación actualizada correctamente"
+    OK_DELETED = "Notificación eliminada correctamente"
+    ERROR_NOT_FOUND = "Notificación no encontrada"

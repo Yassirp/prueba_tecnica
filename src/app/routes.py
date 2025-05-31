@@ -7,6 +7,7 @@ from .modules.entity_document_logs_module.routes.entity_document_logs_routes imp
 from .modules.entity_types_module.routes.entity_type_routes import (
     router as entity_types_router,
 )
+from .modules.notifications_module.routes.notifications_routes import router as notifications_routes
 
 router = APIRouter()
 
@@ -16,3 +17,4 @@ router.include_router(parameters_routes)
 router.include_router(attributes_routes)
 router.include_router(document_rules_routes)
 router.include_router(entity_document_logs_routes)
+router.include_router(notifications_routes)

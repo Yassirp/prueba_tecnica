@@ -21,3 +21,4 @@ class Attribute(BaseModel):
     parameter = relationship("Parameter", back_populates="attributes")
     document_types = relationship("DocumentRule", back_populates="document_types", foreign_keys="[DocumentRule.document_type_id]")
     stages = relationship("DocumentRule", back_populates="stages", foreign_keys="[DocumentRule.stage_id]")
+    notifications = relationship("Notification", back_populates="type_notification", foreign_keys="[Notification.type_notification_id]")

@@ -21,6 +21,7 @@ router = APIRouter(prefix="/entity-document-logs", tags=["Entity Document Logs"]
 @handle_route_responses(
     success_message=EntityDocumentLogMessages.OK_GET_ALL,
     error_message=EntityDocumentLogMessages.ERROR_GET_ALL,
+    not_found_message=EntityDocumentLogMessages.ERROR_NOT_FOUND,
 )
 
 # Obtener todos los logs de documentos
@@ -59,55 +60,3 @@ async def get_entity_document_log_by_id(
 ):
     service = EntityDocumentLogsService(db)
     return await service.get_by_id(entity_document_log_id)
-
-
-# Crear un nuevo log de documento
-@router.post("/create", response_model=EntityDocumentLogOut, status_code=status.HTTP_201_CREATED)
-@handle_route_responses(
-    success_message=EntityDocumentLogMessages.OK_CREATED,
-    error_message=EntityDocumentLogMessages.ERROR_CREATED,
-)
-
-# Crear un nuevo log de documento
-async def create_entity_document_log(
-    entity_document_log: EntityDocumentLogCreate,
-    db: AsyncSession = Depends(get_db)
-):
-    service = EntityDocumentLogsService(db)
-    return await service.create(entity_document_log)
-
-
-# Actualizar un log de documento
-@router.put("/update/{entity_document_log_id}", response_model=EntityDocumentLogOut)
-@handle_route_responses(
-    success_message=EntityDocumentLogMessages.OK_UPDATED,
-    error_message=EntityDocumentLogMessages.ERROR_UPDATED,
-    not_found_message=EntityDocumentLogMessages.ERROR_NOT_FOUND,
-)
-
-# Actualizar un log de documento
-async def update_entity_document_log(
-    entity_document_log_id: int,
-    entity_document_log: EntityDocumentLogUpdate,
-    db: AsyncSession = Depends(get_db)
-):
-    service = EntityDocumentLogsService(db)
-    return await service.update(entity_document_log_id, entity_document_log)    
-
-
-# Eliminar un log de documento
-@router.delete("/delete/{entity_document_log_id}", status_code=status.HTTP_204_NO_CONTENT)
-@handle_route_responses(
-    success_message=EntityDocumentLogMessages.OK_DELETED,
-    error_message=EntityDocumentLogMessages.ERROR_DELETED,  
-    not_found_message=EntityDocumentLogMessages.ERROR_NOT_FOUND,
-)
-
-# Eliminar un log de documento  
-async def delete_entity_document_log(
-    entity_document_log_id: int,
-    db: AsyncSession = Depends(get_db)
-):
-    service = EntityDocumentLogsService(db)
-    return await service.delete(entity_document_log_id)
-
