@@ -1,4 +1,5 @@
 # Archivo generado automáticamente para entity_documents - services
+from datetime import datetime
 from fastapi import HTTPException, status
 from typing import List, Optional, Dict, Any,Tuple
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -41,6 +42,7 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
         entity_type_id: Optional[int] = None,
         stage_id: Optional[int] = None,
         document_type_id: Optional[int] = None,
+        id:  Optional[int] = None,
     ) -> Tuple[List[Dict[str, Any]], int]:
         try:
             stmt = select(self.model).options(
@@ -52,6 +54,10 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
                 )
             conditions = []
             
+            # Filtramos por el id:
+            if id:
+                conditions.append(self.model.id == id)
+
             # Filtramos por el id del proyecto
             if project_id:
                 conditions.append(self.model.project_id == project_id)
@@ -60,12 +66,15 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
             if document_status_id:
                 conditions.append(self.model.document_status_id == document_status_id)
 
+            # FIiltramos por el tipo de etapa
             if entity_type_id:
                 conditions.append(self.model.entity_type_id == entity_type_id)
 
+            # Filtrampos por la etapa
             if stage_id:
                 conditions.append(self.model.stage_id == stage_id)
 
+            # Filtrampos por el tipo de documento
             if document_type_id:
                 conditions.append(self.model.document_type_id == document_type_id)
 
@@ -142,12 +151,23 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
                     detail=f"No se encontró el estado del documento con el id '{document_status_id}'.",
             )
 
-            data, entity_document = await self.get_all(project_id=project_id, document_status_id=AttributeIds.APPROVED.value, entity_type_id=entity_type_id, stage_id=stage_id, document_type_id=document_type_id)
-            if entity_document:
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail=f"Ya existe un tipo de documento en estado aprobado para esta entidad.",
-            )
+            data, entity_document = await self.get_all(project_id=project_id, entity_type_id=entity_type_id, stage_id=stage_id, document_type_id=document_type_id)
+            if data:
+                for rules in data:
+                    if rules.document_status_id == AttributeIds.APPROVED.value:
+                        raise HTTPException(
+                            status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f"Ya existe un tipo de documento en estado aprobado para esta entidad.",
+                        )
+                    else:
+                        rules.document_status_id = AttributeIds.CANCEL.value
+                        rules.updated_at = datetime.utcnow() 
+
+                        # Guardar (con SQLAlchemy async ORM)
+                        self.db_session.add(rules)
+                        await self.db_session.commit()
+                        await self.db_session.refresh(rules)
+
             return True
         except Exception as e:
             raise e
@@ -161,15 +181,47 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
         except Exception as e:
             raise e
         
-    
+
     async def update(
         self, entity_document_id: int, data: Dict[str, Any]
     ) -> Optional[Dict[str, Any]]:
         try:
-            await self._validate_data(data, True, entity_document_id)
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Metodo no disponible.",
+            )
+        except Exception as e:
+            raise e
+        
 
-            item = await self.repo.update(entity_document_id, data)
-            if not item: return None
-            return self.out_schema.model_validate(item).model_dump()
+    async def check_doocument_status(self, entity_document_id: int, 
+        data: Dict[str, Any]
+    ) -> Optional[Dict[str, Any]]:
+        try:
+            document_status_id = data.get("document_status_id")
+            model, entity_document = await self.get_all(id=entity_document_id,limit=1)
+            for rules in model:
+                data, document_status = await self.attribute_service.get_all(id=document_status_id, parameter_id=ParameterIds.DOCUMENT_STATUS.value, limit=1)
+                if not document_status:
+                    raise HTTPException(
+                        status_code=status.HTTP_404_NOT_FOUND,
+                        detail=f"No se encontró el estado del documento con el id '{document_status_id}'.",
+                )
+
+                if rules.document_status_id == AttributeIds.APPROVED.value:
+                    raise HTTPException(
+                        status_code=status.HTTP_404_NOT_FOUND,
+                        detail=f"El tipo de documento ya fue aprobado.",
+                    )
+                else:
+                    rules.document_status_id = document_status_id
+                    rules.updated_at = datetime.utcnow() 
+
+                    # Guardar (con SQLAlchemy async ORM)
+                    self.db_session.add(rules)
+                    await self.db_session.commit()
+                    await self.db_session.refresh(rules)
+
+            return []
         except Exception as e:
             raise e

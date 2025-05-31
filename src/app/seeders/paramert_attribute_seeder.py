@@ -42,6 +42,9 @@ class ParameterAttributeSeeder:
                 Attribute(name=AttributeName.CONSENT_INFORMED.value, description=" ", parameter_id=ParameterIds.TYPE_DOCUMENT.value),
                 Attribute(name=AttributeName.CERTIFICATE_CRIMES.value, description=" ", parameter_id=ParameterIds.TYPE_DOCUMENT.value),
                 Attribute(name=AttributeName.OTHERS.value, description=" ", parameter_id=ParameterIds.TYPE_DOCUMENT.value),
+                
+                # SEEDER DE ESTADOS DE DODUMENTO
+                Attribute(name=AttributeName.CANCEL.value, description=" ", parameter_id=ParameterIds.DOCUMENT_STATUS.value),
             ]
 
             session.add_all(attributes)

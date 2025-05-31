@@ -24,8 +24,7 @@ class EntityDocumentBase(BaseModel):
     @root_validator(pre=True)
     def check_fields(cls, values):
         try:
-            if not isinstance(values, dict):
-                return values   
+            if not isinstance(values, dict): return values   
 
             required_int_fields = [
                 ("project_id", "El proyecto es requerido.", "El proyecto debe ser un número entero positivo."),
@@ -87,8 +86,7 @@ class EntityDocumentUpdate(BaseModel):
     @root_validator(pre=True)
     def check_fields(cls, values):
         try:
-            if not isinstance(values, dict):
-                return values   
+            if not isinstance(values, dict): return values   
 
             required_int_fields = [
                 ("project_id", "El proyecto es requerido.", "El proyecto debe ser un número entero positivo."),
@@ -132,3 +130,31 @@ class EntityDocumentOut(EntityDocumentBase, BaseOutSchema):
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
     deleted_at: Optional[datetime] = None
+
+
+class EntityDocumentStatus(BaseModel):
+    document_status_id: int = Field(..., ge=1, description="ID del estado del documento")
+    class Config:
+        extra = "ignore" 
+
+        
+    @root_validator(pre=True)
+    def check_fields(cls, values):
+        try:
+            if not isinstance(values, dict): return values
+
+            required_int_fields = [
+                ("document_status_id", "El estado del documento es requerido.", "El estado del documento debe ser un número entero positivo."),
+            ]
+
+            for field, msg_required, msg_invalid in required_int_fields:
+                if field not in values or values[field] is None:
+                    raise Exception(msg_required)
+                
+                if not isinstance(values[field], int) or values[field] < 1:
+                    raise Exception(msg_invalid)
+
+            return values
+
+        except Exception as e:
+            raise e
