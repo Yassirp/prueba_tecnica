@@ -13,6 +13,8 @@ class Project(BaseModel):
     created_at = Column(DateTime(timezone=True), default=datetime.now(pytz.timezone('America/Bogota')))
     updated_at = Column(DateTime(timezone=True), onupdate=datetime.now(pytz.timezone('America/Bogota')))
     deleted_at = Column(DateTime(timezone=True), nullable=True)
-
+    
+    # Relaciones    
     entity_types = relationship("EntityType", back_populates="project")
     document_rule = relationship("DocumentRule", back_populates="project")
+    entity_documents = relationship("EntityDocument", back_populates="project")

@@ -16,7 +16,7 @@ class Parameter(BaseModel):
     updated_at = Column(DateTime(timezone=True), onupdate=datetime.now(pytz.timezone('America/Bogota')))
     deleted_at = Column(DateTime(timezone=True), nullable=True)
     
-    attributes = relationship("Attribute", back_populates="parameter")
+    attributes = relationship("Attribute", back_populates="parameters")
 
 
 

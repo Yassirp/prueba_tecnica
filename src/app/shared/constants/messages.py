@@ -62,7 +62,16 @@ class DocumentRuleMessages(GlobalMessages):
     OK_DELETED = "Reglas de documento eliminada correctamente"
 
 
-# Logs de documentos 
+# Documentos de entidades
+class EntityDocumentMessages(GlobalMessages):
+    OK_GET_ALL = "Documentos de entidades obtenidos correctamente"
+    OK_GET = "Documentos de entidad obtenido correctamente"
+    OK_CREATED = "Documentos de entidad creado correctamente"
+    OK_UPDATED = "Documentos de entidad actualizado correctamente"
+    OK_DELETED = "Documentos de entidad eliminado correctamente"
+    ERROR_NOT_FOUND = "Documentos de entidad no encontrado"
+
+# Logs de documentos
 class EntityDocumentLogMessages(GlobalMessages):
     OK_GET_ALL = "Logs de documentos obtenidos correctamente"
     OK_GET     = "Log de documento obtenido correctamente"
