@@ -10,7 +10,6 @@ from sqlalchemy.orm import selectinload
 from fastapi import HTTPException
 from src.app.shared.constants.messages import NotificationMessages
 
-
 class NotificationsService(BaseService[Notification, NotificationOut]):
     def __init__(self, db_session: AsyncSession):
         super().__init__(
@@ -19,7 +18,7 @@ class NotificationsService(BaseService[Notification, NotificationOut]):
             db_session=db_session,
             out_schema=NotificationOut,
         )
-        self.db_session = db_session
+        self.db_session=db_session
 
     async def get_all(
         self,
@@ -31,7 +30,8 @@ class NotificationsService(BaseService[Notification, NotificationOut]):
         try:
             
             stmt = select(self.model).options(
-                selectinload(self.model.type_notification)
+                selectinload(self.model.type_notification),
+                selectinload(self.model.entity_document)
             )  
 
             if order_by:
@@ -54,7 +54,8 @@ class NotificationsService(BaseService[Notification, NotificationOut]):
     async def get_by_id(self, notification_id: int) -> NotificationOut:
         try:
             stmt = select(self.model).options(
-                selectinload(self.model.type_notification)
+                selectinload(self.model.type_notification),
+                selectinload(self.model.entity_document)
             ).where(self.model.id == notification_id)
 
             result = await self.db_session.execute(stmt)

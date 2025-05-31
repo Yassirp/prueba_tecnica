@@ -59,8 +59,4 @@ class Attribute(BaseModel):
     # ==============================================
 
     # Relaciones inversas hacia Notification
-    notifications = relationship(
-        "Notification",
-        back_populates="type_notification",
-        foreign_keys=[Notification.type_notification_id]
-    )
+    notifications = relationship("Notification",back_populates="type_notification")

@@ -1,6 +1,6 @@
 # Archivo generado autom�ticamente para entity_document_logs - routes
 
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, Query, status, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.app.config.database.session import get_db
 from src.app.modules.entity_document_logs_module.schemas.entity_document_logs_schemas import (
@@ -40,9 +40,13 @@ async def get_all_entity_document_logs(
         None,
         description="Criterios de filtrado en formato JSON (ej: {'name': '%john%', 'state': 0})",
     ),
-) -> Dict[str, Any]:
-    service = EntityDocumentLogsService(db)
-    return await service.get_all(limit, offset, order_by, filters)  
+) -> Dict[str, Any]:        
+    try:
+        service = EntityDocumentLogsService(db)
+        entity_document_logs, total = await service.get_all(limit, offset, order_by, filters)
+        return paginated_response(entity_document_logs, total, limit, offset)
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))   
 
 
 # Obtener un log de documento por su ID

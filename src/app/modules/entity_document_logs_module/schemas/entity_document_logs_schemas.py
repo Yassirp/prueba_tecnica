@@ -6,7 +6,7 @@ from src.app.shared.bases.base_schema import BaseOutSchema
 
 
 class EntityDocumentLogBase(BaseModel):
-    #entity_document_id: int = Field(..., ge=0, description="ID de la entidad documento")
+    entity_document_id: int = Field(..., ge=0, description="ID de la entidad documento")
     action: str = Field(..., max_length=200, description="Acción realizada")
     observations: Optional[str] = Field(None, max_length=200, description="Observaciones")
     before: Optional[dict] = Field(None, description="Datos antes de la acción")
@@ -17,27 +17,37 @@ class EntityDocumentLogBase(BaseModel):
     @root_validator(pre=True)
     def check_fields(cls, values):
         try:
-            if not isinstance(values, dict): return values
+            if not isinstance(values, dict):
+                return values
 
-            #if "entity_document_id" not in values or values["entity_document_id"] is None:
-             #   raise Exception("El ID de la entidad documento es requerido.")
-            #elif not isinstance(values["entity_document_id"], int):
-                #raise Exception("El ID de la entidad documento debe ser un número entero.")
-            
-            if "action" not in values or not values["action"] or not str(values["action"]).strip():
-                raise Exception("La acción es requerida y no puede estar vacía.")
-            elif not isinstance(values["action"], str):
-                raise Exception("La acción debe ser una cadena de texto.")
-            
-            if "state" not in values or values["state"] is None:
-                raise Exception("El estado es requerido.")
-            elif not isinstance(values["state"], int):
-                raise Exception("El estado debe ser un número entero.")
-            
+            required_int_fields = [
+                ("entity_document_id", "El ID de la entidad documento es requerido.", "El ID de la entidad documento debe ser un número entero positivo."),
+                ("state", "El estado es requerido.", "El estado debe ser un número entero."),
+            ]
+
+            required_str_fields = [
+                ("action", "La acción es requerida y no puede estar vacía.", "La acción debe ser una cadena de texto."),
+            ]
+
+            for field, msg_required, msg_invalid in required_int_fields:
+                value = values.get(field)
+                if value is None:
+                    raise ValueError(msg_required)
+                if not isinstance(value, int) or value < 0:
+                    raise ValueError(msg_invalid)
+
+            for field, msg_required, msg_invalid in required_str_fields:
+                value = values.get(field)
+                if not value or not str(value).strip():
+                    raise ValueError(msg_required)
+                if not isinstance(value, str):
+                    raise ValueError(msg_invalid)
 
             return values
+
         except Exception as e:
             raise e
+
              
     
     
@@ -46,7 +56,7 @@ class EntityDocumentLogCreate(EntityDocumentLogBase):
 
 
 class EntityDocumentLogUpdate(EntityDocumentLogBase):
-    #entity_document_id: int = Field(..., ge=0, description="ID de la entidad documento")
+    entity_document_id: int = Field(..., ge=0, description="ID de la entidad documento")
     action: Optional[str] = Field(None, max_length=200, description="Acción realizada")
     observations: Optional[str] = Field(None, max_length=200, description="Observaciones")
     before: Optional[dict] = Field(None, description="Datos antes de la acción")

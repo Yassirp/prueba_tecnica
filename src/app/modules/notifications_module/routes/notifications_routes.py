@@ -21,7 +21,7 @@ router = APIRouter(prefix="/notifications", tags=["Notifications"])
     error_message=NotificationMessages.ERROR_GET_ALL,
     not_found_message=NotificationMessages.ERROR_NOT_FOUND,
 )
-
+# Obtener todas las notificaciones
 async def get_all_notifications(
     db: AsyncSession = Depends(get_db),
     limit: Optional[int] = Query(
@@ -40,8 +40,8 @@ async def get_all_notifications(
 ):
     try:
         service = NotificationsService(db)
-        notifications = await service.get_all(limit=limit, offset=offset, order_by=order_by, filters=filters)
-        return paginated_response(notifications, notifications.total)
+        notifications, total = await service.get_all(limit=limit, offset=offset, order_by=order_by, filters=filters)
+        return paginated_response(notifications, total, limit, offset)
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
@@ -52,7 +52,7 @@ async def get_all_notifications(
     error_message=NotificationMessages.ERROR_GET,
     not_found_message=NotificationMessages.ERROR_NOT_FOUND,
 )
-
+# Obtener una notificación por su ID
 async def get_notification_by_id(
     notification_id: int,
     db: AsyncSession = Depends(get_db)
@@ -70,7 +70,7 @@ async def get_notification_by_id(
     error_message=NotificationMessages.ERROR_CREATED,
     not_found_message=NotificationMessages.ERROR_NOT_FOUND,
 )
-
+# Crear una notificación
 async def create_notification(
     notification: NotificationCreate,
     db: AsyncSession = Depends(get_db)

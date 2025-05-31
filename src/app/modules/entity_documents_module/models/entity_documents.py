@@ -34,4 +34,5 @@ class EntityDocument(BaseModel):
     document_types = relationship("Attribute", back_populates="document_types_entity_documents",foreign_keys=[document_type_id])
     stages = relationship("Attribute", back_populates="stages_entity_documents",foreign_keys=[stage_id])
     document_status = relationship("Attribute", back_populates="document_status_entity_documents", foreign_keys=[document_status_id])
-
+    entity_document_logs = relationship("EntityDocumentLog", back_populates="entity_document")
+    notifications = relationship("Notification", back_populates="entity_document")

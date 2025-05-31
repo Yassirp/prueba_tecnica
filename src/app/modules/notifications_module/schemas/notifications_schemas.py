@@ -8,6 +8,7 @@ from datetime import datetime
 
 class NotificationBase(BaseModel):
     type_notification_id: int = Field(..., ge=0, description="ID de la notificación")
+    entity_document_id: int = Field(..., ge=0, description="ID de la entidad documento")
     title: str = Field(..., max_length=255, description="Título de la notificación")
     message: str = Field(..., description="Mensaje de la notificación")
     data: Optional[dict] = Field(None, description="Datos adicionales de la notificación")
@@ -18,21 +19,39 @@ class NotificationBase(BaseModel):
 
     @root_validator(pre=True)
     def check_fields(cls, values):
-        if not isinstance(values, dict): return values
+        try:
+            if not isinstance(values, dict):
+                return values
 
-        if "type_notification_id" not in values or values["type_notification_id"] is None:
-            raise ValueError("El ID de la notificación es requerido")
-        
-        if "title" not in values or not values["title"] or not str(values["title"]).strip():
-            raise ValueError("El título de la notificación es requerido")
-        
-        if "message" not in values or not values["message"] or not str(values["message"]).strip():
-            raise ValueError("El mensaje de la notificación es requerido")
-        
-        if "state" not in values or values["state"] is None:
-            raise ValueError("El estado de la notificación es requerido")
-        
-        return values
+            required_int_fields = [
+                ("type_notification_id", "El ID de la notificación es requerido.", "El ID de la notificación debe ser un número entero positivo."),
+                ("entity_document_id", "El ID de la entidad documento es requerido.", "El ID de la entidad documento debe ser un número entero positivo."),
+                ("state", "El estado de la notificación es requerido.", "El estado de la notificación debe ser un número entero."),
+            ]
+
+            required_str_fields = [
+                ("title", "El título de la notificación es requerido.", "El título de la notificación debe ser una cadena de texto."),
+                ("message", "El mensaje de la notificación es requerido.", "El mensaje de la notificación debe ser una cadena de texto."),
+            ]
+
+            for field, msg_required, msg_invalid in required_int_fields:
+                value = values.get(field)
+                if value is None:
+                    raise ValueError(msg_required)
+                if not isinstance(value, int) or (field != "state" and value <= 0):
+                    raise ValueError(msg_invalid)
+
+            for field, msg_required, msg_invalid in required_str_fields:
+                value = values.get(field)
+                if not value or not str(value).strip():
+                    raise ValueError(msg_required)
+                if not isinstance(value, str):
+                    raise ValueError(msg_invalid)
+
+            return values
+
+        except Exception as e:
+            raise e
     
 
 class NotificationCreate(NotificationBase):
@@ -41,6 +60,7 @@ class NotificationCreate(NotificationBase):
 
 class NotificationUpdate(NotificationBase):
     type_notification_id: Optional[int] = Field(None, ge=0, description="ID de la notificación")
+    entity_document_id: Optional[int] = Field(None, ge=0, description="ID de la entidad documento")
     title: Optional[str] = Field(None, max_length=255, description="Título de la notificación")
     message: Optional[str] = Field(None, description="Mensaje de la notificación")
     data: Optional[dict] = Field(None, description="Datos adicionales de la notificación")

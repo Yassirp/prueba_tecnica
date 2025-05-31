@@ -4,12 +4,13 @@ from src.app.shared.bases.base_model import BaseModel
 from datetime import datetime
 from sqlalchemy.orm import relationship
 import pytz
+from src.app.modules.entity_documents_module.models.entity_documents import EntityDocument
 
 class EntityDocumentLog(BaseModel):
     __tablename__ = "m_entity_document_logs"
 
     id = Column(Integer, primary_key=True, index=True)
-    #entity_document_id = Column(Integer, ForeignKey("m_entity_documents.id"), nullable=False)
+    entity_document_id = Column(Integer, ForeignKey("m_entity_documents.id"), nullable=False)
     action = Column(String(200), nullable=False)
     observations = Column(Text(), nullable=True)
     before = Column(JSON, nullable=True)
@@ -21,7 +22,7 @@ class EntityDocumentLog(BaseModel):
     deleted_at = Column(DateTime(timezone=True), nullable=True)
 
     # Relaciones a otros modelos
-    #entity_document = relationship("EntityDocument", back_populates="entity_document_logs")
+    entity_document = relationship("EntityDocument", back_populates="entity_document_logs")
 
 
 

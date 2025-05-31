@@ -88,7 +88,6 @@ async def create_entity_docuemnt(
 @handle_route_responses(
     success_message=EntityDocumentMessages.OK_UPDATED,
     error_message=EntityDocumentMessages.ERROR_UPDATED,
-    not_found_message=EntityDocumentMessages.ERROR_NOT_FOUND,
 )
 async def update_entity_docuemnt(
     entity_docuemnt_id: int, data: EntityDocumentUpdate, db: AsyncSession = Depends(get_db)
