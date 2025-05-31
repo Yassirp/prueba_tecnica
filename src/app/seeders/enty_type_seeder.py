@@ -1,6 +1,6 @@
 from src.app.config.database.session_seed import SessionLocalSeed
 from src.app.modules.entity_types_module.models.entity_types import EntityType
-from src.app.shared.constants.enty_type_enum import (
+from src.app.shared.constants.entity_type_enum import (
     EntityTypeds,
     EntityTypeName
 )

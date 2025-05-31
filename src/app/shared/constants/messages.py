@@ -60,3 +60,13 @@ class DocumentRuleMessages(GlobalMessages):
     OK_CREATED = "Reglas de documento creada correctamente"
     OK_UPDATED = "Reglas de documento actualizada correctamente"
     OK_DELETED = "Reglas de documento eliminada correctamente"
+
+
+# Documentos de entidades
+class EntityDocumentMessages(GlobalMessages):
+    OK_GET_ALL = "Documentos de entidades obtenidos correctamente"
+    OK_GET = "Documentos de entidad obtenido correctamente"
+    OK_CREATED = "Documentos de entidad creado correctamente"
+    OK_UPDATED = "Documentos de entidad actualizado correctamente"
+    OK_DELETED = "Documentos de entidad eliminado correctamente"
+    ERROR_NOT_FOUND = "Documentos de entidad no encontrado"

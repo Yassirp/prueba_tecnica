@@ -18,3 +18,4 @@ class EntityType(BaseModel):
 
     project = relationship("Project", back_populates="entity_types")
     document_rules = relationship("DocumentRule", back_populates="entity_types")
+    entity_documents = relationship("EntityDocument", back_populates="entity_types")

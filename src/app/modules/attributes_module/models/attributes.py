@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, func
 from sqlalchemy.orm import relationship
 from src.app.modules.document_rules_module.models.document_rules import DocumentRule
+from src.app.modules.entity_documents_module.models.entity_documents import EntityDocument
 from src.app.shared.bases.base_model import BaseModel
 from datetime import datetime
 import pytz
@@ -33,3 +34,25 @@ class Attribute(BaseModel):
         back_populates="stages",
         foreign_keys=[DocumentRule.stage_id]
     )
+    # ==============================================
+    
+    # Relaciones inversas hacia EntityDocument
+    document_types_entity_documents = relationship(
+        "EntityDocument",
+        back_populates="document_types",
+        foreign_keys=[EntityDocument.document_type_id]
+    )
+
+
+    stages_entity_documents = relationship(
+        "EntityDocument",
+        back_populates="stages",
+        foreign_keys=[EntityDocument.stage_id]
+    )
+    
+    document_status_entity_documents = relationship(
+        "EntityDocument",
+        back_populates="document_status",
+        foreign_keys=[EntityDocument.document_status_id]
+    )
+    # ==============================================

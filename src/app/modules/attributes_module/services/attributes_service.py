@@ -29,7 +29,7 @@ class AttributeService(BaseService[Attribute, AttributeOut]):
         parameter_id: Optional[int] = None,
     ) -> Tuple[List[Dict[str, Any]], int]:
         try:
-            stmt = select(self.model).options(selectinload(self.model.parameter))
+            stmt = select(self.model).options(selectinload(self.model.parameters))
 
             conditions = []
 
