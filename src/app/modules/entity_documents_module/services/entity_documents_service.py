@@ -16,6 +16,7 @@ from src.app.modules.entity_types_module.repositories.entity_types_repository im
     EntityTypeRepository,
 )
 from src.app.shared.constants.attribute_and_parameter_enum import AttributeIds, ParameterIds
+from src.app.shared.utils.utils import upload_base64_to_s3_with_structure
 
 class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
     def __init__(self, db_session: AsyncSession):
@@ -173,9 +174,44 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
             raise e
 
 
+    async def _upload_file_to_S3(self, data):
+        try:
+            file_url = data.get("file_url",None)
+            project_id = data.get("project_id",None)
+            document_type_id = data.get("document_type_id",None)
+            entity_type_id = data.get("entity_type_id",None)
+            stage_id = data.get("stage_id",None)
+            entity_id = data.get("entity_id")
+
+            # Consultamos los servicios
+            project = await self.project_service.get_by_id(project_id)
+            entity_type = await self.entity_type_service.get_by_id(entity_type_id)
+            stage = await self.attribute_service.get_by_id(stage_id)
+
+            if file_url: 
+                s3_file = upload_base64_to_s3_with_structure(
+                    base64_data=file_url,  # cadena base64
+                    environment="dev",
+                    project_name=project['name'],
+                    entity_type_name=entity_type['name'],
+                    stage_name=stage['name'],
+                    entity_id=entity_id,
+                    document_type_id=document_type_id,
+                    document_type_name="contrato"
+                )
+                print("Ruta s3: ",s3_file)
+        except Exception as e:
+            raise e
+        
+    
     async def create(self, data: Dict[str, Any]) -> Dict[str, Any]:
         try:
+            file_url = data.get("file_url",None)
             await self._validate_data(data)
+            if file_url:  
+                new_file_url  = await self._upload_file_to_S3(data)
+                data["file_url"] = new_file_url # Asingamos la nueva ruta de S3 del el archivo
+
             item = await self.repo.create(data)
             return self.out_schema.model_validate(item).model_dump()
         except Exception as e:

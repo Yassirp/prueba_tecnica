@@ -1,5 +1,6 @@
 # Archivo generado automáticamente para entity_documents - schemas
 from datetime import datetime
+from fastapi import HTTPException, status
 from typing import Optional, Dict, Any, Literal, Union
 from pydantic import BaseModel, Field, root_validator
 from src.app.shared.bases.base_schema import BaseOutSchema
@@ -11,7 +12,7 @@ class EntityDocumentBase(BaseModel):
     entity_type_id: int = Field(..., ge=1, description="ID del tipo de entidad")
     entity_id: int = Field(..., ge=1, description="ID de la entidad externa (opcional)")
     stage_id: int = Field(..., ge=1, description="ID de la etapa")
-    file_url: str = Field(..., max_length=100, description="Ruta del archivo en S3")
+    file_url: str = Field(..., description="Ruta del archivo en S3")
     file_extension: str = Field(..., max_length=100, description="Extensión del archivo")
     file_size: int = Field(..., ge=0, description="Tamaño del archivo en bytes")
     mime_type: int = Field(..., ge=0, description="Tipo MIME del archivo")
@@ -73,7 +74,7 @@ class EntityDocumentUpdate(BaseModel):
     entity_type_id: int = Field(..., ge=1, description="ID del tipo de entidad")
     entity_id: int = Field(..., ge=1, description="ID de la entidad externa (opcional)")
     stage_id: int = Field(..., ge=1, description="ID de la etapa")
-    file_url: str = Field(..., max_length=100, description="Ruta del archivo en S3")
+    file_url: str = Field(..., description="Ruta del archivo en S3")
     file_extension: str = Field(..., max_length=100, description="Extensión del archivo")
     file_size: int = Field(..., ge=0, description="Tamaño del archivo en bytes")
     mime_type: int = Field(..., ge=0, description="Tipo MIME del archivo")

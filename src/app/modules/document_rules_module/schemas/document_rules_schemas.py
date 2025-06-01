@@ -22,38 +22,33 @@ class DocumentRuleBase(BaseModel):
         try:
             if not isinstance(values, dict): return values
 
-            if "name" not in values or not values["name"] or not str(values["name"]).strip():
-                raise Exception("El nombre de la regla es requerida y no puede estar vacía.")
-            elif not isinstance(values["name"], str):
+            # Validación del campo 'name'
+            if "name" not in values or values["name"] is None or not str(values["name"]).strip():
+                raise Exception("El nombre de la regla es requerido y no puede estar vacío.")
+            if not isinstance(values["name"], str):
                 raise Exception("El nombre de la regla debe ser una cadena de texto.")
-            
-            elif not isinstance(values["project_id"], int) or values["project_id"] < 0:
-                raise Exception("El poyecto debe ser un número entero positivo.")
-            elif "project_id" not in values or values["project_id"] is None:
-                raise Exception("El poyecto es requerido.")
-            elif not isinstance(values["project_id"], int) or values["project_id"] < 0:
-                raise Exception("El poyecto debe ser un número entero positivo.")
 
-            elif "document_type_id" not in values or values["document_type_id"] is None:
-                raise Exception("El tipo de documento es requerido.")
-            elif not isinstance(values["document_type_id"], int) or values["document_type_id"] < 0:
-                raise Exception("El tipo de documento debe ser un número entero positivo.")
+            # Campos enteros requeridos
+            required_int_fields = [
+                ("project_id", "El proyecto es requerido.", "El proyecto debe ser un número entero positivo."),
+                ("document_type_id", "El tipo de documento es requerido.", "El tipo de documento debe ser un número entero positivo."),
+                ("entity_type_id", "El tipo de entidad es requerido.", "El tipo de entidad debe ser un número entero positivo."),
+                ("stage_id", "La etapa es requerida.", "La etapa debe ser un número entero positivo."),
+            ]
 
-            elif "entity_type_id" not in values or values["entity_type_id"] is None:
-                raise Exception("El tipo de entidad es requerido.")
-            elif not isinstance(values["entity_type_id"], int) or values["entity_type_id"] < 0:
-                raise Exception("El tipo de entidad debe ser un número entero positivo.")
+            for field, msg_required, msg_invalid in required_int_fields:
+                if field not in values or values[field] is None:
+                    raise Exception(msg_required)
+                if not isinstance(values[field], int) or values[field] < 0:
+                    raise Exception(msg_invalid)
 
-            elif "stage_id" not in values or values["stage_id"] is None:
-                raise Exception("El tipo de etapa es requerido.")
-            elif not isinstance(values["stage_id"], int) or values["stage_id"] < 0:
-                raise Exception("El tipo de etapa debe ser un número entero positivo.")
-
+            # Validación opcional para 'max_file_size'
             if "max_file_size" in values and values["max_file_size"] is not None:
                 if not isinstance(values["max_file_size"], int) or values["max_file_size"] < 0:
                     raise Exception("El tamaño del archivo debe ser un número entero positivo.")
-        
+
             return values
+
         except Exception as e:
             raise e
        
@@ -80,38 +75,33 @@ class DocumentRuleUpdate(BaseModel):
         try:
             if not isinstance(values, dict): return values
 
-            if "name" not in values or not values["name"] or not str(values["name"]).strip():
-                raise Exception("El nombre de la regla es requerida y no puede estar vacía.")
-            elif not isinstance(values["name"], str):
+            # Validación del campo 'name'
+            if "name" not in values or values["name"] is None or not str(values["name"]).strip():
+                raise Exception("El nombre de la regla es requerido y no puede estar vacío.")
+            if not isinstance(values["name"], str):
                 raise Exception("El nombre de la regla debe ser una cadena de texto.")
-            
-            elif not isinstance(values["project_id"], int) or values["project_id"] < 0:
-                raise Exception("El poyecto debe ser un número entero positivo.")
-            elif "project_id" not in values or values["project_id"] is None:
-                raise Exception("El poyecto es requerido.")
-            elif not isinstance(values["project_id"], int) or values["project_id"] < 0:
-                raise Exception("El poyecto debe ser un número entero positivo.")
 
-            elif "document_type_id" not in values or values["document_type_id"] is None:
-                raise Exception("El tipo de documento es requerido.")
-            elif not isinstance(values["document_type_id"], int) or values["document_type_id"] < 0:
-                raise Exception("El tipo de documento debe ser un número entero positivo.")
+            # Campos enteros requeridos
+            required_int_fields = [
+                ("project_id", "El proyecto es requerido.", "El proyecto debe ser un número entero positivo."),
+                ("document_type_id", "El tipo de documento es requerido.", "El tipo de documento debe ser un número entero positivo."),
+                ("entity_type_id", "El tipo de entidad es requerido.", "El tipo de entidad debe ser un número entero positivo."),
+                ("stage_id", "La etapa es requerida.", "La etapa debe ser un número entero positivo."),
+            ]
 
-            elif "entity_type_id" not in values or values["entity_type_id"] is None:
-                raise Exception("El tipo de entidad es requerido.")
-            elif not isinstance(values["entity_type_id"], int) or values["entity_type_id"] < 0:
-                raise Exception("El tipo de entidad debe ser un número entero positivo.")
+            for field, msg_required, msg_invalid in required_int_fields:
+                if field not in values or values[field] is None:
+                    raise Exception(msg_required)
+                if not isinstance(values[field], int) or values[field] < 0:
+                    raise Exception(msg_invalid)
 
-            elif "stage_id" not in values or values["stage_id"] is None:
-                raise Exception("El tipo de etapa es requerido.")
-            elif not isinstance(values["stage_id"], int) or values["stage_id"] < 0:
-                raise Exception("El tipo de etapa debe ser un número entero positivo.")
-
+            # Validación opcional para 'max_file_size'
             if "max_file_size" in values and values["max_file_size"] is not None:
                 if not isinstance(values["max_file_size"], int) or values["max_file_size"] < 0:
                     raise Exception("El tamaño del archivo debe ser un número entero positivo.")
-        
+
             return values
+
         except Exception as e:
             raise e
     
