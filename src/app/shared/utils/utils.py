@@ -74,7 +74,7 @@ def upload_base64_to_s3_with_structure(
             "AWS_ACCESS_KEY_ID: ",os.getenv('AWS_ACCESS_KEY_ID'),
             "AWS_SECRET_ACCESS_KEY: ",os.getenv('AWS_SECRET_ACCESS_KEY'),
             "S3_BUCKET_NAME: ",os.getenv('S3_BUCKET_NAME'),
-            "https://{os.getenv('S3_BUCKET_NAME')}.s3.{os.getenv('AWS_REGION')}.amazonaws.com/{key}"
+            f"https://{os.getenv('S3_BUCKET_NAME')}.s3.{os.getenv('AWS_REGION')}.amazonaws.com/{key}"
         )
         s3 = boto3.client(
             "s3",
@@ -89,7 +89,7 @@ def upload_base64_to_s3_with_structure(
         
         s3.upload_fileobj(BytesIO(file_content), os.getenv("S3_BUCKET_NAME"), key)
 
-        file_url = f"https://{os.getenv('S3_BUCKET_NAME')}.s3.{os.getenv('AWS_REGION')}.amazonaws.com/{key}"
+        file_url = f"https://ms-documents.s3.{os.getenv('AWS_REGION')}.amazonaws.com/{key}"
         return file_url
 
     except Exception as e:

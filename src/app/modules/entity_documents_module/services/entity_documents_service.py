@@ -191,7 +191,7 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
             if file_url: 
                 s3_file = upload_base64_to_s3_with_structure(
                     base64_data=file_url,  # cadena base64
-                    environment="dev",
+                    environment="production",
                     project_name=project['name'],
                     entity_type_name=entity_type['name'],
                     stage_name=stage['name'],
