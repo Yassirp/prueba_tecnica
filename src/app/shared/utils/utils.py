@@ -82,14 +82,9 @@ def upload_base64_to_s3_with_structure(
             aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
             aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY')
         )
-        try:
-            s3.head_bucket(Bucket=os.getenv("S3_BUCKET_NAME"))
-        except Exception:
-            raise Exception("El bucket especificado no existe o no es accesible")
-        
         s3.upload_fileobj(BytesIO(file_content), os.getenv("S3_BUCKET_NAME"), key)
 
-        file_url = f"https://ms-documents.s3.{os.getenv('AWS_REGION')}.amazonaws.com/{key}"
+        file_url = f"https://{os.getenv('S3_BUCKET_NAME')}.s3.{os.getenv('AWS_REGION')}.amazonaws.com/{key}"
         return file_url
 
     except Exception as e:
