@@ -199,7 +199,7 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
                     document_type_id=document_type_id,
                     document_type_name="contrato"
                 )
-                print("Ruta s3: ",s3_file)
+                return s3_file
         except Exception as e:
             raise e
         
