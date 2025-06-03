@@ -118,3 +118,10 @@ src/test/__pycache__/
 
 # mypy
 .mypy_cache/
+
+# Migrations (optional, if auto-generated and re-creatable)
+migrations/__pycache__/
+migrations/*.pyc
+src/migrations/__pycache__/
+src/migrations/*.pyc
+src/migrations/versions/

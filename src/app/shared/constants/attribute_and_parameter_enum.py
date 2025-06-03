@@ -31,6 +31,7 @@ class AttributeIds(Enum):
     CONSENT_INFORMED = 16
     CERTIFICATE_CRIMES = 17
     OTHERS = 18
+    CANCEL = 19
 
 class AttributeName(Enum):
     DEPARTMENTAL = "Departamental"
@@ -51,6 +52,7 @@ class AttributeName(Enum):
     CONSENT_INFORMED = "Consentimiento informado para mayores de edad"
     CERTIFICATE_CRIMES = "Certificación de consulta de inhabilidades (Delitos sexuales cometidos contra menores de 18 años"
     OTHERS = "RETHUS - Solo Aplica para Medicos - Fisioterapeutas"
+    CANCEL = "Documentos anulados"
 
 
 

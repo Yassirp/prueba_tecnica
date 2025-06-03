@@ -6,6 +6,7 @@ from src.app.config.database.session import get_db
 from src.app.modules.entity_documents_module.schemas.entity_documents_schemas import (
     EntityDocumentCreate, 
     EntityDocumentOut,
+    EntityDocumentStatus,
     EntityDocumentUpdate
     )
 from src.app.modules.entity_documents_module.services.entity_documents_service import EntityDocumentService
@@ -41,6 +42,7 @@ async def get_all_entity_docuemnt(
     document_status_id: Optional[int] =  Query(None),
     entity_type_id: Optional[int] =  Query(None),
     stage_id: Optional[int] =  Query(None),
+    id: Optional[int] =  Query(None),
 ) -> Dict[str, Any]:
     try:
         service = EntityDocumentService(db)
@@ -113,3 +115,20 @@ async def delete_entity_docuemnt(
         return await service.delete(entity_docuemnt_id)
     except Exception as e: 
         raise e
+    
+
+@router.put("/check-doocument-status/{entity_document_id}", response_model=EntityDocumentOut)
+@handle_route_responses(
+    success_message=EntityDocumentMessages.OK_UPDATED,
+    error_message=EntityDocumentMessages.ERROR_UPDATED,
+    not_found_message=EntityDocumentMessages.ERROR_NOT_FOUND,
+)
+async def check_doocument_status(
+    entity_document_id: int, data: EntityDocumentStatus, db: AsyncSession = Depends(get_db)
+) -> Dict[str, Any]:
+    try:
+        service = EntityDocumentService(db)
+        return await service.check_doocument_status(entity_document_id,data.model_dump(exclude_unset=True))
+    except Exception as e:
+        raise e
+    

@@ -1,5 +1,6 @@
 # Archivo generado automáticamente para entity_documents - schemas
 from datetime import datetime
+from fastapi import HTTPException, status
 from typing import Optional, Dict, Any, Literal, Union
 from pydantic import BaseModel, Field, root_validator
 from src.app.shared.bases.base_schema import BaseOutSchema
@@ -11,7 +12,7 @@ class EntityDocumentBase(BaseModel):
     entity_type_id: int = Field(..., ge=1, description="ID del tipo de entidad")
     entity_id: int = Field(..., ge=1, description="ID de la entidad externa (opcional)")
     stage_id: int = Field(..., ge=1, description="ID de la etapa")
-    file_url: str = Field(..., max_length=100, description="Ruta del archivo en S3")
+    file_url: str = Field(..., description="Ruta del archivo en S3")
     file_extension: str = Field(..., max_length=100, description="Extensión del archivo")
     file_size: int = Field(..., ge=0, description="Tamaño del archivo en bytes")
     mime_type: int = Field(..., ge=0, description="Tipo MIME del archivo")
@@ -24,8 +25,7 @@ class EntityDocumentBase(BaseModel):
     @root_validator(pre=True)
     def check_fields(cls, values):
         try:
-            if not isinstance(values, dict):
-                return values   
+            if not isinstance(values, dict): return values   
 
             required_int_fields = [
                 ("project_id", "El proyecto es requerido.", "El proyecto debe ser un número entero positivo."),
@@ -74,7 +74,7 @@ class EntityDocumentUpdate(BaseModel):
     entity_type_id: int = Field(..., ge=1, description="ID del tipo de entidad")
     entity_id: int = Field(..., ge=1, description="ID de la entidad externa (opcional)")
     stage_id: int = Field(..., ge=1, description="ID de la etapa")
-    file_url: str = Field(..., max_length=100, description="Ruta del archivo en S3")
+    file_url: str = Field(..., description="Ruta del archivo en S3")
     file_extension: str = Field(..., max_length=100, description="Extensión del archivo")
     file_size: int = Field(..., ge=0, description="Tamaño del archivo en bytes")
     mime_type: int = Field(..., ge=0, description="Tipo MIME del archivo")
@@ -87,8 +87,7 @@ class EntityDocumentUpdate(BaseModel):
     @root_validator(pre=True)
     def check_fields(cls, values):
         try:
-            if not isinstance(values, dict):
-                return values   
+            if not isinstance(values, dict): return values   
 
             required_int_fields = [
                 ("project_id", "El proyecto es requerido.", "El proyecto debe ser un número entero positivo."),
@@ -132,3 +131,31 @@ class EntityDocumentOut(EntityDocumentBase, BaseOutSchema):
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
     deleted_at: Optional[datetime] = None
+
+
+class EntityDocumentStatus(BaseModel):
+    document_status_id: int = Field(..., ge=1, description="ID del estado del documento")
+    class Config:
+        extra = "ignore" 
+
+        
+    @root_validator(pre=True)
+    def check_fields(cls, values):
+        try:
+            if not isinstance(values, dict): return values
+
+            required_int_fields = [
+                ("document_status_id", "El estado del documento es requerido.", "El estado del documento debe ser un número entero positivo."),
+            ]
+
+            for field, msg_required, msg_invalid in required_int_fields:
+                if field not in values or values[field] is None:
+                    raise Exception(msg_required)
+                
+                if not isinstance(values[field], int) or values[field] < 1:
+                    raise Exception(msg_invalid)
+
+            return values
+
+        except Exception as e:
+            raise e
