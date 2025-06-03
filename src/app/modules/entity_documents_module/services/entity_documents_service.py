@@ -186,6 +186,7 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
             # Consultamos los servicios
             project = await self.project_service.get_by_id(project_id)
             entity_type = await self.entity_type_service.get_by_id(entity_type_id)
+            document_type = await self.entity_type_service.get_by_id(document_type_id)
             stage = await self.attribute_service.get_by_id(stage_id)
 
             if file_url: 
@@ -197,7 +198,7 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
                     stage_name=stage['name'],
                     entity_id=entity_id,
                     document_type_id=document_type_id,
-                    document_type_name="contrato"
+                    document_type_name=document_type['name']
                 )
                 return s3_file
         except Exception as e:
