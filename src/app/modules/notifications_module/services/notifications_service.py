@@ -10,6 +10,8 @@ from sqlalchemy.orm import selectinload
 from fastapi import HTTPException
 from src.app.shared.constants.messages import NotificationMessages
 
+import os
+
 class NotificationsService(BaseService[Notification, NotificationOut]):
     def __init__(self, db_session: AsyncSession):
         super().__init__(
@@ -81,7 +83,6 @@ class NotificationsService(BaseService[Notification, NotificationOut]):
             return item
         except Exception as e:
             raise e
-        
 
         
         

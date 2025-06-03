@@ -64,39 +64,4 @@ async def get_notification_by_id(
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))   
 
-@router.post("/create-notification", response_model=NotificationOut)
-@handle_route_responses(
-    success_message=NotificationMessages.OK_CREATED,
-    error_message=NotificationMessages.ERROR_CREATED,
-    not_found_message=NotificationMessages.ERROR_NOT_FOUND,
-)
-# Crear una notificación
-async def create_notification(
-    notification: NotificationCreate,
-    db: AsyncSession = Depends(get_db)
-):
-    try:
-        service = NotificationsService(db)
-        notification = await service.create(notification.model_dump())
-        return notification
-    except Exception as e:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
-@router.put("/update-notification/{notification_id}", response_model=NotificationOut)
-@handle_route_responses(
-    success_message=NotificationMessages.OK_UPDATED,
-    error_message=NotificationMessages.ERROR_UPDATED,
-    not_found_message=NotificationMessages.ERROR_NOT_FOUND,
-)
-
-async def update_notification(
-    notification_id: int,
-    notification: NotificationUpdate,
-    db: AsyncSession = Depends(get_db)
-):
-    try:
-        service = NotificationsService(db)
-        notification = await service.update(notification_id, notification.model_dump())
-        return notification
-    except Exception as e:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))

@@ -15,8 +15,12 @@ from src.app.shared.bases.base_service import BaseService
 from src.app.modules.entity_types_module.repositories.entity_types_repository import (
     EntityTypeRepository,
 )
-from src.app.shared.constants.attribute_and_parameter_enum import AttributeIds, ParameterIds
+from src.app.shared.constants.attribute_and_parameter_enum import AttributeIds, ParameterIds, AttributeName
 from src.app.shared.utils.utils import upload_base64_to_s3_with_structure
+from src.app.modules.entity_document_logs_module.services.entity_document_logs_service import EntityDocumentLogsService
+from src.app.modules.notifications_module.services.notifications_service import NotificationsService
+from src.app.utils.mailer import send_email
+
 
 class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
     def __init__(self, db_session: AsyncSession):
@@ -167,6 +171,36 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
                         # Guardar (con SQLAlchemy async ORM)
                         self.db_session.add(rules)
                         await self.db_session.commit()
+
+                        # Crear notificación data
+                        notification_data = {
+                            "entity_document_id": entity_document_id,
+                            "type_notification_id": AttributeIds.CREATED_NOTIFICATION.value,
+                            "title": f"Documento {document_type.name} creado",
+                            "message": f"El documento {document_type.name} ha sido creado",
+                            "data": {
+                                "entity_document_id": entity_document_id,
+                                "document_type_id": document_type_id,
+                                "entity_type_id": entity_type_id,
+                                "stage_id": stage_id,
+                                "project_id": project_id,
+                            },
+                            "state": AttributeIds.APPROVED.value
+                        }
+                        # Crear notificación
+                        #service_notification = NotificationsService(self.db_session)
+                        #await service_notification.create(notification_data)
+
+                        # Enviar notificación por email
+                        #await send_email(
+                         #   to_email=project.email,
+                          #  subject=AttributeName.CREATED_NOTIFICATION.value,
+                           # template_name="email_notification.html",
+                           # context={
+                            #    "name": project.name,
+                             #   "message": f"El documento {document_type.name} ha sido creado"
+                            #}
+                        #)
                         await self.db_session.refresh(rules)
 
             return True
@@ -236,6 +270,23 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
         try:
             document_status_id = data.get("document_status_id")
             model, entity_document = await self.get_all(id=entity_document_id,limit=1)
+           
+            service_entity_document_log = EntityDocumentLogsService(self.db_session)
+            entity_document_log = await service_entity_document_log.get_by_id(entity_document_id)
+            if not entity_document_log:
+                entity_document_log = None
+                
+            data_log = {
+                "entity_document_id": entity_document_id,
+                "action": data.get("action"),
+                "observations": data.get("observations"),
+                "before": entity_document_log,
+                "after": data,
+                "created_by": data.get("created_by"),
+                "state": data.get("state")
+            }
+            await service_entity_document_log.create(data_log)
+
             for rules in model:
                 data, document_status = await self.attribute_service.get_all(id=document_status_id, parameter_id=ParameterIds.DOCUMENT_STATUS.value, limit=1)
                 if not document_status:
