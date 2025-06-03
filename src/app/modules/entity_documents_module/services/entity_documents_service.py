@@ -220,9 +220,8 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
             # Consultamos los servicios
             project = await self.project_service.get_by_id(project_id)
             entity_type = await self.entity_type_service.get_by_id(entity_type_id)
-            document_type = await self.entity_type_service.get_by_id(document_type_id)
+            document_type = await self.attribute_service.get_by_id(document_type_id)
             stage = await self.attribute_service.get_by_id(stage_id)
-
             if file_url: 
                 s3_file = upload_base64_to_s3_with_structure(
                     base64_data=file_url,  # cadena base64

@@ -27,9 +27,9 @@ async def send_email(to_email: str,subject: str,template_name: str,context: dict
     # Enviar email
     await aiosmtplib.send(
     message,
-    hostname=os.getenv("SMTP_HOST"),
-    port=int(os.getenv("SMTP_PORT")),
+    hostname=os.getenv("MAIL_HOST"),
+    port=int(os.getenv("MAIL_PORT")),
     start_tls=True,
-    username=os.getenv("SMTP_USER"),
-    password=os.getenv("SMTP_PASSWORD"),
+    username=os.getenv("MAIL_USERNAME"),
+    password=os.getenv("MAIL_PASSWORD"),
     )
