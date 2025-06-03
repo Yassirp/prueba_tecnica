@@ -37,16 +37,16 @@ class NotificationBase(BaseModel):
             for field, msg_required, msg_invalid in required_int_fields:
                 value = values.get(field)
                 if value is None:
-                    raise ValueError(msg_required)
+                    raise Exception(msg_required)
                 if not isinstance(value, int) or (field != "state" and value <= 0):
-                    raise ValueError(msg_invalid)
+                    raise Exception(msg_invalid)
 
             for field, msg_required, msg_invalid in required_str_fields:
                 value = values.get(field)
                 if not value or not str(value).strip():
-                    raise ValueError(msg_required)
+                    raise Exception(msg_required)
                 if not isinstance(value, str):
-                    raise ValueError(msg_invalid)
+                    raise Exception(msg_invalid)
 
             return values
 
