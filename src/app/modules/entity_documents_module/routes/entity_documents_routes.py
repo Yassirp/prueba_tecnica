@@ -43,12 +43,14 @@ async def get_all_entity_docuemnt(
     entity_type_id: Optional[int] =  Query(None),
     stage_id: Optional[int] =  Query(None),
     id: Optional[int] =  Query(None),
+    search: Optional[str] =  Query(None),
 ) -> Dict[str, Any]:
     try:
         service = EntityDocumentService(db)
         entity_docuemnt, total = await service.get_all(
         limit=limit, offset=offset, order_by=order_by, filters=filters , project_id=project_id, 
-        document_status_id=document_status_id, entity_type_id=entity_type_id, stage_id=stage_id
+        document_status_id=document_status_id, entity_type_id=entity_type_id, stage_id=stage_id, 
+        search= search
         )
         return paginated_response(entity_docuemnt, total, limit, offset)
     except Exception as e:

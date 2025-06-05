@@ -13,6 +13,7 @@ from src.app.modules.attributes_module.services.attributes_service import Attrib
 from src.app.modules.entity_documents_module.models.entity_documents import EntityDocument
 from src.app.modules.entity_documents_module.schemas.entity_documents_schemas import EntityDocumentOut
 from src.app.modules.entity_types_module.services.entity_type_service import EntityTypeService
+from src.app.modules.projects_module.models.projects import Project
 from src.app.modules.projects_module.services.projects_service import ProjectService
 from src.app.shared.bases.base_service import BaseService
 from src.app.modules.entity_types_module.repositories.entity_types_repository import (
@@ -55,15 +56,28 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
         stage_id: Optional[int] = None,
         document_type_id: Optional[int] = None,
         id:  Optional[int] = None,
+        search: Optional[str] = None,
     ) -> Tuple[List[Dict[str, Any]], int]:
         try:
-            stmt = select(self.model).options(
+            document_status = aliased(Attribute)
+            document_types = aliased(Attribute)
+            project = aliased(Project)
+
+            stmt = select(self.model).join(
+                document_status, self.model.document_status_id == document_status.id
+            ).join(
+                document_types, self.model.document_type_id == document_types.id
+            ).join(
+                project, self.model.project_id == project.id
+            ).options(
                 selectinload(self.model.stages),
                 selectinload(self.model.project),
                 selectinload(self.model.entity_types),
                 selectinload(self.model.document_types),
                 selectinload(self.model.document_status),
-                )
+
+            ).where(self.model.state == Setting.STATUS.value)
+            
             conditions = []
             
             # Filtramos por el id:
@@ -90,10 +104,20 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
             if document_type_id:
                 conditions.append(self.model.document_type_id == document_type_id)
 
+
+                     # Filtro LIKE con búsqueda en document_status.name y document_types.name
+            if search:
+                search_pattern = f"%{search}%"
+                conditions.append(
+                    or_(
+                        document_status.name.ilike(search_pattern),
+                        document_types.name.ilike(search_pattern),
+                        project.name.ilike(search_pattern),
+                    )
+                )
             # Aplicar condiciones al query
             if conditions:
                 stmt = stmt.where(and_(*conditions))
-             
             # Aquí puedes aplicar filtros, orden y paginación si los necesitas.
             if order_by:
                 stmt = stmt.order_by(order_by)
