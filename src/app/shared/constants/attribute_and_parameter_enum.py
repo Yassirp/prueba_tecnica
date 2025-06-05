@@ -58,8 +58,8 @@ class AttributeName(Enum):
     OTHERS = "RETHUS - Solo Aplica para Medicos - Fisioterapeutas"
     CANCEL = "Documentos anulados"
     MESSAGE_NOTIFICATION = "Mensaje de notificación"
-    CREATED_NOTIFICATION = "Documento creado"
-    UPDATED_NOTIFICATION = "Documento actualizado"
+    CREATED_NOTIFICATION = "Documento cargado correctamente"
+    UPDATED_NOTIFICATION = "Documento actualizado correctamente"
 
 
 

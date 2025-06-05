@@ -19,7 +19,7 @@ from src.app.shared.constants.attribute_and_parameter_enum import AttributeIds, 
 from src.app.shared.utils.utils import upload_base64_to_s3_with_structure
 from src.app.modules.entity_document_logs_module.services.entity_document_logs_service import EntityDocumentLogsService
 from src.app.modules.notifications_module.services.notifications_service import NotificationsService
-from src.app.utils.mailer import send_email
+from src.app.modules.entity_documents_module.schemas.entity_documents_schemas import EntityDocumentBase
 
 
 class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
@@ -115,7 +115,9 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
             entity_type_id = data.get("entity_type_id")
             stage_id = data.get("stage_id")
             document_status_id = data.get("document_status_id")
-
+            
+            
+          
             # Validamos si existe el proyecto
             project = await self.project_service.get_by_id(project_id)
             if not project:
@@ -171,38 +173,7 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
                         # Guardar (con SQLAlchemy async ORM)
                         self.db_session.add(rules)
                         await self.db_session.commit()
-
-                        # Crear notificación data
-                        notification_data = {
-                            "entity_document_id": entity_document_id,
-                            "type_notification_id": AttributeIds.CREATED_NOTIFICATION.value,
-                            "title": f"Documento {document_type.name} creado",
-                            "message": f"El documento {document_type.name} ha sido creado",
-                            "data": {
-                                "entity_document_id": entity_document_id,
-                                "document_type_id": document_type_id,
-                                "entity_type_id": entity_type_id,
-                                "stage_id": stage_id,
-                                "project_id": project_id,
-                            },
-                            "state": AttributeIds.APPROVED.value
-                        }
-                        # Crear notificación
-                        #service_notification = NotificationsService(self.db_session)
-                        #await service_notification.create(notification_data)
-
-                        # Enviar notificación por email
-                        #await send_email(
-                         #   to_email=project.email,
-                          #  subject=AttributeName.CREATED_NOTIFICATION.value,
-                           # template_name="email_notification.html",
-                           # context={
-                            #    "name": project.name,
-                             #   "message": f"El documento {document_type.name} ha sido creado"
-                            #}
-                        #)
                         await self.db_session.refresh(rules)
-
             return True
         except Exception as e:
             raise e
@@ -246,7 +217,13 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
                 new_file_url  = await self._upload_file_to_S3(data)
                 data["file_url"] = new_file_url # Asingamos la nueva ruta de S3 del el archivo
 
-            item = await self.repo.create(data)
+            # Convertimos el diccionario a un modelo Pydantic
+            entity_document = EntityDocumentBase(**data)
+            # Usamos dict_for_db para obtener solo los campos que van a la base de datos
+            item = await self.repo.create(entity_document.dict_for_db())
+
+            notification_service = NotificationsService(self.db_session)            
+            await notification_service.create_notification_send_email(item.id, data)
             return self.out_schema.model_validate(item).model_dump()
         except Exception as e:
             raise e
@@ -312,3 +289,6 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
             return []
         except Exception as e:
             raise e
+        
+
+  

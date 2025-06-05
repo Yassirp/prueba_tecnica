@@ -11,25 +11,29 @@ env = Environment(
     autoescape=select_autoescape(['html', 'xml'])
 )
 
-async def send_email(to_email: str,subject: str,template_name: str,context: dict):
-    # Renderizar HTML
-    template = env.get_template(template_name)
-    html_content = template.render(context)
+async def send_email(to_email, subject,template_name,context):
+    try:
+        # Renderizar HTML
+        template = env.get_template(template_name)
+        html_content = template.render(context)
 
-    # Crear mensaje
-    message = EmailMessage()
-    message["From"] = os.getenv("SMTP_SENDER_EMAIL")
-    message["To"] = to_email
-    message["Subject"] = subject
-    message.set_content("Este correo requiere un cliente que soporte HTML.")
-    message.add_alternative(html_content, subtype='html')
+        # Crear mensaje
+        message = EmailMessage()
+        message["From"] = os.getenv("MAIL_USERNAME")
+        message["To"] = to_email
+        message["Subject"] = subject
+        message.set_content("Este correo requiere un cliente que soporte HTML.")
+        message.add_alternative(html_content, subtype='html')
 
-    # Enviar email
-    await aiosmtplib.send(
-    message,
-    hostname=os.getenv("MAIL_HOST"),
-    port=int(os.getenv("MAIL_PORT")),
-    start_tls=True,
-    username=os.getenv("MAIL_USERNAME"),
-    password=os.getenv("MAIL_PASSWORD"),
-    )
+        # Enviar email
+        await aiosmtplib.send(
+        message,
+        hostname=os.getenv("MAIL_HOST"),
+        port=int(os.getenv("MAIL_PORT")),
+        start_tls=True,
+        username=os.getenv("MAIL_USERNAME"),
+        password=os.getenv("MAIL_PASSWORD"),
+        )
+    except Exception as e:
+        raise e
+   

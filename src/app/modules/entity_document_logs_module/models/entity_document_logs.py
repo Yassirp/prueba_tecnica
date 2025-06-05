@@ -22,6 +22,6 @@ class EntityDocumentLog(BaseModel):
     deleted_at = Column(DateTime(timezone=True), nullable=True)
 
     # Relaciones a otros modelos
-    entity_document = relationship("EntityDocument", back_populates="entity_document_logs")
+    entity_document = relationship("EntityDocument", back_populates="entity_document_logs", foreign_keys=[entity_document_id])
 
 
