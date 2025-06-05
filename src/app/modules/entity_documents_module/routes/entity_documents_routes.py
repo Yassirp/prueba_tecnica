@@ -119,18 +119,16 @@ async def delete_entity_docuemnt(
         raise e
     
 
-@router.put("/check-doocument-status/{entity_document_id}", response_model=EntityDocumentOut)
+@router.post("/check-doocument-status/", response_model=EntityDocumentOut, status_code=status.HTTP_201_CREATED)
 @handle_route_responses(
     success_message=EntityDocumentMessages.OK_UPDATED,
-    error_message=EntityDocumentMessages.ERROR_UPDATED,
-    not_found_message=EntityDocumentMessages.ERROR_NOT_FOUND,
+    error_message=EntityDocumentMessages.ERROR_UPDATED
 )
-async def check_doocument_status(
-    entity_document_id: int, data: EntityDocumentStatus, db: AsyncSession = Depends(get_db)
+async def check_doocument_status( data: EntityDocumentStatus, db: AsyncSession = Depends(get_db)
 ) -> Dict[str, Any]:
     try:
         service = EntityDocumentService(db)
-        return await service.check_doocument_status(entity_document_id,data.model_dump(exclude_unset=True))
+        return await service.check_doocument_status(data.model_dump())
     except Exception as e:
         raise e
     

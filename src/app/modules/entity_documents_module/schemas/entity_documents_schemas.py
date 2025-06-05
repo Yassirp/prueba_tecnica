@@ -149,6 +149,7 @@ class EntityDocumentOut(EntityDocumentBase, BaseOutSchema):
 
 class EntityDocumentStatus(BaseModel):
     document_status_id: int = Field(..., ge=1, description="ID del estado del documento")
+    documents: Any = Field(..., description="Lista de documentos")  # Aquí usamos Any para forzar la validación manual
     class Config:
         extra = "ignore" 
 
@@ -168,8 +169,17 @@ class EntityDocumentStatus(BaseModel):
                 
                 if not isinstance(values[field], int) or values[field] < 1:
                     raise Exception(msg_invalid)
-
+                
+            documents = values.get("documents")
+            if documents is None:
+                raise Exception("El campo documents es requerido.")
+            
+            if not isinstance(documents, list):
+                raise Exception("El campo documents debe ser un arreglo (array).")
+            
+            if len(documents) == 0:
+                raise Exception("El campo documents no puede estar vacío.")
+            
             return values
-
         except Exception as e:
             raise e

@@ -1,4 +1,5 @@
 # Archivo generado automáticamente para entity_documents - services
+import json
 from datetime import datetime
 from collections import defaultdict
 from fastapi import HTTPException, status
@@ -256,6 +257,7 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
             data_log = {
                 "entity_document_id": item.id,
                 "action": "create",
+                "before": json.dumps(data, ensure_ascii=False),  # Serializar `data` como JSON
                 "observations": "Documento creado",
                 "created_by": data.get("created_by"),
             }
@@ -278,44 +280,67 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
             )
         except Exception as e:
             raise e
+
         
-
-    async def check_doocument_status(self, entity_document_id: int, 
-        data: Dict[str, Any]
-    ) -> Optional[Dict[str, Any]]:
+    async def check_doocument_status(self, data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         try:
-            document_status_id = data.get("document_status_id")
-            model, entity_document = await self.get_all(id=entity_document_id,limit=1)
-            
-            entity_document_log = await self.entity_document_log_service.get_by_id(entity_document_id)
-            data_log = { "after": data.get("document_status_id",None)}
-            await self.entity_document_log_service.update(entity_document_log.id, data_log)
-
-            for rules in model:
-                data, document_status = await self.attribute_service.get_all(id=document_status_id, parameter_id=ParameterIds.DOCUMENT_STATUS.value, limit=1)
+            async with self.db_session.begin():
+                documents = data.get("documents", None)
+                document_status_id = data.get("document_status_id", None)
+    
+                for id in documents:
+                    entity_document = await self.get_by_id(id)
+                    if not entity_document:
+                        raise HTTPException(
+                            status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f"No se encontró el documento con el id '{id}'.",
+                        )
+                    if entity_document["document_status_id"] == AttributeIds.APPROVED.value:
+                        raise HTTPException(
+                            status_code=status.HTTP_400_BAD_REQUEST,
+                            detail=f"El tipo de documento ya fue aprobado.",
+                        )
+    
+                    # Obtener y modificar la entidad
+                    entity_document = await self.db_session.get(EntityDocument, id)
+                    entity_document.document_status_id = document_status_id
+                    entity_document.updated_at = datetime.utcnow()
+    
+                    self.db_session.add(entity_document)
+                    await self.db_session.flush()  
+                    await self.db_session.refresh(entity_document)
+    
+                    # Actualizar logs
+                    model_log, entity_document_log = await self.entity_document_log_service.get_all(
+                        entity_document_id=id
+                    )
+                    if not entity_document_log:
+                        raise HTTPException(
+                            status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f"No se encontró el log para el documento con el id '{id}'.",
+                        )
+    
+                    for log in model_log:
+                        log.after = json.dumps(data, ensure_ascii=False)
+                        self.db_session.add(log)
+    
+                # Validar el estado
+                model_document, document_status = await self.attribute_service.get_all(
+                    id=document_status_id,
+                    parameter_id=ParameterIds.DOCUMENT_STATUS.value,
+                    limit=1
+                )
                 if not document_status:
                     raise HTTPException(
                         status_code=status.HTTP_404_NOT_FOUND,
                         detail=f"No se encontró el estado del documento con el id '{document_status_id}'.",
-                )
-
-                if rules.document_status_id == AttributeIds.APPROVED.value:
-                    raise HTTPException(
-                        status_code=status.HTTP_404_NOT_FOUND,
-                        detail=f"El tipo de documento ya fue aprobado.",
                     )
-                else:
-                    rules.document_status_id = document_status_id
-                    rules.updated_at = datetime.utcnow() 
-
-                    # Guardar (con SQLAlchemy async ORM)
-                    self.db_session.add(rules)
-                    await self.db_session.commit()
-                    await self.db_session.refresh(rules)
-
-            return []
+    
+                return []
+    
         except Exception as e:
             raise e
+
         
   
     async def get_group_by_document_status(        
