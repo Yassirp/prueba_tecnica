@@ -1,11 +1,14 @@
 # Archivo generado automáticamente para entity_documents - services
 from datetime import datetime
+from collections import defaultdict
 from fastapi import HTTPException, status
 from typing import List, Optional, Dict, Any,Tuple
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from sqlalchemy import and_
+from sqlalchemy import and_, or_
+from sqlalchemy.orm import selectinload, joinedload, aliased
 from sqlalchemy.orm import selectinload
+from src.app.modules.attributes_module.models.attributes import Attribute
 from src.app.modules.attributes_module.services.attributes_service import AttributeService
 from src.app.modules.entity_documents_module.models.entity_documents import EntityDocument
 from src.app.modules.entity_documents_module.schemas.entity_documents_schemas import EntityDocumentOut
@@ -16,6 +19,7 @@ from src.app.modules.entity_types_module.repositories.entity_types_repository im
     EntityTypeRepository,
 )
 from src.app.shared.constants.attribute_and_parameter_enum import AttributeIds, ParameterIds, AttributeName
+from src.app.shared.constants.project_enum import Setting
 from src.app.shared.utils.utils import upload_base64_to_s3_with_structure
 from src.app.modules.entity_document_logs_module.services.entity_document_logs_service import EntityDocumentLogsService
 from src.app.modules.notifications_module.services.notifications_service import NotificationsService
@@ -287,5 +291,73 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
         except Exception as e:
             raise e
         
-
   
+    async def get_group_by_document_status(        
+        self,
+        limit: Optional[int] = None,
+        offset: Optional[int] = None,
+        order_by: Optional[str] = None,
+        document_status_id: Optional[int] = None,
+        search: Optional[str] = None,
+        )-> Tuple[List[Dict[str, Any]], int]:
+        try:
+            # Alias de cada los modelos
+            document_status = aliased(Attribute)
+            document_types = aliased(Attribute)
+
+            stmt = select(self.model).join(
+                document_status, self.model.document_status_id == document_status.id
+            ).join(
+                document_types, self.model.document_type_id == document_types.id
+            ).options(
+                selectinload(self.model.document_status),
+                selectinload(self.model.document_types),
+
+            ).where(self.model.state == Setting.STATUS.value)
+
+            conditions = []
+
+
+            # Filtrampos por el tipo de estado del documento
+            if document_status_id:
+                conditions.append(self.model.document_status_id == document_status_id)
+            
+            # Realizamos el like 
+            if search:
+                conditions.append(or_(
+                    document_status.name.ilike(f"%{search}%"),
+                    document_types.name.ilike(f"%{search}%")
+                ))
+
+            if conditions:
+                stmt = stmt.where(and_(*conditions))
+
+            if order_by:
+                stmt = stmt.order_by(order_by)
+
+            if offset:
+                stmt = stmt.offset(offset)
+
+            if limit:
+                stmt = stmt.limit(limit)
+
+            result = await self.db_session.execute(stmt)
+            items = result.scalars().all()
+            total = len(items)
+
+            # Agrupar por document_status_id
+            grouped = defaultdict(lambda: {
+                "document_status_id": None,
+                "document_status_name": None,
+                "documents": []
+            })
+
+            for doc in items:
+                document = doc.document_status
+                grouped[document.id]["document_status_id"] = document.id
+                grouped[document.id]["document_status_name"] = document.name
+                grouped[document.id]["documents"].append(doc)
+
+            return list(grouped.values()) ,total
+        except Exception as e:
+            raise e

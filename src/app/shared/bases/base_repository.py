@@ -1,3 +1,4 @@
+from sqlalchemy import and_
 from typing import (
     TypeVar,
     Generic,
@@ -11,6 +12,7 @@ from typing import (
 )
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update, delete
+from src.app.shared.constants.project_enum import Setting
 from src.app.shared.utils.query_utils import apply_filters, apply_order_by
 from src.app.shared.bases.base_model import BaseModel
 from datetime import datetime
@@ -27,7 +29,7 @@ class BaseRepository(Generic[T]):
 
     async def get_by_id(self, id: Any) -> Optional[T]:
         try:
-            query = select(self.model).where(self.model.id == id)
+            query = select(self.model).where(self.model.id == id, self.model.state == 1)
             result = await self.db_session.execute(query)
             return result.scalar_one_or_none()
         except Exception as e:
@@ -41,8 +43,10 @@ class BaseRepository(Generic[T]):
         filters: Optional[Dict[str, Any]] = None,
     ) -> Tuple[Sequence[T], int]:
         try:
-            stmt = select(self.model)
+            stmt = select(self.model).where(self.model.state == Setting.STATUS.value)
+            conditions = []
 
+            stmt = stmt.where(and_(*conditions))
             if filters:
                 stmt = apply_filters(stmt, self.model, filters)
 

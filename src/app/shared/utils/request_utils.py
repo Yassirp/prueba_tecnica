@@ -40,7 +40,7 @@ def http_response(
     errors: Optional[List[Union[str, Dict[str, str]]]] = None,
     status: int = 200,
 ) -> JSONResponse:
-    response_data = {"message": message, "status": status, "status_ok": status < 400}
+    response_data = {"message": message, "status": status, "status_ok": status < 400, "data": []}
 
     if data is not None:
         response_data["data"] = jsonable_encoder(data)

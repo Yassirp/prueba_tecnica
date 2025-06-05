@@ -132,3 +132,31 @@ async def check_doocument_status(
     except Exception as e:
         raise e
     
+
+@router.get("/get-group-by-document-status", response_model=List[EntityDocumentOut])
+@handle_route_responses(
+    success_message=EntityDocumentMessages.OK_GET_ALL,
+    error_message=EntityDocumentMessages.ERROR_GET_ALL,
+)
+async def get_group_by_document_status(
+    db: AsyncSession = Depends(get_db),
+    limit: Optional[int] = Query(
+        None, ge=1, le=100, description="Número de elementos por página"
+    ),
+    offset: Optional[int] = Query(
+        None, ge=0, description="Número de elementos a omitir"
+    ),
+    order_by: Optional[str] = Query(
+        None, description="Campo para ordenar (ej: 'id:asc' o 'name:desc')"
+    ),
+    document_status_id: Optional[int] =  Query(None),
+    search: Optional[str] =  Query(None),
+) -> Dict[str, Any]:
+    try:
+        service = EntityDocumentService(db)
+        attributes, total = await service.get_group_by_document_status(
+        limit=limit, offset=offset, order_by=order_by, document_status_id=document_status_id, search=search
+        )
+        return paginated_response(attributes, total, limit, offset)
+    except Exception as e:
+        raise e

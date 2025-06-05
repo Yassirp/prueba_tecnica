@@ -61,7 +61,6 @@ class DocumentRuleMessages(GlobalMessages):
     OK_UPDATED = "Reglas de documento actualizada correctamente"
     OK_DELETED = "Reglas de documento eliminada correctamente"
 
-
 # Documentos de entidades
 class EntityDocumentMessages(GlobalMessages):
     OK_GET_ALL = "Documentos de entidades obtenidos correctamente"
