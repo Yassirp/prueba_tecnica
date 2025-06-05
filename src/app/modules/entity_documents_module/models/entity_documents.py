@@ -1,6 +1,7 @@
 # Archivo generado automáticamente para entity_documents - models
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, func
 from sqlalchemy.orm import relationship
+from src.app.modules.entity_document_logs_module.models.entity_document_logs import EntityDocumentLog
 from src.app.shared.bases.base_model import BaseModel
 from datetime import datetime
 import pytz
@@ -34,5 +35,12 @@ class EntityDocument(BaseModel):
     document_types = relationship("Attribute", back_populates="document_types_entity_documents",foreign_keys=[document_type_id])
     stages = relationship("Attribute", back_populates="stages_entity_documents",foreign_keys=[stage_id])
     document_status = relationship("Attribute", back_populates="document_status_entity_documents", foreign_keys=[document_status_id])
-    entity_document_logs = relationship("EntityDocumentLog", back_populates="entity_document")
     notifications = relationship("Notification", back_populates="entity_document")
+
+    # Relaciones inversas hacia EntityDocumentLog
+    entity_document_logs = relationship(
+        "EntityDocumentLog",
+        back_populates="entity_document",
+        foreign_keys=[EntityDocumentLog.entity_document_id]
+    )
+

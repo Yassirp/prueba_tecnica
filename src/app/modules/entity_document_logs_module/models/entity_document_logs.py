@@ -4,7 +4,6 @@ from src.app.shared.bases.base_model import BaseModel
 from datetime import datetime
 from sqlalchemy.orm import relationship
 import pytz
-from src.app.modules.entity_documents_module.models.entity_documents import EntityDocument
 
 class EntityDocumentLog(BaseModel):
     __tablename__ = "m_entity_document_logs"
