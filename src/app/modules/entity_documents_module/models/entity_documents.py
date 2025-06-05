@@ -1,5 +1,5 @@
 # Archivo generado automáticamente para entity_documents - models
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, func
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Text
 from sqlalchemy.orm import relationship
 from src.app.modules.entity_document_logs_module.models.entity_document_logs import EntityDocumentLog
 from src.app.shared.bases.base_model import BaseModel
@@ -15,7 +15,7 @@ class EntityDocument(BaseModel):
     entity_type_id = Column(Integer, ForeignKey("m_entity_types.id"), comment="Hace referencia la tipo de entidad.", nullable=False)
     entity_id = Column(Integer, nullable=True, comment="Hace referencia al id de la entidad externa (estudiante o deportista).")
     stage_id = Column(Integer, ForeignKey("m_attributes.id"), nullable=False, comment="Hace referencia a la Etapa.")
-    file_url = Column(String(1000), nullable=True, comment="Hace referencia a la ruta de S3.")
+    file_url = Column(Text, nullable=True, comment="Hace referencia a la ruta de S3.")
     file_extension  = Column(String(100), nullable=True, comment="Hace referencia a la extension.")
     file_size = Column(Integer, nullable=True, comment="Hace referencia al tamaño del archivo.")
     mime_type = Column(Integer, nullable=True, comment="Hace referencia al tipo minimo.")

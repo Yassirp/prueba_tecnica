@@ -218,7 +218,7 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
             await self._validate_data(data)
             if file_url:  
                 new_file_url  = await self._upload_file_to_S3(data)
-                data["file_url"] = "new_file_url" # Asingamos la nueva ruta de S3 del el archivo
+                data["file_url"] = new_file_url # Asingamos la nueva ruta de S3 del el archivo
 
             # Convertimos el diccionario a un modelo Pydantic
             entity_document = EntityDocumentBase(**data)
