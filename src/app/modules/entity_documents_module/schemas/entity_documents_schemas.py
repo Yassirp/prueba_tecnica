@@ -22,6 +22,18 @@ class EntityDocumentBase(BaseModel):
     observations: str = Field(..., max_length=100, description="Observaciones")
     created_by: int = Field(..., ge=1, description="ID del usuario")
 
+    # Campos adicionales que no se guardan en la base de datos
+    email: Optional[str] = Field(None, description="Correo electrónico del usuario")
+    name: Optional[str] = Field(None, description="Nombre del usuario")
+
+    class Config:
+        extra = "allow"  # Permite campos extra
+        exclude = {'email', 'name'}  # Excluye estos campos al serializar
+
+    def dict_for_db(self) -> Dict[str, Any]:
+        """Retorna un diccionario con solo los campos que van a la base de datos"""
+        return self.model_dump(exclude={'email', 'name'})
+
     @root_validator(pre=True)
     def check_fields(cls, values):
         try:
@@ -44,6 +56,8 @@ class EntityDocumentBase(BaseModel):
                 ("upload_device", "El nombre del dispositivo es requerido.", "El nombre del dispositivo debe ser una cadena de texto."),
                 ("upload_ip", "La IP del dispositivo es requerida.", "La IP del dispositivo debe ser una cadena de texto."),
                 ("observations", "Las observaciones son requeridas.", "Las observaciones deben ser una cadena de texto."),
+                ("email", "El email del usuario es requerido.", "El email del usuario debe ser una cadena de texto."),
+                ("name", "El nombre del usuario es requerido.", "El nombre del usuario debe ser una cadena de texto."),
             ]   
 
             for field, msg_required, msg_invalid in required_int_fields:

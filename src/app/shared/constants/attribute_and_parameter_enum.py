@@ -4,13 +4,13 @@ class ParameterIds(Enum):
     STAGES = 1 # Etapas
     DOCUMENT_STATUS = 2 # Estados de documentos
     TYPE_DOCUMENT = 3 # TIPO DE DOCUMENTO
-
+    NOTIFICATION_TYPE = 4 # TIPO DE NOTIFICACION
 
 class ParameterName(Enum):
     STAGES = "Etapas."
     DOCUMENT_STATUS = "Estados de documentos."
     TYPE_DOCUMENT = "Tipo de documento."
-
+    NOTIFICATION_TYPE = "Tipo de notificación."
 
 class AttributeIds(Enum):
     DEPARTMENTAL = 1
@@ -32,6 +32,10 @@ class AttributeIds(Enum):
     CERTIFICATE_CRIMES = 17
     OTHERS = 18
     CANCEL = 19
+    MESSAGE_NOTIFICATION = 20
+    CREATED_NOTIFICATION = 21
+    UPDATED_NOTIFICATION = 22
+
 
 class AttributeName(Enum):
     DEPARTMENTAL = "Departamental"
@@ -53,6 +57,10 @@ class AttributeName(Enum):
     CERTIFICATE_CRIMES = "Certificación de consulta de inhabilidades (Delitos sexuales cometidos contra menores de 18 años"
     OTHERS = "RETHUS - Solo Aplica para Medicos - Fisioterapeutas"
     CANCEL = "Documentos anulados"
+    MESSAGE_NOTIFICATION = "Mensaje de notificación"
+    CREATED_NOTIFICATION = "Documento cargado correctamente"
+    UPDATED_NOTIFICATION = "Documento actualizado correctamente"
+
 
 
 

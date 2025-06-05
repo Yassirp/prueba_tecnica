@@ -15,8 +15,12 @@ from src.app.shared.bases.base_service import BaseService
 from src.app.modules.entity_types_module.repositories.entity_types_repository import (
     EntityTypeRepository,
 )
-from src.app.shared.constants.attribute_and_parameter_enum import AttributeIds, ParameterIds
+from src.app.shared.constants.attribute_and_parameter_enum import AttributeIds, ParameterIds, AttributeName
 from src.app.shared.utils.utils import upload_base64_to_s3_with_structure
+from src.app.modules.entity_document_logs_module.services.entity_document_logs_service import EntityDocumentLogsService
+from src.app.modules.notifications_module.services.notifications_service import NotificationsService
+from src.app.modules.entity_documents_module.schemas.entity_documents_schemas import EntityDocumentBase
+
 
 class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
     def __init__(self, db_session: AsyncSession):
@@ -111,7 +115,9 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
             entity_type_id = data.get("entity_type_id")
             stage_id = data.get("stage_id")
             document_status_id = data.get("document_status_id")
-
+            
+            
+          
             # Validamos si existe el proyecto
             project = await self.project_service.get_by_id(project_id)
             if not project:
@@ -168,7 +174,6 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
                         self.db_session.add(rules)
                         await self.db_session.commit()
                         await self.db_session.refresh(rules)
-
             return True
         except Exception as e:
             raise e
@@ -186,8 +191,8 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
             # Consultamos los servicios
             project = await self.project_service.get_by_id(project_id)
             entity_type = await self.entity_type_service.get_by_id(entity_type_id)
+            document_type = await self.attribute_service.get_by_id(document_type_id)
             stage = await self.attribute_service.get_by_id(stage_id)
-
             if file_url: 
                 s3_file = upload_base64_to_s3_with_structure(
                     base64_data=file_url,  # cadena base64
@@ -197,7 +202,7 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
                     stage_name=stage['name'],
                     entity_id=entity_id,
                     document_type_id=document_type_id,
-                    document_type_name="contrato"
+                    document_type_name=document_type['name']
                 )
                 return s3_file
         except Exception as e:
@@ -212,7 +217,13 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
                 new_file_url  = await self._upload_file_to_S3(data)
                 data["file_url"] = new_file_url # Asingamos la nueva ruta de S3 del el archivo
 
-            item = await self.repo.create(data)
+            # Convertimos el diccionario a un modelo Pydantic
+            entity_document = EntityDocumentBase(**data)
+            # Usamos dict_for_db para obtener solo los campos que van a la base de datos
+            item = await self.repo.create(entity_document.dict_for_db())
+
+            notification_service = NotificationsService(self.db_session)            
+            await notification_service.create_notification_send_email(item.id, data)
             return self.out_schema.model_validate(item).model_dump()
         except Exception as e:
             raise e
@@ -236,6 +247,23 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
         try:
             document_status_id = data.get("document_status_id")
             model, entity_document = await self.get_all(id=entity_document_id,limit=1)
+           
+            service_entity_document_log = EntityDocumentLogsService(self.db_session)
+            entity_document_log = await service_entity_document_log.get_by_id(entity_document_id)
+            if not entity_document_log:
+                entity_document_log = None
+                
+            data_log = {
+                "entity_document_id": entity_document_id,
+                "action": data.get("action"),
+                "observations": data.get("observations"),
+                "before": entity_document_log,
+                "after": data,
+                "created_by": data.get("created_by"),
+                "state": data.get("state")
+            }
+            await service_entity_document_log.create(data_log)
+
             for rules in model:
                 data, document_status = await self.attribute_service.get_all(id=document_status_id, parameter_id=ParameterIds.DOCUMENT_STATUS.value, limit=1)
                 if not document_status:
@@ -261,3 +289,6 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
             return []
         except Exception as e:
             raise e
+        
+
+  

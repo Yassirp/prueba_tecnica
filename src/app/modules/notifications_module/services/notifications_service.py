@@ -9,6 +9,11 @@ from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 from fastapi import HTTPException
 from src.app.shared.constants.messages import NotificationMessages
+from src.app.utils.mailer import send_email
+from src.app.shared.constants.attribute_and_parameter_enum import AttributeIds, ParameterIds, AttributeName
+
+
+import os
 
 class NotificationsService(BaseService[Notification, NotificationOut]):
     def __init__(self, db_session: AsyncSession):
@@ -81,7 +86,47 @@ class NotificationsService(BaseService[Notification, NotificationOut]):
             return item
         except Exception as e:
             raise e
-        
+
+    async def create_notification_send_email(self, entity_document_id: int, data: dict):
+        try:
+           
+            email = data.get("email")
+            name = data.get("name")
+            document_type_id = data.get("document_type_id")
+            entity_type_id = data.get("entity_type_id")
+            stage_id = data.get("stage_id")
+            project_id = data.get("project_id")
+ 
+            notification_data = {
+                "entity_document_id":entity_document_id,
+                "type_notification_id": AttributeIds.CREATED_NOTIFICATION.value,
+                "title": AttributeName.CREATED_NOTIFICATION.value,
+                "message":  AttributeName.CREATED_NOTIFICATION.value,
+                "data": {
+                    "entity_document_id":entity_document_id,
+                    "document_type_id": document_type_id,
+                    "entity_type_id": entity_type_id,
+                    "stage_id": stage_id,
+                    "project_id": project_id,
+                }
+            }
+            
+            await self.create(notification_data)
+      
+            await send_email(
+                to_email=email,
+                subject=AttributeName.CREATED_NOTIFICATION.value,
+                template_name="email_notification.html",
+                context={
+                    "name": name,
+                    "message": AttributeName.CREATED_NOTIFICATION.value,
+                    "document_type": "Documento de Prueba"
+                }
+            )
+            return True
+        except Exception as e:
+            raise e
+
 
         
         

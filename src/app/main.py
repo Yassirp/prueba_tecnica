@@ -9,6 +9,7 @@ from src.app.routes import router as main_router
 from src.app.shared.utils.request_utils import http_response, get_errors_validations
 from src.app.shared.constants.messages import GlobalMessages
 from src.app.middleware.api_key import APIKeyMiddleware
+from src.app.utils.email_preview import router as email_preview_router
 
 app = FastAPI(
     title=Settings.APP_NAME,
@@ -25,6 +26,7 @@ app.mount("/static", StaticFiles(directory="src/app/static"), name="static")
 
 # MAIN ROUTERS
 app.include_router(main_router)
+#app.include_router(email_preview_router, tags=["Email Preview"])
 
 
 @app.get("/", include_in_schema=False, response_class=HTMLResponse)

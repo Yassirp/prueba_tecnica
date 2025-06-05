@@ -13,6 +13,7 @@ class ParameterAttributeSeeder:
                 Parameter(name="Tipos de etapas.", description="Etapas", state=1),
                 Parameter(name="Tipos de estados de documentos.", description="Estados",state=1),
                 Parameter(name="Tipos de documentos.", description="Estados",state=1),
+                Parameter(name="Tipos de Notificaciones.", description="Notificaciones",state=1),
             ]
             session.add_all(parameter)
             await session.commit()  # await aquí
@@ -45,6 +46,12 @@ class ParameterAttributeSeeder:
                 
                 # SEEDER DE ESTADOS DE DODUMENTO
                 Attribute(name=AttributeName.CANCEL.value, description=" ", parameter_id=ParameterIds.DOCUMENT_STATUS.value),
+
+                # SEEDER DE NOTIFICACIONES
+                Attribute(name=AttributeName.MESSAGE_NOTIFICATION.value, description=" ", parameter_id=ParameterIds.NOTIFICATION_TYPE.value),
+                Attribute(name=AttributeName.CREATED_NOTIFICATION.value, description=" ", parameter_id=ParameterIds.NOTIFICATION_TYPE.value),
+                Attribute(name=AttributeName.UPDATED_NOTIFICATION.value, description=" ", parameter_id=ParameterIds.NOTIFICATION_TYPE.value),
+                
             ]
 
             session.add_all(attributes)
