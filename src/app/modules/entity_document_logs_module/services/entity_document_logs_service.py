@@ -31,7 +31,7 @@ class EntityDocumentLogsService(BaseService[EntityDocumentLog, EntityDocumentLog
         offset: Optional[int] = None,
         order_by: Optional[str] = None,
         filters: Optional[Dict[str, Any]] = None,
-        entity_document_id: Optional[str] = None,
+        entity_document_id: Optional[int] = None,
     ) -> Tuple[List[Dict[str, Any]], int]:
         try:
             stmt = select(self.model).options(
@@ -47,6 +47,9 @@ class EntityDocumentLogsService(BaseService[EntityDocumentLog, EntityDocumentLog
             # Aplicar condiciones al query
             if conditions:
                 stmt = stmt.where(and_(*conditions))
+
+            if entity_document_id:
+                stmt = stmt.where(self.model.entity_document_id == entity_document_id)
 
             if order_by:
                 stmt = stmt.order_by(order_by)

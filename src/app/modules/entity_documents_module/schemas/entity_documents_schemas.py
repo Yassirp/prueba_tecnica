@@ -20,19 +20,19 @@ class EntityDocumentBase(BaseModel):
     upload_ip: str = Field(..., max_length=100, description="IP del dispositivo")
     document_status_id: int = Field(AttributeIds.PENDING_APPROVAL.value, ge=1, description="ID del estado del documento")
     observations: str = Field(..., max_length=100, description="Observaciones")
-    created_by: int = Field(..., ge=1, description="ID del usuario")
+    
 
     # Campos adicionales que no se guardan en la base de datos
     email: Optional[str] = Field(None, description="Correo electrónico del usuario")
     name: Optional[str] = Field(None, description="Nombre del usuario")
-
+    created_by: Optional[int] = Field(None, description="ID del usuario")
     class Config:
         extra = "allow"  # Permite campos extra
-        exclude = {'email', 'name'}  # Excluye estos campos al serializar
+        exclude = {'email', 'name', 'created_by'}  # Excluye estos campos al serializar
 
     def dict_for_db(self) -> Dict[str, Any]:
         """Retorna un diccionario con solo los campos que van a la base de datos"""
-        return self.model_dump(exclude={'email', 'name'})
+        return self.model_dump(exclude={'email', 'name', 'created_by'})
 
     @root_validator(pre=True)
     def check_fields(cls, values):

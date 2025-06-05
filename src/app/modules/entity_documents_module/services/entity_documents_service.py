@@ -252,8 +252,17 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
             entity_document = EntityDocumentBase(**data)
             # Usamos dict_for_db para obtener solo los campos que van a la base de datos
             item = await self.repo.create(entity_document.dict_for_db())
-
+            #Creamos el log del la entidad
+            data_log = {
+                "entity_document_id": item.id,
+                "action": "create",
+                "observations": "Documento creado",
+                "created_by": data.get("created_by"),
+            }
+            await self.entity_document_log_service.create(data_log)
+            #Enviamos el correo de notificación
             await self.notification_service.create_notification_send_email(item.id, data)
+            
             return self.out_schema.model_validate(item).model_dump()
         except Exception as e:
             raise e
@@ -277,17 +286,10 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
         try:
             document_status_id = data.get("document_status_id")
             model, entity_document = await self.get_all(id=entity_document_id,limit=1)
-                
-            data_log = {
-                "entity_document_id": entity_document_id,
-                "action": "cambio de estado",
-                "observations": "",
-                "before": entity_document,
-                "after": data,
-                "created_by": data.get("created_by"),
-                "state": data.get("state")
-            }
-            await self.entity_document_log_service.create(data_log)
+            
+            entity_document_log = await self.entity_document_log_service.get_by_id(entity_document_id)
+            data_log = { "after": data.get("document_status_id",None)}
+            await self.entity_document_log_service.update(entity_document_log.id, data_log)
 
             for rules in model:
                 data, document_status = await self.attribute_service.get_all(id=document_status_id, parameter_id=ParameterIds.DOCUMENT_STATUS.value, limit=1)
