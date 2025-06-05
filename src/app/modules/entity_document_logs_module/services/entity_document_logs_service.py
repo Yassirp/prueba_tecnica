@@ -1,19 +1,17 @@
 # Archivo generado autom�ticamente para entity_document_logs - services
-
-from src.app.modules.entity_document_logs_module.schemas.entity_document_logs_schemas import (
-    EntityDocumentLogCreate,
-    EntityDocumentLogUpdate,
-    EntityDocumentLogOut
-)
-from src.app.modules.entity_document_logs_module.repositories.entity_document_logs_repository import EntityDocumentLogsRepository
-from src.app.shared.bases.base_service import BaseService
-from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List, Optional, Dict, Any, Tuple 
-from src.app.modules.entity_document_logs_module.models.entity_document_logs import EntityDocumentLog
+from sqlalchemy import and_
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
 from fastapi import HTTPException
 from src.app.shared.constants.messages import EntityDocumentLogMessages
+from src.app.modules.entity_document_logs_module.repositories.entity_document_logs_repository import EntityDocumentLogsRepository
+from src.app.shared.bases.base_service import BaseService
+from src.app.modules.entity_document_logs_module.models.entity_document_logs import EntityDocumentLog
+from src.app.modules.entity_document_logs_module.schemas.entity_document_logs_schemas import (
+    EntityDocumentLogOut
+)
 
 class EntityDocumentLogsService(BaseService[EntityDocumentLog, EntityDocumentLogOut]):
     def __init__(self, db_session: AsyncSession):
@@ -33,11 +31,22 @@ class EntityDocumentLogsService(BaseService[EntityDocumentLog, EntityDocumentLog
         offset: Optional[int] = None,
         order_by: Optional[str] = None,
         filters: Optional[Dict[str, Any]] = None,
+        entity_document_id: Optional[str] = None,
     ) -> Tuple[List[Dict[str, Any]], int]:
         try:
             stmt = select(self.model).options(
                 selectinload(self.model.entity_document)
             )   
+            conditions = []
+            
+            # Filtramos por la entidad del documento
+            if entity_document_id:
+                conditions.append(self.model.entity_document_id == entity_document_id)    
+            
+            # Filtramos por el tipo de documentop¡
+            # Aplicar condiciones al query
+            if conditions:
+                stmt = stmt.where(and_(*conditions))
 
             if order_by:
                 stmt = stmt.order_by(order_by)

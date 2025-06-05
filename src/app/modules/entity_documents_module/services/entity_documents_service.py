@@ -249,15 +249,12 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
         try:
             document_status_id = data.get("document_status_id")
             model, entity_document = await self.get_all(id=entity_document_id,limit=1)
-           
-            entity_document_log = await self.entity_document_log_service.get_by_id(entity_document_id)
-            if not entity_document_log: entity_document_log = None
                 
             data_log = {
                 "entity_document_id": entity_document_id,
-                "action": data.get("action"),
-                "observations": data.get("observations"),
-                "before": entity_document_log,
+                "action": "cambio de estado",
+                "observations": "",
+                "before": entity_document,
                 "after": data,
                 "created_by": data.get("created_by"),
                 "state": data.get("state")

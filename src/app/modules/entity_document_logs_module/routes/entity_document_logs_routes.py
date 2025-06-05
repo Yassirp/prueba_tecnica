@@ -40,11 +40,14 @@ async def get_all_entity_document_logs(
         None,
         description="Criterios de filtrado en formato JSON (ej: {'name': '%john%', 'state': 0})",
     ),
+    entity_document_id: Optional[str] = Query(
+        None,
+    ),
 ) -> Dict[str, Any]:        
     try:
         service = EntityDocumentLogsService(db)
-        entity_document_logs, total = await service.get_all(limit, offset, order_by, filters)
-        return paginated_response(entity_document_logs, total, limit, offset)
+        entity_document_logs, total = await service.get_all(limit, offset, order_by, filters, entity_document_id)
+        return paginated_response(entity_document_logs, total, limit, offset, )
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))   
 
