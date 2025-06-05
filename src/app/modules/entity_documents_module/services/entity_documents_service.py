@@ -35,6 +35,9 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
         self.project_service = ProjectService(db_session)
         self.attribute_service = AttributeService(db_session)
         self.entity_type_service = EntityTypeService(db_session)
+        self.notification_service = NotificationsService(db_session)
+        self.entity_document_log_service = EntityDocumentLogsService(db_session)
+
 
     async def get_all(
         self,
@@ -215,15 +218,14 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
             await self._validate_data(data)
             if file_url:  
                 new_file_url  = await self._upload_file_to_S3(data)
-                data["file_url"] = new_file_url # Asingamos la nueva ruta de S3 del el archivo
+                data["file_url"] = "new_file_url" # Asingamos la nueva ruta de S3 del el archivo
 
             # Convertimos el diccionario a un modelo Pydantic
             entity_document = EntityDocumentBase(**data)
             # Usamos dict_for_db para obtener solo los campos que van a la base de datos
             item = await self.repo.create(entity_document.dict_for_db())
 
-            notification_service = NotificationsService(self.db_session)            
-            await notification_service.create_notification_send_email(item.id, data)
+            await self.notification_service.create_notification_send_email(item.id, data)
             return self.out_schema.model_validate(item).model_dump()
         except Exception as e:
             raise e
@@ -248,10 +250,8 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
             document_status_id = data.get("document_status_id")
             model, entity_document = await self.get_all(id=entity_document_id,limit=1)
            
-            service_entity_document_log = EntityDocumentLogsService(self.db_session)
-            entity_document_log = await service_entity_document_log.get_by_id(entity_document_id)
-            if not entity_document_log:
-                entity_document_log = None
+            entity_document_log = await self.entity_document_log_service.get_by_id(entity_document_id)
+            if not entity_document_log: entity_document_log = None
                 
             data_log = {
                 "entity_document_id": entity_document_id,
@@ -262,7 +262,7 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
                 "created_by": data.get("created_by"),
                 "state": data.get("state")
             }
-            await service_entity_document_log.create(data_log)
+            await self.entity_document_log_service.create(data_log)
 
             for rules in model:
                 data, document_status = await self.attribute_service.get_all(id=document_status_id, parameter_id=ParameterIds.DOCUMENT_STATUS.value, limit=1)

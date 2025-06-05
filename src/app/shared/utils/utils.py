@@ -3,6 +3,9 @@ import sys
 import os
 import base64
 import mimetypes
+import uuid
+import unicodedata
+import re
 from fastapi import UploadFile
 from botocore.exceptions import NoCredentialsError, ClientError
 from pprint import pprint
@@ -41,6 +44,11 @@ def clean_dict(data: Dict[str, Any]) -> Dict[str, Any]:
 def chunk_list(lst: List[Any], chunk_size: int) -> List[List[Any]]:
     return [lst[i : i + chunk_size] for i in range(0, len(lst), chunk_size)]
 
+def slugify(value):
+    # Convierte texto a ascii, elimina caracteres no permitidos y reemplaza espacios por guiones bajos
+    value = unicodedata.normalize('NFKD', value).encode('ascii', 'ignore').decode('ascii')
+    value = re.sub(r'[^\w\s-]', '', value).strip().lower()
+    return re.sub(r'[-\s]+', '_', value)
 
 def upload_base64_to_s3_with_structure(
     base64_data: str,
@@ -62,9 +70,14 @@ def upload_base64_to_s3_with_structure(
         ext = mimetypes.guess_extension(mime_type) or ".bin"
         
         now = datetime.utcnow().strftime("%Y%m%d%H%M%S")
-        filename = f"{document_type_id}_{document_type_name}_{now}{ext}"
-        key = (
-            f"ms-documents/{environment}/{project_name}/"
+        short_uuid = str(uuid.uuid4()).split('-')[0]
+        base_name = f"{document_type_name}_{now}_{str(uuid.uuid4()).split('-')[0]}_{document_type_id}_{document_type_name}"
+        
+        # Aplica slugify para evitar problemas con caracteres especiales
+        filename = slugify(base_name) + ext
+
+        key = ( 
+            f"{environment}/{project_name}/"
             f"{entity_type_name}/{stage_name}/{entity_id}/{filename}"
         )
 
