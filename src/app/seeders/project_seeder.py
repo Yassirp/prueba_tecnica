@@ -9,14 +9,16 @@ class ProjectSeeder:
         session = SessionLocalSeed()
 
         try:
-            raw_key = "Comite123"
-            hashed_key = hashlib.sha256(raw_key.encode('utf-8')).hexdigest()
-            
-            # Crear un proyecto
-            project = [
-                Project(name="Comite", key=hashed_key, state=1),
+            raw_keys = {
+                "Comite": "Comite123",
+                "Naowee": "Naowee123",
+            }
+
+            projects = [
+                Project(name=name, key=hashlib.sha256(raw_key.encode('utf-8')).hexdigest(), state=1)
+                for name, raw_key in raw_keys.items()
             ]
-            session.add_all(project)
+            session.add_all(projects)
             await session.commit()  # await aquí
 
 

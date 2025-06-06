@@ -92,5 +92,12 @@ class NotificationMessages(GlobalMessages):
 
 # Login
 class LoginMessages(GlobalMessages):
-    SUCCESS = "Inicio de session exitoso"
+    SUCCESS = "Inicio de session correctamente"
     ERROR = "Inicio de session fallido"
+
+
+# Logout 
+
+class LogoutMessages(GlobalMessages):
+    SUCCESS = "Cerrar session realizado correctamente"
+    ERROR = "Cerrar session fallido"

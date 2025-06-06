@@ -68,14 +68,18 @@ class AccessTokenService(BaseService[AccessToken, AccessTokenOut]):
     async def login(self, data: Dict[str, Any]) -> Dict[str, Any]:
         try:
             key = data.get("key")
+            project_id = data.get("project_id")
+            user_id= data.get("user_id", None)
             hashed_key = hashlib.sha256(key.encode('utf-8')).hexdigest()
             # Validamos si existe el proyecto
-            project = await self.project_service.get_by_id(Projectds.COMITE.value)
+            project = await self.project_service.get_by_id(project_id)
+            
             if not project:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
-                    detail=f"No se encontró el proyecto con el id '{Projectds.COMITE.value}'.",
+                    detail=f"No se encontró el proyecto con el id '{project_id}'.",
             )
+
             if project["key"] != hashed_key:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
@@ -86,6 +90,7 @@ class AccessTokenService(BaseService[AccessToken, AccessTokenOut]):
             access_token = AccessToken(
                 token=secrets.token_hex(32),
                 project_id=project["id"],
+                user_id=user_id if user_id else None,
                 expires_at=datetime.now(pytz.timezone("America/Bogota")) + timedelta(hours=24),
                 created_at=datetime.now(pytz.timezone("America/Bogota")),
             )
@@ -97,3 +102,23 @@ class AccessTokenService(BaseService[AccessToken, AccessTokenOut]):
             return [access_token.token]
         except Exception as e:
             raise e
+        
+
+    async def logout(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        try:
+            token = data.get("token", None)
+            
+            model, count = await self.get_all(token=token)
+            if not count:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"el token {token} no existe.",
+            )
+            for value in model:
+                await self.db_session.delete(value)
+
+            await self.db_session.commit()
+
+            return []
+        except Exception as e:
+            raise e 

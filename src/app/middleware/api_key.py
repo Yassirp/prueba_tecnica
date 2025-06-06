@@ -11,6 +11,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 class APIKeyMiddleware(BaseHTTPMiddleware):
     excluded_paths = {
         "/auth/login",
+        "/docs",
+        "/redoc", 
+        "/openapi.json", 
+        "/favicon.ico",
+        "/"
     }
     async def dispatch(
         self, request: Request, call_next: Callable[[Request], Awaitable[Response]]

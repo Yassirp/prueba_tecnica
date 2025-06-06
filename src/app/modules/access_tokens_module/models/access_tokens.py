@@ -10,6 +10,7 @@ class AccessToken(BaseModel):
 
     token = Column(Text, primary_key=True, nullable=False)
     project_id = Column(Integer, ForeignKey("m_projects.id"), comment="Hace referencia al id del proyecto.", nullable=False)
+    user_id  = Column(Integer, nullable=True, comment="Hace referencia al id del usuario en sistema.")
     state = Column(Integer, nullable=False, default=1)
     expires_at = Column(DateTime(timezone=True), nullable=True, comment="Tiempo de expiracion del token.")
     created_at = Column(DateTime(timezone=True), default=datetime.now(pytz.timezone('America/Bogota')))

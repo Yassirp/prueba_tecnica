@@ -9,8 +9,8 @@ class Project(BaseModel):
     __tablename__ = "m_projects"
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String(100), nullable=False)
-    key  = Column(Text, unique=True, nullable=False)
+    name = Column(String(100),comment="Hace referncia al nombre de la empresa.", nullable=False)
+    key  = Column(Text, unique=True, comment="Hace referncia a la contraseña por empresa.", nullable=False)
     state = Column(Integer, nullable=False, default=1)
     created_at = Column(DateTime(timezone=True), default=datetime.now(pytz.timezone('America/Bogota')))
     updated_at = Column(DateTime(timezone=True), onupdate=datetime.now(pytz.timezone('America/Bogota')))
