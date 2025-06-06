@@ -1,3 +1,4 @@
+from src.app.modules.access_tokens_module.models.access_tokens import AccessToken
 from src.app.modules.attributes_module.models.attributes import Attribute
 from src.app.modules.document_rules_module.models.document_rules import DocumentRule
 from src.app.modules.entity_documents_module.models.entity_documents import EntityDocument

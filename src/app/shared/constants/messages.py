@@ -88,3 +88,9 @@ class NotificationMessages(GlobalMessages):
     OK_UPDATED = "Notificación actualizada correctamente"
     OK_DELETED = "Notificación eliminada correctamente"
     ERROR_NOT_FOUND = "Notificación no encontrada"
+
+
+# Login
+class LoginMessages(GlobalMessages):
+    SUCCESS = "Inicio de session exitoso"
+    ERROR = "Inicio de session fallido"

@@ -6,7 +6,8 @@ from src.app.shared.bases.base_schema import BaseOutSchema
 class ProjectBase(BaseModel):
     name: str = Field(max_length=100)
     state: int = Field(ge=0)
-
+    key: str = Field(..., max_length=200, description="Clave de la empresa.")
+    
 class ProjectCreate(ProjectBase):
     pass
 

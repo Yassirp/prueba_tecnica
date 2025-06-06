@@ -9,7 +9,7 @@ from .modules.entity_types_module.routes.entity_type_routes import (
 )
 from .modules.notifications_module.routes.notifications_routes import router as notifications_routes
 from .modules.entity_document_logs_module.routes.entity_document_logs_routes import router as entity_document_logs_routes
-
+from .modules.access_tokens_module.routes.access_tokens_routes import router as access_tokens_routes
 router = APIRouter()
 
 router.include_router(projects_router)
@@ -20,3 +20,4 @@ router.include_router(document_rules_routes)
 router.include_router(entity_documents_routes)
 router.include_router(entity_document_logs_routes)
 router.include_router(notifications_routes)
+router.include_router(access_tokens_routes)
