@@ -1,5 +1,5 @@
 # Archivo generado automáticamente para access_tokens - models
-from sqlalchemy import Column, Integer, Text, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, Text, DateTime, ForeignKey, JSON
 from src.app.shared.bases.base_model import BaseModel
 from sqlalchemy.orm import relationship
 from datetime import datetime

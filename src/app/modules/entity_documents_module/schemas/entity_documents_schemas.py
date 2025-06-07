@@ -20,7 +20,7 @@ class EntityDocumentBase(BaseModel):
     upload_ip: str = Field(..., max_length=100, description="IP del dispositivo")
     document_status_id: int = Field(AttributeIds.PENDING_APPROVAL.value, ge=1, description="ID del estado del documento")
     observations: str = Field(..., max_length=100, description="Observaciones")
-    
+    state: int = Field(1,ge=0)
 
     # Campos adicionales que no se guardan en la base de datos
     email: Optional[str] = Field(None, description="Correo electrónico del usuario")

@@ -2,7 +2,7 @@
 import json
 from datetime import datetime
 from collections import defaultdict
-from fastapi import HTTPException, status
+from fastapi import HTTPException, status, Request
 from typing import List, Optional, Dict, Any,Tuple
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
@@ -58,11 +58,19 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
         document_type_id: Optional[int] = None,
         id:  Optional[int] = None,
         search: Optional[str] = None,
+        request: Optional[Request] = None,
     ) -> Tuple[List[Dict[str, Any]], int]:
         try:
             document_status = aliased(Attribute)
             document_types = aliased(Attribute)
             project = aliased(Project)
+
+            if request: 
+                project_id = request.state.query_params.get("project_id", None)
+                department_id = request.state.query_params.get("department_id", None)
+                municipality_id = request.state.query_params.get("municipality_id", None)
+                region_id = request.state.query_params.get("region_id", None)
+
 
             stmt = select(self.model).join(
                 document_status, self.model.document_status_id == document_status.id
@@ -142,6 +150,8 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
 
     async def _validate_data(self, data, is_update=False, entity_document_id=None):
         try:
+            print("LLEGO ACA 2")
+
             project_id = data.get("project_id")
             document_type_id = data.get("document_type_id")
             entity_type_id = data.get("entity_type_id")
@@ -152,6 +162,7 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
           
             # Validamos si existe el proyecto
             project = await self.project_service.get_by_id(project_id)
+            print("LLEGO ACA  project")
             if not project:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
@@ -160,6 +171,7 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
 
             # Validamos el tipo de documento
             data, document_type = await self.attribute_service.get_all(id=document_type_id, parameter_id=ParameterIds.TYPE_DOCUMENT.value)
+            print("LLEGO ACA  document_type")
             if not document_type:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
@@ -168,6 +180,7 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
 
             # Validamos el tipo de entidad
             entity_type = await self.entity_type_service.get_by_id(entity_type_id)
+            print("LLEGO ACA  entity_type")
             if not entity_type:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
@@ -176,6 +189,7 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
 
             # Validamos la etapa
             data, stage = await self.attribute_service.get_all(id=stage_id, parameter_id=ParameterIds.STAGES.value)
+            print("LLEGO ACA  stage")
             if not stage:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
@@ -184,14 +198,17 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
 
             # Validamos el estado del documento
             data, document_status = await self.attribute_service.get_all(id=document_status_id, parameter_id=ParameterIds.DOCUMENT_STATUS.value)
+            print("LLEGO ACA  document_status")
             if not document_status:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
                     detail=f"No se encontró el estado del documento con el id '{document_status_id}'.",
             )
-
+            
+            print("ANTES ACA  entity_document")
             data, entity_document = await self.get_all(project_id=project_id, entity_type_id=entity_type_id, stage_id=stage_id, document_type_id=document_type_id)
-            if data:
+            print("LLEGO ACA  entity_document")
+            if entity_document:
                 for rules in data:
                     if rules.document_status_id == AttributeIds.APPROVED.value:
                         raise HTTPException(
@@ -243,12 +260,15 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
     
     async def create(self, data: Dict[str, Any]) -> Dict[str, Any]:
         try:
+            print("LLEGO ACA 1")
             file_url = data.get("file_url",None)
             await self._validate_data(data)
+            print("LLEGO ACA 3")
             if file_url:  
                 new_file_url  = await self._upload_file_to_S3(data)
                 data["file_url"] = new_file_url # Asingamos la nueva ruta de S3 del el archivo
-
+            
+            print("LLEGO ACA")
             # Convertimos el diccionario a un modelo Pydantic
             entity_document = EntityDocumentBase(**data)
             # Usamos dict_for_db para obtener solo los campos que van a la base de datos

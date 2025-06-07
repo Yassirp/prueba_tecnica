@@ -2,6 +2,9 @@
 import hashlib
 import secrets
 import pytz
+import base64
+import json
+from dotenv import load_dotenv
 from datetime import datetime, timedelta
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List, Optional, Dict, Any,Tuple
@@ -14,6 +17,7 @@ from src.app.modules.access_tokens_module.models.access_tokens import AccessToke
 from src.app.modules.access_tokens_module.repositories.access_tokens_repository import AccessTokenRepository
 from src.app.modules.access_tokens_module.schemas.access_tokens_schemas import AccessTokenOut
 from src.app.shared.bases.base_service import BaseService
+load_dotenv()
 
 class AccessTokenService(BaseService[AccessToken, AccessTokenOut]):
     def __init__(self, db_session: AsyncSession):
@@ -85,10 +89,14 @@ class AccessTokenService(BaseService[AccessToken, AccessTokenOut]):
                     status_code=status.HTTP_404_NOT_FOUND,
                     detail="No se ha encontrado una empresa asociada a esta clave.",
             )
-
+            json_str = json.dumps(data)              # convertir dict a JSON string
+            json_bytes = json_str.encode('utf-8')    # JSON string a bytes
+            base64_bytes = base64.b64encode(json_bytes)  # bytes a Base64 bytes
+            base64_token = base64_bytes.decode('utf-8')  # Base64 bytes a string
+            
             # Crear objeto AccessToken
             access_token = AccessToken(
-                token=secrets.token_hex(32),
+                token=base64_token,
                 project_id=project["id"],
                 user_id=user_id if user_id else None,
                 expires_at=datetime.now(pytz.timezone("America/Bogota")) + timedelta(hours=24),
@@ -99,7 +107,7 @@ class AccessTokenService(BaseService[AccessToken, AccessTokenOut]):
             self.db_session.add(access_token)
             await self.db_session.commit()
  
-            return [access_token.token]
+            return [{"access_token": access_token.token}]
         except Exception as e:
             raise e
         

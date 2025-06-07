@@ -1,5 +1,5 @@
 # Archivo generado automáticamente para entity_documents - models
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Text
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Text, JSON
 from sqlalchemy.orm import relationship
 from src.app.modules.entity_document_logs_module.models.entity_document_logs import EntityDocumentLog
 from src.app.shared.bases.base_model import BaseModel
@@ -23,6 +23,7 @@ class EntityDocument(BaseModel):
     upload_ip = Column(String(100), nullable=True, comment="Ip del dispositivo.")
     document_status_id =  Column(Integer, ForeignKey("m_attributes.id"), comment="Hace refenrecia al estado del documento.", nullable=False)
     observations = Column(String(100), nullable=True, comment="Hace referencia a la observacion.")
+    properties = Column(JSON, nullable=True, comment="Hace referencia a los paramtros por los cuales filtrar")
     state = Column(Integer, nullable=False, default=1)
     created_by = Column(Integer, nullable=True, comment="Hace referencia al usario de creacion.")
     created_at = Column(DateTime(timezone=True), default=datetime.now(pytz.timezone('America/Bogota')))

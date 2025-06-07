@@ -1,5 +1,5 @@
 # Archivo generado automáticamente para entity_documents - routes
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, Query, status, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List, Optional, Dict, Any
 from src.app.config.database.session import get_db
@@ -24,6 +24,7 @@ router = APIRouter(prefix="/entity-documents", tags=["Entity Documents"])
     error_message=EntityDocumentMessages.ERROR_GET_ALL,
 )
 async def get_all_entity_docuemnt(
+    request: Request,
     db: AsyncSession = Depends(get_db),
     limit: Optional[int] = Query(
         None, ge=1, le=100, description="Número de elementos por página"
@@ -50,7 +51,7 @@ async def get_all_entity_docuemnt(
         entity_docuemnt, total = await service.get_all(
         limit=limit, offset=offset, order_by=order_by, filters=filters , project_id=project_id, 
         document_status_id=document_status_id, entity_type_id=entity_type_id, stage_id=stage_id, 
-        search= search
+        search= search, request=request
         )
         return paginated_response(entity_docuemnt, total, limit, offset)
     except Exception as e:
