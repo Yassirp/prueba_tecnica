@@ -10,13 +10,38 @@ from src.app.routes import router as main_router
 from src.app.shared.utils.request_utils import http_response, get_errors_validations
 from src.app.shared.constants.messages import GlobalMessages
 from src.app.utils.email_preview import router as email_preview_router
+from fastapi.openapi.utils import get_openapi
 
+# Configuracion para Swagger
 app = FastAPI(
     title=Settings.APP_NAME,
     description=Settings.APP_DESCRIPTION,
     version=Settings.APP_VERSION,
     swagger_ui_parameters={"displayRequestDuration": True},
 )
+
+# Configuracion para Swagger
+def custom_openapi():
+    if app.openapi_schema:
+        return app.openapi_schema
+    openapi_schema = get_openapi(
+        title=Settings.APP_NAME,
+        version=Settings.APP_VERSION,
+        description=Settings.APP_DESCRIPTION,
+        routes=app.routes,
+    )
+    openapi_schema["components"]["securitySchemes"] = {
+        "BearerAuth": {
+            "type": "http",
+            "scheme": "bearer",
+            "bearerFormat": "JWT"
+        }
+    }
+    openapi_schema["security"] = [{"BearerAuth": []}]
+    app.openapi_schema = openapi_schema
+    return app.openapi_schema
+
+app.openapi = custom_openapi
 
 # TEMPLATES
 templates = Jinja2Templates(directory="src/app/templates")

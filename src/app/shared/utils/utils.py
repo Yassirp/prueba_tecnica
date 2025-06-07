@@ -12,6 +12,8 @@ from pprint import pprint
 from typing import Any, Dict, List, Optional
 from datetime import datetime
 from dotenv import load_dotenv
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi import Depends, HTTPException, status
 
 from io import BytesIO
 load_dotenv()
