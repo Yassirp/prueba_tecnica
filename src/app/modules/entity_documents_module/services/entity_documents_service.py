@@ -6,7 +6,7 @@ from fastapi import HTTPException, status, Request
 from typing import List, Optional, Dict, Any,Tuple
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from sqlalchemy import and_, or_
+from sqlalchemy import and_, or_, func
 from sqlalchemy.orm import selectinload, joinedload, aliased
 from sqlalchemy.orm import selectinload
 from src.app.modules.attributes_module.models.attributes import Attribute
@@ -173,8 +173,6 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
 
     async def _validate_data(self, data, is_update=False, entity_document_id=None):
         try:
-            print("LLEGO ACA 2")
-
             project_id = data.get("project_id")
             document_type_id = data.get("document_type_id")
             entity_type_id = data.get("entity_type_id")
@@ -185,7 +183,6 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
           
             # Validamos si existe el proyecto
             project = await self.project_service.get_by_id(project_id)
-            print("LLEGO ACA  project")
             if not project:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
@@ -194,7 +191,6 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
 
             # Validamos el tipo de documento
             data, document_type = await self.attribute_service.get_all(id=document_type_id, parameter_id=ParameterIds.TYPE_DOCUMENT.value)
-            print("LLEGO ACA  document_type")
             if not document_type:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
@@ -203,7 +199,6 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
 
             # Validamos el tipo de entidad
             entity_type = await self.entity_type_service.get_by_id(entity_type_id)
-            print("LLEGO ACA  entity_type")
             if not entity_type:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
@@ -212,7 +207,6 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
 
             # Validamos la etapa
             data, stage = await self.attribute_service.get_all(id=stage_id, parameter_id=ParameterIds.STAGES.value)
-            print("LLEGO ACA  stage")
             if not stage:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
@@ -221,16 +215,13 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
 
             # Validamos el estado del documento
             data, document_status = await self.attribute_service.get_all(id=document_status_id, parameter_id=ParameterIds.DOCUMENT_STATUS.value)
-            print("LLEGO ACA  document_status")
             if not document_status:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
                     detail=f"No se encontró el estado del documento con el id '{document_status_id}'.",
             )
             
-            print("ANTES ACA  entity_document")
             data, entity_document = await self.get_all(project_id=project_id, entity_type_id=entity_type_id, stage_id=stage_id, document_type_id=document_type_id)
-            print("LLEGO ACA  entity_document")
             if entity_document:
                 for rules in data:
                     if rules.document_status_id == AttributeIds.APPROVED.value:
@@ -283,15 +274,12 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
     
     async def create(self, data: Dict[str, Any]) -> Dict[str, Any]:
         try:
-            print("LLEGO ACA 1")
             file_url = data.get("file_url",None)
             await self._validate_data(data)
-            print("LLEGO ACA 3")
             if file_url:  
                 new_file_url  = await self._upload_file_to_S3(data)
                 data["file_url"] = new_file_url # Asingamos la nueva ruta de S3 del el archivo
             
-            print("LLEGO ACA")
             # Convertimos el diccionario a un modelo Pydantic
             entity_document = EntityDocumentBase(**data)
             # Usamos dict_for_db para obtener solo los campos que van a la base de datos
@@ -453,5 +441,61 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
                 grouped[document.id]["documents"].append(doc)
 
             return list(grouped.values()) ,total
+        except Exception as e:
+            raise e
+        
+
+    async def get_count_document_status(
+        self,
+        limit: Optional[int] = None,
+        offset: Optional[int] = None,
+        order_by: Optional[str] = None,
+        )-> Tuple[List[Dict[str, Any]], int]:
+        try:
+            # Alias para evitar colisiones
+            document_status = aliased(Attribute)
+            document_types = aliased(Attribute)
+
+            # SELECT document_status_id, COUNT(*) ...
+            stmt = select(
+                self.model.document_status_id,
+                document_status.name.label("document_status_name"),
+                func.count(self.model.id).label("count_document")
+            ).join(
+                document_status, self.model.document_status_id == document_status.id
+            ).join(
+                document_types, self.model.document_type_id == document_types.id
+            ).where(
+                self.model.state == Setting.STATUS.value
+            ).group_by(
+                self.model.document_status_id,
+                document_status.name
+            )
+
+            if order_by:
+                stmt = stmt.order_by(order_by)
+
+            if offset:
+                stmt = stmt.offset(offset)
+
+            if limit:
+                stmt = stmt.limit(limit)
+
+            result = await self.db_session.execute(stmt)
+            items = result.all()
+            total = len(items)
+
+            # Convertir a lista de diccionarios
+            response = [
+                {
+                    "document_status_id": row.document_status_id,
+                    "document_status_name": row.document_status_name,
+                    "count_document": row.count_document
+                }
+                for row in items
+            ]
+
+            return response, total
+
         except Exception as e:
             raise e
