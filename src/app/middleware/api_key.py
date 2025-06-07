@@ -1,5 +1,6 @@
 import base64
 import json
+import pytz
 from typing import Callable, Awaitable
 from fastapi import Request, Response
 from src.app.config.database.session import SessionLocal
@@ -8,6 +9,8 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from src.app.shared.constants.settings import Settings
 from src.app.shared.utils.request_utils import http_response
 from fastapi import status
+from datetime import datetime
+from fastapi import HTTPException
 
 class APIKeyMiddleware(BaseHTTPMiddleware):
     excluded_paths = {
@@ -37,6 +40,14 @@ class APIKeyMiddleware(BaseHTTPMiddleware):
                             data, count = await access_token_service.get_all(token=token, limit=1)                        
                             if not count:
                                 raise Exception("El token es inválido.")
+                            
+                            for value in data:
+                                if datetime.now(pytz.timezone("America/Bogota")) >= value.expires_at:
+                                    # Eliminar el token
+                                    await session.delete(value)
+                                    await session.commit()
+                                    raise Exception("El token es inválido.")
+
                             decoded_bytes = base64.b64decode(token)
                             decoded_str = decoded_bytes.decode('utf-8')
                             query_params = json.loads(decoded_str)  # dict resultante
