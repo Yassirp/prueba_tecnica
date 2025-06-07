@@ -65,11 +65,18 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
             document_types = aliased(Attribute)
             project = aliased(Project)
 
-            if request: 
-                project_id = request.state.query_params.get("project_id", None)
-                department_id = request.state.query_params.get("department_id", None)
-                municipality_id = request.state.query_params.get("municipality_id", None)
-                region_id = request.state.query_params.get("region_id", None)
+            is_project = None
+            is_department = None
+            is_municipality = None
+            is_region = None
+
+            if request and hasattr(request.state, "query_params"):
+                query_params = request.state.query_params
+                if isinstance(query_params, dict):  # por si usas dict directamente
+                    is_project = query_params.get("project_id")
+                    is_department = query_params.get("department_id")
+                    is_municipality = query_params.get("municipality_id")
+                    is_region = query_params.get("region_id")
 
 
             stmt = select(self.model).join(
@@ -88,7 +95,23 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
             ).where(self.model.state == Setting.STATUS.value)
             
             conditions = []
-            
+
+            # ----------------------------------------------------------
+            # Seccion de filtros para projectos
+            if is_project:
+                stmt = stmt.where(self.model.project_id == int(is_project))          
+
+            if is_department:
+                stmt = stmt.where(self.model.properties["department_id"].as_integer() == int(is_department))            
+
+            if is_municipality:
+                stmt = stmt.where(self.model.properties["municipality_id"].as_integer() == int(is_municipality))            
+
+            if is_region:
+                stmt = stmt.where(self.model.properties["region_id"].as_integer() == int(is_region))
+
+            # ----------------------------------------------------------
+
             # Filtramos por el id:
             if id:
                 conditions.append(self.model.id == id)
@@ -114,7 +137,7 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
                 conditions.append(self.model.document_type_id == document_type_id)
 
 
-                     # Filtro LIKE con búsqueda en document_status.name y document_types.name
+            # Filtro LIKE con búsqueda en document_status.name y document_types.name
             if search:
                 search_pattern = f"%{search}%"
                 conditions.append(

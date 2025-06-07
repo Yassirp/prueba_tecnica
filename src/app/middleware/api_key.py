@@ -6,6 +6,7 @@ from fastapi import Request, Response
 from src.app.config.database.session import SessionLocal
 from src.app.modules.access_tokens_module.services.access_tokens_service import AccessTokenService
 from starlette.middleware.base import BaseHTTPMiddleware
+from src.app.shared.constants.project_enum import Projectds
 from src.app.shared.constants.settings import Settings
 from src.app.shared.utils.request_utils import http_response
 from fastapi import status
@@ -48,10 +49,11 @@ class APIKeyMiddleware(BaseHTTPMiddleware):
                                     await session.commit()
                                     raise Exception("El token es inválido.")
 
-                            decoded_bytes = base64.b64decode(token)
-                            decoded_str = decoded_bytes.decode('utf-8')
-                            query_params = json.loads(decoded_str)  # dict resultante
-                            request.state.query_params = query_params  # por ejemplo, un dict con user_id, region_id, etc.
+                                if value.project_id != Projectds.NAOWEE.value:
+                                    decoded_bytes = base64.b64decode(token)
+                                    decoded_str = decoded_bytes.decode('utf-8')
+                                    query_params = json.loads(decoded_str)  # dict resultante
+                                    request.state.query_params = query_params  # por ejemplo, un dict con user_id, region_id, etc.
                 else:
                     raise Exception("Authorization header presente pero no es Bearer")
             else:

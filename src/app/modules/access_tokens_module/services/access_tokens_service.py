@@ -89,6 +89,10 @@ class AccessTokenService(BaseService[AccessToken, AccessTokenOut]):
                     status_code=status.HTTP_404_NOT_FOUND,
                     detail="No se ha encontrado una empresa asociada a esta clave.",
             )
+            tz = pytz.timezone("America/Bogota")
+            now = datetime.now(tz)
+            # Incluir la fecha y hora exacta en el dict que codificas
+            data["timestamp"] = now.strftime("%Y-%m-%d %H:%M:%S")  # Formato legible
             json_str = json.dumps(data)              # convertir dict a JSON string
             json_bytes = json_str.encode('utf-8')    # JSON string a bytes
             base64_bytes = base64.b64encode(json_bytes)  # bytes a Base64 bytes
