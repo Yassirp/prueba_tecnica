@@ -366,9 +366,7 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
                         status_code=status.HTTP_404_NOT_FOUND,
                         detail=f"No se encontró el estado del documento con el id '{document_status_id}'.",
                     )
-    
                 return []
-    
         except Exception as e:
             raise e
 
@@ -381,12 +379,26 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
         order_by: Optional[str] = None,
         document_status_id: Optional[int] = None,
         search: Optional[str] = None,
+        request: Optional[Request] = None,
         )-> Tuple[List[Dict[str, Any]], int]:
         try:
             # Alias de cada los modelos
             document_status = aliased(Attribute)
             document_types = aliased(Attribute)
 
+            is_project = None
+            is_department = None
+            is_municipality = None
+            is_region = None
+
+            if request and hasattr(request.state, "query_params"):
+                query_params = request.state.query_params
+                if isinstance(query_params, dict):  # por si usas dict directamente
+                    is_project = query_params.get("project_id")
+                    is_department = query_params.get("department_id")
+                    is_municipality = query_params.get("municipality_id")
+                    is_region = query_params.get("region_id")
+                    
             stmt = select(self.model).join(
                 document_status, self.model.document_status_id == document_status.id
             ).join(
@@ -399,6 +411,21 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
 
             conditions = []
 
+            # ----------------------------------------------------------
+            # Seccion de filtros para projectos
+            if is_project:
+                stmt = stmt.where(self.model.project_id == int(is_project))          
+
+            if is_department:
+                stmt = stmt.where(self.model.properties["department_id"].as_integer() == int(is_department))            
+
+            if is_municipality:
+                stmt = stmt.where(self.model.properties["municipality_id"].as_integer() == int(is_municipality))            
+
+            if is_region:
+                stmt = stmt.where(self.model.properties["region_id"].as_integer() == int(is_region))
+
+            # ----------------------------------------------------------
 
             # Filtrampos por el tipo de estado del documento
             if document_status_id:
@@ -450,11 +477,25 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
         limit: Optional[int] = None,
         offset: Optional[int] = None,
         order_by: Optional[str] = None,
+        request: Optional[Request] = None,
         )-> Tuple[List[Dict[str, Any]], int]:
         try:
             # Alias para evitar colisiones
             document_status = aliased(Attribute)
             document_types = aliased(Attribute)
+
+            is_project = None
+            is_department = None
+            is_municipality = None
+            is_region = None
+
+            if request and hasattr(request.state, "query_params"):
+                query_params = request.state.query_params
+                if isinstance(query_params, dict):  # por si usas dict directamente
+                    is_project = query_params.get("project_id")
+                    is_department = query_params.get("department_id")
+                    is_municipality = query_params.get("municipality_id")
+                    is_region = query_params.get("region_id")
 
             # SELECT document_status_id, COUNT(*) ...
             stmt = select(
@@ -472,6 +513,21 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
                 document_status.name
             )
 
+            # ----------------------------------------------------------
+            # Seccion de filtros para projectos
+            if is_project:
+                stmt = stmt.where(self.model.project_id == int(is_project))          
+
+            if is_department:
+                stmt = stmt.where(self.model.properties["department_id"].as_integer() == int(is_department))            
+
+            if is_municipality:
+                stmt = stmt.where(self.model.properties["municipality_id"].as_integer() == int(is_municipality))            
+
+            if is_region:
+                stmt = stmt.where(self.model.properties["region_id"].as_integer() == int(is_region))
+
+            # ----------------------------------------------------------
             if order_by:
                 stmt = stmt.order_by(order_by)
 

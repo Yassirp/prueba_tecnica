@@ -140,6 +140,7 @@ async def check_doocument_status( data: EntityDocumentStatus, db: AsyncSession =
     error_message=EntityDocumentMessages.ERROR_GET_ALL,
 )
 async def get_group_by_document_status(
+    request: Request,
     db: AsyncSession = Depends(get_db),
     limit: Optional[int] = Query(
         None, ge=1, le=100, description="Número de elementos por página"
@@ -156,8 +157,8 @@ async def get_group_by_document_status(
     try:
         service = EntityDocumentService(db)
         entity_document, total = await service.get_group_by_document_status(
-        limit=limit, offset=offset, order_by=order_by, document_status_id=document_status_id, search=search
-        )
+        limit=limit, offset=offset, order_by=order_by, document_status_id=document_status_id, 
+        search=search,request=request)
         return paginated_response(entity_document, total, limit, offset)
     except Exception as e:
         raise e
@@ -169,6 +170,7 @@ async def get_group_by_document_status(
     error_message=EntityDocumentMessages.ERROR_GET_ALL,
 )
 async def get_count_document_status(
+    request: Request,
     db: AsyncSession = Depends(get_db),
     limit: Optional[int] = Query(
         None, ge=1, le=100, description="Número de elementos por página"
@@ -183,7 +185,7 @@ async def get_count_document_status(
     try:
         service = EntityDocumentService(db)
         entity_document, total = await service.get_count_document_status(
-        limit=limit, offset=offset, order_by=order_by
+        limit=limit, offset=offset, order_by=order_by, request=request
         )
         return paginated_response(entity_document, total, limit, offset)
     except Exception as e:
