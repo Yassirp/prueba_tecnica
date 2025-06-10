@@ -124,7 +124,7 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
             if document_status_id:
                 conditions.append(self.model.document_status_id == document_status_id)
 
-            # FIiltramos por el tipo de etapa
+            # FIiltramos por el tipo de entidad
             if entity_type_id:
                 conditions.append(self.model.entity_type_id == entity_type_id)
 
@@ -147,6 +147,7 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
                         project.name.ilike(search_pattern),
                     )
                 )
+                
             # Aplicar condiciones al query
             if conditions:
                 stmt = stmt.where(and_(*conditions))

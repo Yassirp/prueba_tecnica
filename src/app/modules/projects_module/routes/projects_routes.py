@@ -31,11 +31,12 @@ async def get_all_projects(
         None,
         description="Criterios de filtrado en formato JSON (ej: {'name': '%john%', 'state': 0})",
     ),
+    key: Optional[str] =  Query(None),
 ) -> Dict[str, Any]:
     try:
         service = ProjectService(db)
         projects, total = await service.get_all(
-            limit=limit, offset=offset, order_by=order_by, filters=filters
+            limit=limit, offset=offset, order_by=order_by, filters=filters, key=key
         )
         return paginated_response(projects, total, limit, offset)
     except Exception as e:
