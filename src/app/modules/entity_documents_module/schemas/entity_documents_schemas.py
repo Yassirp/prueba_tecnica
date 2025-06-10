@@ -1,5 +1,6 @@
 # Archivo generado automáticamente para entity_documents - schemas
 from datetime import datetime
+import json
 from fastapi import HTTPException, status
 from typing import Optional, Dict, Any, Literal, Union
 from pydantic import BaseModel, Field, root_validator
@@ -21,6 +22,8 @@ class EntityDocumentBase(BaseModel):
     document_status_id: int = Field(AttributeIds.PENDING_APPROVAL.value, ge=1, description="ID del estado del documento")
     observations: str = Field(..., max_length=100, description="Observaciones")
     state: int = Field(1,ge=0)
+    properties: Optional[dict] = Field(None, description="Propiedaes por la cules filtrar.")
+    properties_project: Optional[dict] =  Field(None, description="Data del projecto compratida.")
 
     # Campos adicionales que no se guardan en la base de datos
     email: Optional[str] = Field(None, description="Correo electrónico del usuario")
@@ -59,6 +62,10 @@ class EntityDocumentBase(BaseModel):
                 ("email", "El email del usuario es requerido.", "El email del usuario debe ser una cadena de texto."),
                 ("name", "El nombre del usuario es requerido.", "El nombre del usuario debe ser una cadena de texto."),
             ]   
+            json_fields = [
+                ("properties", "El campo properties es requerido y debe ser un JSON válido."),
+                ("properties_project", "El campo properties_project es requerido y debe ser un JSON válido."),
+            ]
 
             for field, msg_required, msg_invalid in required_int_fields:
                 if field not in values or values[field] is None:
@@ -71,7 +78,19 @@ class EntityDocumentBase(BaseModel):
                     raise Exception(msg_required)
                 if not isinstance(values[field], str):
                     raise Exception(msg_invalid)    
-
+                
+            # Validar campos JSON requeridos
+            for field, msg in json_fields:
+                if field not in values or values[field] is None:
+                    raise Exception(msg)
+                # Comprobar que sea dict (JSON parseado)
+                # Si viene como string, intentar parsear a dict
+                val = values[field]
+                if not isinstance(val, dict):
+                    raise Exception(f"El campo {field} debe ser un JSON válido.")
+                # Reasignar el valor parseado (por si viene como string JSON)
+                values[field] = val
+                    
             return values   
 
         except Exception as e:

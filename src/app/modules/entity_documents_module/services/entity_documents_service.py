@@ -295,7 +295,7 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
             }
             await self.entity_document_log_service.create(data_log)
             #Enviamos el correo de notificación
-            await self.notification_service.create_notification_send_email(item.id, data)
+            #await self.notification_service.create_notification_send_email(item.id, data)
             
             return self.out_schema.model_validate(item).model_dump()
         except Exception as e:

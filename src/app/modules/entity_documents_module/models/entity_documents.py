@@ -24,6 +24,7 @@ class EntityDocument(BaseModel):
     document_status_id =  Column(Integer, ForeignKey("m_attributes.id"), comment="Hace refenrecia al estado del documento.", nullable=False)
     observations = Column(String(100), nullable=True, comment="Hace referencia a la observacion.")
     properties = Column(JSON, nullable=True, comment="Hace referencia a los paramtros por los cuales filtrar")
+    properties_project = Column(JSON, nullable=True, comment="Hace referencia a la data compratida por")
     state = Column(Integer, nullable=False, default=1)
     created_by = Column(Integer, nullable=True, comment="Hace referencia al usario de creacion.")
     created_at = Column(DateTime(timezone=True), default=datetime.now(pytz.timezone('America/Bogota')))
