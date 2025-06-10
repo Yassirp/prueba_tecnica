@@ -37,11 +37,12 @@ async def get_all_entity_types(
         None,
         description="Criterios de filtrado en formato JSON (ej: {'name': '%john%', 'state': 0})",
     ),
+    project_id: Optional[int] =  Query(None),
 ) -> Dict[str, Any]:
     try:
         service = EntityTypeService(db)
         entity_types, total = await service.get_all(
-        limit=limit, offset=offset, order_by=order_by, filters=filters
+        limit=limit, offset=offset, order_by=order_by, filters=filters, project_id=project_id
         )
         return paginated_response(entity_types, total, limit, offset)
     except Exception as e:
