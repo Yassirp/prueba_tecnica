@@ -6,6 +6,11 @@ Este es un microservicio para la Gestión Documental de todos los proyectos de N
 
 Version de Python requerida: Python 3.12.x
 
+- Eliminar migraciones anteriores:
+```bash
+python src/app/command/delete_migrations.py
+```
+
 - Ejecutar docker compose:
 ```bash
 docker compose up -d --build
@@ -85,4 +90,9 @@ python3 src/app/command/generate_module.py vehicles
 - 🔁 Alternativa: Si python3 no funciona en tu entorno, prueba con:
 ```bash
 python src/app/command/generate_module.py vehicles
+```
+
+## Ejecutar seeders
+```bash
+python3 src/app/command/db_seed.py
 ```
