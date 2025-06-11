@@ -6,13 +6,15 @@ from fastapi import HTTPException, status, Request
 from typing import List, Optional, Dict, Any,Tuple
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from sqlalchemy import and_, or_, func
+from sqlalchemy import and_, or_, func, literal_column, case
 from sqlalchemy.orm import selectinload, joinedload, aliased
 from sqlalchemy.orm import selectinload
 from src.app.modules.attributes_module.models.attributes import Attribute
 from src.app.modules.attributes_module.services.attributes_service import AttributeService
+from src.app.modules.document_rules_module.models.document_rules import DocumentRule
 from src.app.modules.entity_documents_module.models.entity_documents import EntityDocument
 from src.app.modules.entity_documents_module.schemas.entity_documents_schemas import EntityDocumentOut
+from src.app.modules.entity_types_module.models.entity_types import EntityType
 from src.app.modules.entity_types_module.services.entity_type_service import EntityTypeService
 from src.app.modules.projects_module.models.projects import Project
 from src.app.modules.projects_module.services.projects_service import ProjectService
@@ -21,7 +23,7 @@ from src.app.modules.entity_types_module.repositories.entity_types_repository im
     EntityTypeRepository,
 )
 from src.app.shared.constants.attribute_and_parameter_enum import AttributeIds, ParameterIds, AttributeName
-from src.app.shared.constants.project_enum import Setting
+from src.app.shared.constants.project_enum import EntityTypeIds, Setting
 from src.app.shared.utils.utils import upload_base64_to_s3_with_structure
 from src.app.modules.entity_document_logs_module.services.entity_document_logs_service import EntityDocumentLogsService
 from src.app.modules.notifications_module.services.notifications_service import NotificationsService
@@ -315,7 +317,7 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
             raise e
 
         
-    async def check_doocument_status(self, data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    async def check_document_status(self, data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         try:
             async with self.db_session.begin():
                 documents = data.get("documents", None)
@@ -480,55 +482,65 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
         offset: Optional[int] = None,
         order_by: Optional[str] = None,
         request: Optional[Request] = None,
+        user_id: Optional[int] = None,
         )-> Tuple[List[Dict[str, Any]], int]:
         try:
             # Alias para evitar colisiones
-            document_status = aliased(Attribute)
-            document_types = aliased(Attribute)
-
-            is_project = None
-            is_department = None
-            is_municipality = None
-            is_region = None
-
-            if request and hasattr(request.state, "query_params"):
-                query_params = request.state.query_params
-                if isinstance(query_params, dict):  # por si usas dict directamente
-                    is_project = query_params.get("project_id")
-                    is_department = query_params.get("department_id")
-                    is_municipality = query_params.get("municipality_id")
-                    is_region = query_params.get("region_id")
-
+            med = aliased(EntityDocument)
+            med_base = aliased(EntityDocument)
+            mdr = aliased(DocumentRule)
+            met = aliased(EntityType)
+            ma = aliased(Attribute)
+            mat = aliased(Attribute)  # Estado del documento (si lo necesitas)
+            
+            if not user_id:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="El id del estudiante es requerido.",
+                )
             # SELECT document_status_id, COUNT(*) ...
-            stmt = select(
-                self.model.document_status_id,
-                document_status.name.label("document_status_name"),
-                func.count(self.model.id).label("count_document")
-            ).join(
-                document_status, self.model.document_status_id == document_status.id
-            ).join(
-                document_types, self.model.document_type_id == document_types.id
-            ).where(
-                self.model.state == Setting.STATUS.value
-            ).group_by(
-                self.model.document_status_id,
-                document_status.name
+            stmt = (
+                select(
+                    case(
+                        (med.document_status_id == None, literal_column("NULL")),
+                        else_=med.document_status_id
+                    ).label("document_status_id"),
+                    case(
+                        (mat.name == None, literal_column("'Por cargar'")),
+                        else_=mat.name
+                    ).label("document_status_name"),
+                    func.count(med_base.id).label("count_document")  # Contamos el registro base
+                )
+                .select_from(mdr)
+                .join(
+                    med_base,
+                    and_(
+                        mdr.project_id == med_base.project_id,
+                        mdr.document_type_id == med_base.document_type_id,
+                        mdr.entity_type_id == med_base.entity_type_id,
+                        mdr.stage_id == med_base.stage_id
+                    )
+                )
+                .outerjoin(
+                    med,
+                    and_(
+                        med.id == med_base.id,
+                        (med.state == Setting.STATUS.value) | (med.state == None),
+                        med.document_status_id != AttributeIds.CANCEL.value,
+                        med.entity_id == user_id
+                    )
+                )
+                .join(met, met.id == mdr.entity_type_id)
+                .join(ma, ma.id == mdr.document_type_id)
+                .outerjoin(mat, mat.id == med.document_status_id)
+                .where(mdr.entity_type_id == EntityTypeIds.SPORTSMAN.value)
+                .group_by(
+                    med.document_status_id,
+                    mat.name
+                )
             )
 
-            # ----------------------------------------------------------
-            # Seccion de filtros para projectos
-            if is_project:
-                stmt = stmt.where(self.model.project_id == int(is_project))          
-
-            if is_department:
-                stmt = stmt.where(self.model.properties["department_id"].as_integer() == int(is_department))            
-
-            if is_municipality:
-                stmt = stmt.where(self.model.properties["municipality_id"].as_integer() == int(is_municipality))            
-
-            if is_region:
-                stmt = stmt.where(self.model.properties["region_id"].as_integer() == int(is_region))
-
+  
             # ----------------------------------------------------------
             if order_by:
                 stmt = stmt.order_by(order_by)
