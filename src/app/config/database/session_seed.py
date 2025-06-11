@@ -14,7 +14,7 @@ import os
 dotenv_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../.env'))
 load_dotenv(dotenv_path)
 
-DATABASE_URL = f'postgresql+asyncpg://{os.getenv("PG_USER")}:{os.getenv("PG_PASSWORD")}@{os.getenv("APP_HOST")}:{os.getenv("PORT_DOCKER")}/{os.getenv("PG_NAME")}'
+DATABASE_URL = f'postgresql+asyncpg://{os.getenv("PG_USER")}:{os.getenv("PG_PASSWORD")}@{os.getenv("PG_HOST")}:{os.getenv("PG_PORT")}/{os.getenv("PG_NAME")}'
 
 # Crear el engine asíncrono
 ENGINE_SEED = create_async_engine(
