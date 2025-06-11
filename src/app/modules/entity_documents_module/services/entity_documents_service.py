@@ -61,6 +61,7 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
         id:  Optional[int] = None,
         search: Optional[str] = None,
         request: Optional[Request] = None,
+        entity_id:  Optional[int] = None
     ) -> Tuple[List[Dict[str, Any]], int]:
         try:
             document_status = aliased(Attribute)
@@ -113,6 +114,8 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
                 stmt = stmt.where(self.model.properties["region_id"].as_integer() == int(is_region))
 
             # ----------------------------------------------------------
+            if entity_id:
+                stmt = stmt.where(self.model.entity_id == entity_id)
 
             # Filtramos por el id:
             if id:
@@ -476,6 +479,26 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
             raise e
         
 
+    async def validate_user(self, user_id):
+        try:
+            print("holaaa: ",user_id)
+            if not user_id:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="El id del estudiante es requerido.",
+                )
+            
+            model, count = await self.get_all(entity_id=user_id)
+            if not count:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"No se encontró el usuario con id '{user_id}'.",
+            )
+            return True
+        except Exception as e:
+            raise e
+        
+
     async def get_count_document_status(
         self,
         limit: Optional[int] = None,
@@ -493,11 +516,8 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
             ma = aliased(Attribute)
             mat = aliased(Attribute)  # Estado del documento (si lo necesitas)
             
-            if not user_id:
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail="El id del estudiante es requerido.",
-                )
+            await self.validate_user(user_id=user_id)
+
             # SELECT document_status_id, COUNT(*) ...
             stmt = (
                 select(

@@ -13,6 +13,7 @@ from src.app.modules.document_rules_module.models.document_rules import Document
 from src.app.modules.document_rules_module.repositories.document_rules_repository import DocumentRuleRepository
 from src.app.modules.document_rules_module.schemas.document_rules_schemas import DocumentRuleOut
 from src.app.modules.entity_documents_module.models.entity_documents import EntityDocument
+from src.app.modules.entity_documents_module.services.entity_documents_service import EntityDocumentService
 from src.app.modules.entity_types_module.models.entity_types import EntityType
 from src.app.modules.entity_types_module.services.entity_type_service import EntityTypeService
 from src.app.modules.projects_module.services.projects_service import ProjectService
@@ -31,7 +32,8 @@ class DocumentRuleService(BaseService[DocumentRule, DocumentRuleOut]):
         self.db_session=db_session
         self.project_service = ProjectService(db_session)
         self.entity_type_service = EntityTypeService(db_session)
-        self.attribute_service = AttributeService(db_session)
+        self.attribute_service = AttributeService(db_session)  
+        self.entity_service = EntityDocumentService(db_session)  
     
     async def get_all(
         self,
@@ -57,7 +59,7 @@ class DocumentRuleService(BaseService[DocumentRule, DocumentRuleOut]):
             # filtramos por el id
             if id:
                 conditions.append(self.model.id == id)
-
+        
             # Filtramos por el tipo de entidad
             if entity_type_id:
                 conditions.append(self.model.entity_type_id == entity_type_id)
@@ -182,6 +184,25 @@ class DocumentRuleService(BaseService[DocumentRule, DocumentRuleOut]):
             raise e
         
 
+    async def validate_user(self, user_id):
+        try:
+            print("validate_user: ",user_id)
+            
+            if not user_id:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="El id del estudiante es requerido.",
+                )
+            
+            model, count = await self.entity_service.get_all(entity_id=user_id)
+            if not count:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"No se encontró el usuario con id '{user_id}'.",
+            )
+            return True
+        except Exception as e:
+            raise e
 
     async def get_document_students(
         self,
@@ -201,12 +222,9 @@ class DocumentRuleService(BaseService[DocumentRule, DocumentRuleOut]):
             ma = aliased(Attribute)
             mat = aliased(Attribute)  # Estado del documento (si lo necesitas)
             
-            if not user_id:
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail="El id del estudiante es requerido.",
-                )
-            
+
+            await self.validate_user(user_id=user_id)
+
             stmt = (
                 select(
                 mdr.project_id,
