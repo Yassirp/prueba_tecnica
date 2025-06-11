@@ -514,24 +514,52 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
             mdr = aliased(DocumentRule)
             met = aliased(EntityType)
             ma = aliased(Attribute)
-            mat = aliased(Attribute)  # Estado del documento
-    
+            mat = aliased(Attribute)
+
             await self.validate_user(user_id=user_id)
-    
-            stmt = (
+
+            # 1. Documentos cargados con estado definido
+            stmt_with_status = (
                 select(
-                    case(
-                        (mat.id == None, literal_column("NULL")),
-                        else_=mat.id
-                    ).label("document_status_id"),
-                    case(
-                        (mat.name == None, literal_column("'Por cargar'")),
-                        else_=mat.name
-                    ).label("document_status_name"),
-                    func.count(mdr.id).label("count_document")
+                    mat.id.label("document_status_id"),
+                    mat.name.label("document_status_name"),
+                    func.count(med.id).label("count_document")
                 )
                 .select_from(mdr)
                 .join(
+                    med_base,
+                    and_(
+                        mdr.project_id == med_base.project_id,
+                        mdr.document_type_id == med_base.document_type_id,
+                        mdr.entity_type_id == med_base.entity_type_id,
+                        mdr.stage_id == med_base.stage_id
+                    )
+                )
+                .join(
+                    med,
+                    and_(
+                        med.id == med_base.id,
+                        (med.state == Setting.STATUS.value) | (med.state == None),
+                        med.document_status_id != AttributeIds.CANCEL.value,
+                        med.entity_id == user_id
+                    )
+                )
+                .join(met, met.id == mdr.entity_type_id)
+                .join(ma, ma.id == mdr.document_type_id)
+                .join(mat, mat.id == med.document_status_id)
+                .where(mdr.entity_type_id == EntityTypeIds.SPORTSMAN.value)
+                .group_by(mat.id, mat.name)
+            )
+
+            # 2. Documentos que no han sido cargados (estado "Por cargar")
+            stmt_missing_docs = (
+                select(
+                    literal_column("NULL").label("document_status_id"),
+                    literal_column("'Por cargar'").label("document_status_name"),
+                    func.count(func.distinct(mdr.id)).label("count_document")
+                )
+                .select_from(mdr)
+                .outerjoin(
                     med_base,
                     and_(
                         mdr.project_id == med_base.project_id,
@@ -545,57 +573,63 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
                     and_(
                         med.id == med_base.id,
                         (med.state == Setting.STATUS.value) | (med.state == None),
-                        med.document_status_id != AttributeIds.CANCEL.value,
-                        med.entity_id == user_id
+                        med.document_status_id != AttributeIds.CANCEL.value
                     )
                 )
-                .join(met, met.id == mdr.entity_type_id)
-                .join(ma, ma.id == mdr.document_type_id)
-                .outerjoin(mat, mat.id == med.document_status_id)
-                .where(mdr.entity_type_id == EntityTypeIds.SPORTSMAN.value)
-                .group_by(mat.id, mat.name)
+                .where(
+                    mdr.entity_type_id == EntityTypeIds.SPORTSMAN.value,
+                    or_(med.id == None, med.entity_id != user_id)
+                )
             )
-    
-            if order_by:
-                stmt = stmt.order_by(order_by)
 
-            if offset:
-                stmt = stmt.offset(offset)
+            # Ejecutar ambas consultas
+            result_with_status = await self.db_session.execute(stmt_with_status)
+            result_missing = await self.db_session.execute(stmt_missing_docs)
 
-            if limit:
-                stmt = stmt.limit(limit)
-    
-            result = await self.db_session.execute(stmt)
-            items = result.all()
-    
-            # Estructura base con todos los estados posibles
+            items = result_with_status.all()
+            missing_items = result_missing.all()
+
+            # Estados esperados
             default_statuses = [
                 {"document_status_id": 4, "document_status_name": "Por revisar", "count_document": 0},
                 {"document_status_id": 5, "document_status_name": "Aprobado", "count_document": 0},
                 {"document_status_id": 6, "document_status_name": "Rechazado", "count_document": 0},
                 {"document_status_id": None, "document_status_name": "Por cargar", "count_document": 0},
             ]
-    
-            # Convertimos los resultados a diccionario para fusión
+
+            # Convertir resultados a diccionario
             result_dict = {
                 row.document_status_id: {
                     "document_status_id": row.document_status_id,
                     "document_status_name": row.document_status_name,
                     "count_document": row.count_document
                 }
-                for row in items
+                for row in (items + missing_items)
             }
-    
-            # Reemplazamos o usamos los valores por defecto
-            response = []
-            for status in default_statuses:
-                sid = status["document_status_id"]
-                response.append(result_dict.get(sid, status))
-    
+
+            # Fusionar con los estados esperados
+            response = [result_dict.get(status["document_status_id"], status) for status in default_statuses]
+            count_with_status = sum(r["count_document"] for r in response if r["document_status_id"] is not None)
+
             total = sum(r["count_document"] for r in response)
-    
+            # Total de reglas esperadas
+            total_rules = await self.db_session.scalar(
+                select(func.count()).select_from(mdr).where(mdr.entity_type_id == EntityTypeIds.SPORTSMAN.value)
+            )
+            
+            # Calcular faltantes
+            missing_docs = max(total_rules - count_with_status, 0)
+            
+            # Asignar el conteo a "Por cargar"
+            for r in response:
+                if r["document_status_id"] is None:
+                    r["count_document"] = missing_docs
+            
+            # Total final
+            total = sum(r["count_document"] for r in response)
             return response, total
-    
         except Exception as e:
             raise e
+
+
     
