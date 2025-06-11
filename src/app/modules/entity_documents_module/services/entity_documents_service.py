@@ -506,7 +506,7 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
         order_by: Optional[str] = None,
         request: Optional[Request] = None,
         user_id: Optional[int] = None,
-        )-> Tuple[List[Dict[str, Any]], int]:
+    ) -> Tuple[List[Dict[str, Any]], int]:
         try:
             # Alias para evitar colisiones
             med = aliased(EntityDocument)
@@ -514,22 +514,21 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
             mdr = aliased(DocumentRule)
             met = aliased(EntityType)
             ma = aliased(Attribute)
-            mat = aliased(Attribute)  # Estado del documento (si lo necesitas)
-            
+            mat = aliased(Attribute)  # Estado del documento
+    
             await self.validate_user(user_id=user_id)
-
-            # SELECT document_status_id, COUNT(*) ...
+    
             stmt = (
                 select(
                     case(
-                        (med.document_status_id == None, literal_column("NULL")),
-                        else_=med.document_status_id
+                        (mat.id == None, literal_column("NULL")),
+                        else_=mat.id
                     ).label("document_status_id"),
                     case(
                         (mat.name == None, literal_column("'Por cargar'")),
                         else_=mat.name
                     ).label("document_status_name"),
-                    func.count(med_base.id).label("count_document")  # Contamos el registro base
+                    func.count(mdr.id).label("count_document")
                 )
                 .select_from(mdr)
                 .join(
@@ -554,38 +553,49 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
                 .join(ma, ma.id == mdr.document_type_id)
                 .outerjoin(mat, mat.id == med.document_status_id)
                 .where(mdr.entity_type_id == EntityTypeIds.SPORTSMAN.value)
-                .group_by(
-                    med.document_status_id,
-                    mat.name
-                )
+                .group_by(mat.id, mat.name)
             )
-
-  
-            # ----------------------------------------------------------
+    
             if order_by:
                 stmt = stmt.order_by(order_by)
 
             if offset:
                 stmt = stmt.offset(offset)
-
+                
             if limit:
                 stmt = stmt.limit(limit)
-
+    
             result = await self.db_session.execute(stmt)
             items = result.all()
-            total = len(items)
-
-            # Convertir a lista de diccionarios
-            response = [
-                {
+    
+            # Estructura base con todos los estados posibles
+            default_statuses = [
+                {"document_status_id": 4, "document_status_name": "Pendiente de aprobación", "count_document": 0},
+                {"document_status_id": 5, "document_status_name": "Aprobado", "count_document": 0},
+                {"document_status_id": 6, "document_status_name": "Rechazado", "count_document": 0},
+                {"document_status_id": None, "document_status_name": "Por cargar", "count_document": 0},
+            ]
+    
+            # Convertimos los resultados a diccionario para fusión
+            result_dict = {
+                row.document_status_id: {
                     "document_status_id": row.document_status_id,
                     "document_status_name": row.document_status_name,
                     "count_document": row.count_document
                 }
                 for row in items
-            ]
-
+            }
+    
+            # Reemplazamos o usamos los valores por defecto
+            response = []
+            for status in default_statuses:
+                sid = status["document_status_id"]
+                response.append(result_dict.get(sid, status))
+    
+            total = sum(r["count_document"] for r in response)
+    
             return response, total
-
+    
         except Exception as e:
             raise e
+    
