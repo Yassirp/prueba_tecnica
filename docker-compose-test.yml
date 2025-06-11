@@ -9,21 +9,7 @@ services:
       - "5001:8000"
     volumes:
       - .:/src
-    depends_on:
-      - micro_documents_db
     restart: always
-    networks:
-      - api_network
-
-  micro_documents_db:
-    image: docker.io/bitnami/postgresql:16
-    container_name: micro_documents_db
-    ports:
-      - "5434:5432"
-    env_file:
-      - ./src/.env
-    volumes:
-      - db-micro-documents-volume:/var/lib/postgresql
     networks:
       - api_network
 
