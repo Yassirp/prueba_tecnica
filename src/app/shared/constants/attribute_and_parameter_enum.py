@@ -41,7 +41,7 @@ class AttributeName(Enum):
     DEPARTMENTAL = "Departamental"
     REGIONAL = "Regional"
     NATIONAL = "Nacional"
-    PENDING_APPROVAL = "Pndiente de aprobación"
+    PENDING_APPROVAL = "Por revisar"
     APPROVED = "Aprobado"
     REJECTED = "Rechazado"
     DOCUMENT_TYPE_PHOTO = "Foto tipo documento"

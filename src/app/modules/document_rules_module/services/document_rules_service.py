@@ -195,18 +195,20 @@ class DocumentRuleService(BaseService[DocumentRule, DocumentRuleOut]):
     ) -> Tuple[List[Dict[str, Any]], int]:
         try:
             med = aliased(EntityDocument)
+            med_base = aliased(EntityDocument)
             mdr = aliased(DocumentRule)
             met = aliased(EntityType)
             ma = aliased(Attribute)
-            mat = aliased(Attribute)
-
+            mat = aliased(Attribute)  # Estado del documento (si lo necesitas)
+            
             if not user_id:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
-                    detail=f"El id del estudiante es requerido.",
-            )
-
-            stmt = select(
+                    detail="El id del estudiante es requerido.",
+                )
+            
+            stmt = (
+                select(
                 mdr.project_id,
                 mdr.document_type_id,
                 mdr.entity_type_id,
@@ -216,33 +218,54 @@ class DocumentRuleService(BaseService[DocumentRule, DocumentRuleOut]):
                 case(
                     (func.count(med.id) > 0, literal_column("'SÍ'")),
                     else_=literal_column("'NO'")
-                ).label("exists")
-            ).select_from(mdr).outerjoin(
+                ).label("exists"),
+                case(
+                    (mat.name == None, literal_column("'Por cargar'")),
+                    else_=mat.name
+                ).label("document_status_name")
+            )
+            .select_from(mdr)
+            # INNER JOIN por tuplas exactas
+            .join(
+                med_base,
+                and_(
+                    mdr.project_id == med_base.project_id,
+                    mdr.document_type_id == med_base.document_type_id,
+                    mdr.entity_type_id == med_base.entity_type_id,
+                    mdr.stage_id == med_base.stage_id
+                )
+            )
+            # LEFT JOIN con filtros adicionales
+            .outerjoin(
                 med,
-                (mdr.project_id == med.project_id) &
-                (mdr.document_type_id == med.document_type_id) &
-                (mdr.entity_type_id == med.entity_type_id) &
-               
-                (mdr.stage_id == med.stage_id) &
-                ((med.state == Setting.STATUS.value) | (med.state == None)) &
-                (med.document_status_id != AttributeIds.CANCEL.value) & (med.entity_id == user_id)
-            ).join(
-                met, met.id == mdr.entity_type_id
-            ).join(ma, ma.id == mdr.document_type_id).group_by(
-                mdr.project_id,
-                mdr.document_type_id,
-                mdr.entity_type_id,
-                mdr.stage_id,
-                ma.name,
-                met.name
-            ).where(
-                mdr.entity_type_id == EntityTypeIds.SPORTSMAN.value
+                and_(
+                    med.id == med_base.id,
+                    (med.state == Setting.STATUS.value) | (med.state == None),
+                    med.document_status_id != AttributeIds.CANCEL.value,
+                    med.entity_id == user_id
+                )
+            )
+            .join(met, met.id == mdr.entity_type_id)
+            .join(ma, ma.id == mdr.document_type_id)
+            .outerjoin(mat, mat.id == med.document_status_id)
+            .where(mdr.entity_type_id == EntityTypeIds.SPORTSMAN.value)
+                .group_by(
+                    mdr.project_id,
+                    mdr.document_type_id,
+                    mdr.entity_type_id,
+                    mdr.stage_id,
+                    ma.name,
+                    met.name,
+                    mat.name
+                )
             )
 
             if offset:
                 stmt = stmt.offset(offset)
+
             if limit:
                 stmt = stmt.limit(limit)
+
             if order_by:
                 stmt = stmt.order_by(order_by)
 
