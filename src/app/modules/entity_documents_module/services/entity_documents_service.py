@@ -561,7 +561,7 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
 
             if offset:
                 stmt = stmt.offset(offset)
-                
+
             if limit:
                 stmt = stmt.limit(limit)
     
@@ -570,7 +570,7 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
     
             # Estructura base con todos los estados posibles
             default_statuses = [
-                {"document_status_id": 4, "document_status_name": "Pendiente de aprobación", "count_document": 0},
+                {"document_status_id": 4, "document_status_name": "Por revisar", "count_document": 0},
                 {"document_status_id": 5, "document_status_name": "Aprobado", "count_document": 0},
                 {"document_status_id": 6, "document_status_name": "Rechazado", "count_document": 0},
                 {"document_status_id": None, "document_status_name": "Por cargar", "count_document": 0},
