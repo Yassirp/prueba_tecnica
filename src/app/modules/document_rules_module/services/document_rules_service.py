@@ -3,16 +3,22 @@ from fastapi import HTTPException, status
 from typing import List, Optional, Dict, Any,Tuple
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
-from sqlalchemy import and_
+from sqlalchemy import and_, select, func, case, literal_column, cast, String
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.orm import aliased
+from src.app.modules.attributes_module.models.attributes import Attribute
 from src.app.modules.attributes_module.services.attributes_service import AttributeService
 from src.app.modules.document_rules_module.models.document_rules import DocumentRule
 from src.app.modules.document_rules_module.repositories.document_rules_repository import DocumentRuleRepository
 from src.app.modules.document_rules_module.schemas.document_rules_schemas import DocumentRuleOut
+from src.app.modules.entity_documents_module.models.entity_documents import EntityDocument
+from src.app.modules.entity_types_module.models.entity_types import EntityType
 from src.app.modules.entity_types_module.services.entity_type_service import EntityTypeService
 from src.app.modules.projects_module.services.projects_service import ProjectService
-from src.app.shared.constants.attribute_and_parameter_enum import ParameterIds
+from src.app.shared.constants.attribute_and_parameter_enum import AttributeIds, ParameterIds
 from src.app.shared.bases.base_service import BaseService
+from src.app.shared.constants.project_enum import EntityTypeIds, Setting
 
 class DocumentRuleService(BaseService[DocumentRule, DocumentRuleOut]):
     def __init__(self, db_session: AsyncSession):
@@ -172,5 +178,78 @@ class DocumentRuleService(BaseService[DocumentRule, DocumentRuleOut]):
             item = await self.repo.update(document_rule_id, data)
             if not item: return None
             return self.out_schema.model_validate(item).model_dump()
+        except Exception as e:
+            raise e
+        
+
+
+    async def get_document_students(
+        self,
+        limit: Optional[int] = None,
+        offset: Optional[int] = None,
+        order_by: Optional[str] = None,
+        filters: Optional[Dict[str, Any]] = None,
+        key: Optional[str] = None,
+        user_id: Optional[int] = None,
+        entity_type_id: Optional[int] = None,
+    ) -> Tuple[List[Dict[str, Any]], int]:
+        try:
+            med = aliased(EntityDocument)
+            mdr = aliased(DocumentRule)
+            met = aliased(EntityType)
+            ma = aliased(Attribute)
+            mat = aliased(Attribute)
+
+            if not user_id:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"El id del estudiante es requerido.",
+            )
+
+            stmt = select(
+                mdr.project_id,
+                mdr.document_type_id,
+                mdr.entity_type_id,
+                mdr.stage_id,
+                ma.name,
+                func.max(func.coalesce(med.updated_at, med.created_at)).label("last_updated"),
+                case(
+                    (func.count(med.id) > 0, literal_column("'SÍ'")),
+                    else_=literal_column("'NO'")
+                ).label("exists")
+            ).select_from(mdr).outerjoin(
+                med,
+                (mdr.project_id == med.project_id) &
+                (mdr.document_type_id == med.document_type_id) &
+                (mdr.entity_type_id == med.entity_type_id) &
+               
+                (mdr.stage_id == med.stage_id) &
+                ((med.state == Setting.STATUS.value) | (med.state == None)) &
+                (med.document_status_id != AttributeIds.CANCEL.value) & (med.entity_id == user_id)
+            ).join(
+                met, met.id == mdr.entity_type_id
+            ).join(ma, ma.id == mdr.document_type_id).group_by(
+                mdr.project_id,
+                mdr.document_type_id,
+                mdr.entity_type_id,
+                mdr.stage_id,
+                ma.name,
+                met.name
+            ).where(
+                mdr.entity_type_id == EntityTypeIds.SPORTSMAN.value
+            )
+
+            if offset:
+                stmt = stmt.offset(offset)
+            if limit:
+                stmt = stmt.limit(limit)
+            if order_by:
+                stmt = stmt.order_by(order_by)
+
+            result = await self.db_session.execute(stmt)
+            rows = result.mappings().all()  # Para obtener dicts por columna
+
+            total = len(rows)
+            return rows, total
         except Exception as e:
             raise e

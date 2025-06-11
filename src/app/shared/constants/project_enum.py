@@ -6,3 +6,9 @@ class Projectds(Enum):
 
 class Setting(Enum):
     STATUS = 1
+    OFF = 0
+
+
+class EntityTypeIds(Enum):
+    SPORTSMAN = 1
+    STAFF = 2

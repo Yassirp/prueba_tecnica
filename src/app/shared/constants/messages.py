@@ -56,6 +56,7 @@ class AttributeMessages(GlobalMessages):
 # Reglas de documentos 
 class DocumentRuleMessages(GlobalMessages):
     OK_GET_ALL = "Reglas de documentos obtenidos correctamente"
+    OK_GET_DOCUMENT_STUDENTE = "Documentos obtenidos correctamente"
     OK_GET     = "Reglas de documentos obtenidos correctamente"
     OK_CREATED = "Reglas de documento creada correctamente"
     OK_UPDATED = "Reglas de documento actualizada correctamente"

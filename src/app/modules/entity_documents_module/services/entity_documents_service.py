@@ -232,6 +232,7 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
                         )
                     else:
                         rules.document_status_id = AttributeIds.CANCEL.value
+                        rules.state = Setting.OFF.value
                         rules.updated_at = datetime.utcnow() 
 
                         # Guardar (con SQLAlchemy async ORM)

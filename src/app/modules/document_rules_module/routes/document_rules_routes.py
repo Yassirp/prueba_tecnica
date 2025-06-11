@@ -113,3 +113,36 @@ async def delete_entity_type(
         return await service.delete(document_rule_id)
     except Exception as e: 
         raise e
+
+
+@router.get("/get-document-students", response_model=List[DocumentRuleOut])
+@handle_route_responses(
+    success_message=DocumentRuleMessages.OK_GET_DOCUMENT_STUDENTE,
+    error_message=DocumentRuleMessages.ERROR_GET_ALL,
+)
+async def get_all_document_rule(
+    db: AsyncSession = Depends(get_db),
+    limit: Optional[int] = Query(
+        None, ge=1, le=100, description="Número de elementos por página"
+    ),
+    offset: Optional[int] = Query(
+        None, ge=0, description="Número de elementos a omitir"
+    ),
+    order_by: Optional[str] = Query(
+        None, description="Campo para ordenar (ej: 'id:asc' o 'name:desc')"
+    ),
+    filters: Optional[str] = Query(
+        None,
+        description="Criterios de filtrado en formato JSON (ej: {'name': '%john%', 'state': 0})",
+    ),
+    user_id: Optional[int] = Query(None),
+    entity_type_id: Optional[int] = Query(None),
+) -> Dict[str, Any]:
+    try:
+        service = DocumentRuleService(db)
+        attributes, total = await service.get_document_students(
+        limit=limit, offset=offset, order_by=order_by, filters=filters, user_id=user_id, entity_type_id= entity_type_id
+        )
+        return paginated_response(attributes, total, limit, offset)
+    except Exception as e:
+        raise e
