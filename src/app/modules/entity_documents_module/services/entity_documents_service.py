@@ -6,13 +6,15 @@ from fastapi import HTTPException, status, Request
 from typing import List, Optional, Dict, Any,Tuple
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from sqlalchemy import and_, or_, func
+from sqlalchemy import and_, or_, func, literal_column, case
 from sqlalchemy.orm import selectinload, joinedload, aliased
 from sqlalchemy.orm import selectinload
 from src.app.modules.attributes_module.models.attributes import Attribute
 from src.app.modules.attributes_module.services.attributes_service import AttributeService
+from src.app.modules.document_rules_module.models.document_rules import DocumentRule
 from src.app.modules.entity_documents_module.models.entity_documents import EntityDocument
 from src.app.modules.entity_documents_module.schemas.entity_documents_schemas import EntityDocumentOut
+from src.app.modules.entity_types_module.models.entity_types import EntityType
 from src.app.modules.entity_types_module.services.entity_type_service import EntityTypeService
 from src.app.modules.projects_module.models.projects import Project
 from src.app.modules.projects_module.services.projects_service import ProjectService
@@ -21,7 +23,7 @@ from src.app.modules.entity_types_module.repositories.entity_types_repository im
     EntityTypeRepository,
 )
 from src.app.shared.constants.attribute_and_parameter_enum import AttributeIds, ParameterIds, AttributeName
-from src.app.shared.constants.project_enum import Setting
+from src.app.shared.constants.project_enum import EntityTypeIds, Setting
 from src.app.shared.utils.utils import upload_base64_to_s3_with_structure
 from src.app.modules.entity_document_logs_module.services.entity_document_logs_service import EntityDocumentLogsService
 from src.app.modules.notifications_module.services.notifications_service import NotificationsService
@@ -59,6 +61,7 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
         id:  Optional[int] = None,
         search: Optional[str] = None,
         request: Optional[Request] = None,
+        entity_id:  Optional[int] = None
     ) -> Tuple[List[Dict[str, Any]], int]:
         try:
             document_status = aliased(Attribute)
@@ -111,6 +114,8 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
                 stmt = stmt.where(self.model.properties["region_id"].as_integer() == int(is_region))
 
             # ----------------------------------------------------------
+            if entity_id:
+                stmt = stmt.where(self.model.entity_id == entity_id)
 
             # Filtramos por el id:
             if id:
@@ -315,7 +320,7 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
             raise e
 
         
-    async def check_doocument_status(self, data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    async def check_document_status(self, data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         try:
             async with self.db_session.begin():
                 documents = data.get("documents", None)
@@ -474,86 +479,157 @@ class EntityDocumentService(BaseService[EntityDocument, EntityDocumentOut]):
             raise e
         
 
+    async def validate_user(self, user_id):
+        try:
+            print("holaaa: ",user_id)
+            if not user_id:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="El id del estudiante es requerido.",
+                )
+            
+            model, count = await self.get_all(entity_id=user_id)
+            if not count:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"No se encontró el usuario con id '{user_id}'.",
+            )
+            return True
+        except Exception as e:
+            raise e
+        
+
     async def get_count_document_status(
         self,
         limit: Optional[int] = None,
         offset: Optional[int] = None,
         order_by: Optional[str] = None,
         request: Optional[Request] = None,
-        )-> Tuple[List[Dict[str, Any]], int]:
+        user_id: Optional[int] = None,
+    ) -> Tuple[List[Dict[str, Any]], int]:
         try:
             # Alias para evitar colisiones
-            document_status = aliased(Attribute)
-            document_types = aliased(Attribute)
+            med = aliased(EntityDocument)
+            med_base = aliased(EntityDocument)
+            mdr = aliased(DocumentRule)
+            met = aliased(EntityType)
+            ma = aliased(Attribute)
+            mat = aliased(Attribute)
 
-            is_project = None
-            is_department = None
-            is_municipality = None
-            is_region = None
+            await self.validate_user(user_id=user_id)
 
-            if request and hasattr(request.state, "query_params"):
-                query_params = request.state.query_params
-                if isinstance(query_params, dict):  # por si usas dict directamente
-                    is_project = query_params.get("project_id")
-                    is_department = query_params.get("department_id")
-                    is_municipality = query_params.get("municipality_id")
-                    is_region = query_params.get("region_id")
-
-            # SELECT document_status_id, COUNT(*) ...
-            stmt = select(
-                self.model.document_status_id,
-                document_status.name.label("document_status_name"),
-                func.count(self.model.id).label("count_document")
-            ).join(
-                document_status, self.model.document_status_id == document_status.id
-            ).join(
-                document_types, self.model.document_type_id == document_types.id
-            ).where(
-                self.model.state == Setting.STATUS.value
-            ).group_by(
-                self.model.document_status_id,
-                document_status.name
+            # 1. Documentos cargados con estado definido
+            stmt_with_status = (
+                select(
+                    mat.id.label("document_status_id"),
+                    mat.name.label("document_status_name"),
+                    func.count(med.id).label("count_document")
+                )
+                .select_from(mdr)
+                .join(
+                    med_base,
+                    and_(
+                        mdr.project_id == med_base.project_id,
+                        mdr.document_type_id == med_base.document_type_id,
+                        mdr.entity_type_id == med_base.entity_type_id,
+                        mdr.stage_id == med_base.stage_id
+                    )
+                )
+                .join(
+                    med,
+                    and_(
+                        med.id == med_base.id,
+                        (med.state == Setting.STATUS.value) | (med.state == None),
+                        med.document_status_id != AttributeIds.CANCEL.value,
+                        med.entity_id == user_id
+                    )
+                )
+                .join(met, met.id == mdr.entity_type_id)
+                .join(ma, ma.id == mdr.document_type_id)
+                .join(mat, mat.id == med.document_status_id)
+                .where(mdr.entity_type_id == EntityTypeIds.SPORTSMAN.value)
+                .group_by(mat.id, mat.name)
             )
 
-            # ----------------------------------------------------------
-            # Seccion de filtros para projectos
-            if is_project:
-                stmt = stmt.where(self.model.project_id == int(is_project))          
+            # 2. Documentos que no han sido cargados (estado "Por cargar")
+            stmt_missing_docs = (
+                select(
+                    literal_column("NULL").label("document_status_id"),
+                    literal_column("'Por cargar'").label("document_status_name"),
+                    func.count(func.distinct(mdr.id)).label("count_document")
+                )
+                .select_from(mdr)
+                .outerjoin(
+                    med_base,
+                    and_(
+                        mdr.project_id == med_base.project_id,
+                        mdr.document_type_id == med_base.document_type_id,
+                        mdr.entity_type_id == med_base.entity_type_id,
+                        mdr.stage_id == med_base.stage_id
+                    )
+                )
+                .outerjoin(
+                    med,
+                    and_(
+                        med.id == med_base.id,
+                        (med.state == Setting.STATUS.value) | (med.state == None),
+                        med.document_status_id != AttributeIds.CANCEL.value
+                    )
+                )
+                .where(
+                    mdr.entity_type_id == EntityTypeIds.SPORTSMAN.value,
+                    or_(med.id == None, med.entity_id != user_id)
+                )
+            )
 
-            if is_department:
-                stmt = stmt.where(self.model.properties["department_id"].as_integer() == int(is_department))            
+            # Ejecutar ambas consultas
+            result_with_status = await self.db_session.execute(stmt_with_status)
+            result_missing = await self.db_session.execute(stmt_missing_docs)
 
-            if is_municipality:
-                stmt = stmt.where(self.model.properties["municipality_id"].as_integer() == int(is_municipality))            
+            items = result_with_status.all()
+            missing_items = result_missing.all()
 
-            if is_region:
-                stmt = stmt.where(self.model.properties["region_id"].as_integer() == int(is_region))
+            # Estados esperados
+            default_statuses = [
+                {"document_status_id": 4, "document_status_name": "Por revisar", "count_document": 0},
+                {"document_status_id": 5, "document_status_name": "Aprobado", "count_document": 0},
+                {"document_status_id": 6, "document_status_name": "Rechazado", "count_document": 0},
+                {"document_status_id": None, "document_status_name": "Por cargar", "count_document": 0},
+            ]
 
-            # ----------------------------------------------------------
-            if order_by:
-                stmt = stmt.order_by(order_by)
-
-            if offset:
-                stmt = stmt.offset(offset)
-
-            if limit:
-                stmt = stmt.limit(limit)
-
-            result = await self.db_session.execute(stmt)
-            items = result.all()
-            total = len(items)
-
-            # Convertir a lista de diccionarios
-            response = [
-                {
+            # Convertir resultados a diccionario
+            result_dict = {
+                row.document_status_id: {
                     "document_status_id": row.document_status_id,
                     "document_status_name": row.document_status_name,
                     "count_document": row.count_document
                 }
-                for row in items
-            ]
+                for row in (items + missing_items)
+            }
 
+            # Fusionar con los estados esperados
+            response = [result_dict.get(status["document_status_id"], status) for status in default_statuses]
+            count_with_status = sum(r["count_document"] for r in response if r["document_status_id"] is not None)
+
+            total = sum(r["count_document"] for r in response)
+            # Total de reglas esperadas
+            total_rules = await self.db_session.scalar(
+                select(func.count()).select_from(mdr).where(mdr.entity_type_id == EntityTypeIds.SPORTSMAN.value)
+            )
+            
+            # Calcular faltantes
+            missing_docs = max(total_rules - count_with_status, 0)
+            
+            # Asignar el conteo a "Por cargar"
+            for r in response:
+                if r["document_status_id"] is None:
+                    r["count_document"] = missing_docs
+            
+            # Total final
+            total = sum(r["count_document"] for r in response)
             return response, total
-
         except Exception as e:
             raise e
+
+
+    

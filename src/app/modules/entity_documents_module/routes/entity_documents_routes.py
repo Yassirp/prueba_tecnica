@@ -45,13 +45,14 @@ async def get_all_entity_docuemnt(
     stage_id: Optional[int] =  Query(None),
     id: Optional[int] =  Query(None),
     search: Optional[str] =  Query(None),
+    entity_id: Optional[int] =  Query(None),
 ) -> Dict[str, Any]:
     try:
         service = EntityDocumentService(db)
         entity_docuemnt, total = await service.get_all(
         limit=limit, offset=offset, order_by=order_by, filters=filters , project_id=project_id, 
         document_status_id=document_status_id, entity_type_id=entity_type_id, stage_id=stage_id, 
-        search= search, request=request
+        search= search, request=request, entity_id=entity_id
         )
         return paginated_response(entity_docuemnt, total, limit, offset)
     except Exception as e:
@@ -120,16 +121,16 @@ async def delete_entity_docuemnt(
         raise e
     
 
-@router.post("/check-doocument-status/", response_model=EntityDocumentOut, status_code=status.HTTP_201_CREATED)
+@router.post("/check-document-status/", response_model=EntityDocumentOut, status_code=status.HTTP_201_CREATED)
 @handle_route_responses(
     success_message=EntityDocumentMessages.OK_UPDATED,
     error_message=EntityDocumentMessages.ERROR_UPDATED
 )
-async def check_doocument_status( data: EntityDocumentStatus, db: AsyncSession = Depends(get_db)
+async def check_document_status( data: EntityDocumentStatus, db: AsyncSession = Depends(get_db)
 ) -> Dict[str, Any]:
     try:
         service = EntityDocumentService(db)
-        return await service.check_doocument_status(data.model_dump())
+        return await service.check_document_status(data.model_dump())
     except Exception as e:
         raise e
     
@@ -180,12 +181,13 @@ async def get_count_document_status(
     ),
     order_by: Optional[str] = Query(
         None, description="Campo para ordenar (ej: 'id:asc' o 'name:desc')"
-    )
+    ),
+    user_id: Optional[int] =  Query(None),
 ) -> Dict[str, Any]:
     try:
         service = EntityDocumentService(db)
         entity_document, total = await service.get_count_document_status(
-        limit=limit, offset=offset, order_by=order_by, request=request
+        limit=limit, offset=offset, order_by=order_by, request=request, user_id=user_id
         )
         return paginated_response(entity_document, total, limit, offset)
     except Exception as e:
