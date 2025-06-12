@@ -66,11 +66,10 @@ async def root(request: Request) -> HTMLResponse:
         },
     )
 
-
 # MIDDLEWARES
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=Settings.ALLOWED_ORIGINS.split(","),
+    allow_origins=[origin.strip() for origin in Settings.ALLOWED_ORIGINS.split(",") if origin.strip()],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
