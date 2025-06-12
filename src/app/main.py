@@ -11,6 +11,7 @@ from src.app.shared.utils.request_utils import http_response, get_errors_validat
 from src.app.shared.constants.messages import GlobalMessages
 from src.app.utils.email_preview import router as email_preview_router
 from fastapi.openapi.utils import get_openapi
+import os
 
 # Configuracion para Swagger
 app = FastAPI(
@@ -69,7 +70,7 @@ async def root(request: Request) -> HTMLResponse:
 # MIDDLEWARES
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[origin.strip() for origin in Settings.ALLOWED_ORIGINS.split(",") if origin.strip()],
+    allow_origins=[origin.strip() for origin in os.getenv("ALLOWED_ORIGINS", "").split(",") if origin.strip()],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
