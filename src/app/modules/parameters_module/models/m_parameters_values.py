@@ -4,22 +4,21 @@ from sqlalchemy.orm import relationship
 from src.app.shared.bases.base_model import BaseModel
 from datetime import datetime
 import pytz
+ 
+class ParameterValue(BaseModel):
+    __tablename__ = 'm_parameters_values'
 
-class Parameter(BaseModel):
-    __tablename__ = "m_parameters"
-
-    id = Column(Integer, primary_key=True, index=True)
-    key = Column(String(100), nullable=False, comment="Hace referencia a la clave del parametro.")
-    name = Column(String(100), nullable=False, comment="Hace referencia al nombre del parametro.")
-    description = Column(String(200), nullable=True, comment="Hace referencia a la descripcion del parametro.")
+    id = Column(Integer, primary_key=True)
+    parameter_id = Column(Integer, ForeignKey('m_parameters.id'))
+    reference = Column(String)
+    value = Column(String)
+    description = Column(String)
+    parent_id = Column(Integer, ForeignKey('m_parameters_values.id'))
     state = Column(Integer, nullable=False, default=1, comment="Hace referencia a si el estado esta activo (1) o no(0).")
     created_at = Column(DateTime(timezone=True), default=datetime.now(pytz.timezone('America/Bogota')))
     updated_at = Column(DateTime(timezone=True), onupdate=datetime.now(pytz.timezone('America/Bogota')))
     deleted_at = Column(DateTime(timezone=True), nullable=True)
     
-    values = relationship("ParameterValue", back_populates="getParameter", foreign_keys="MParameterValue.parameter_id")
-
-
-
-
-
+    getParameter = relationship("Parameter", back_populates="values", foreign_keys=[parameter_id])
+    getParent = relationship("ParameterValue", remote_side=[id], back_populates="children", foreign_keys=[parent_id])
+    children = relationship("ParameterValue", back_populates="getParent", foreign_keys=[parent_id])

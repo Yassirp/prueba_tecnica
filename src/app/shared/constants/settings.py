@@ -17,6 +17,6 @@ class Settings:
     APP_KEY = os.getenv("APP_KEY", "")
     ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "")
 
-    APP_NAME = "Micro Documents API"
-    APP_DESCRIPTION = "API for document management"
-    APP_VERSION = "1.0.0"
+    APP_NAME = "Micro Lv API"
+    APP_DESCRIPTION = "API for lv management"
+    APP_VERSION = "0.0.1"

@@ -2,12 +2,6 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sess
 from .db_connection import Connection
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
-
-
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
-from .db_connection import Connection
-from contextlib import asynccontextmanager
-from typing import AsyncGenerator
 from dotenv import load_dotenv
 import os
 
@@ -18,7 +12,7 @@ DATABASE_URL = f'postgresql+asyncpg://{os.getenv("PG_USER")}:{os.getenv("PG_PASS
 
 # Crear el engine asíncrono
 ENGINE_SEED = create_async_engine(
-    DATABASE_URL, 
+    Connection.URL, 
     echo=True,
     pool_size=10,  # Máximo de conexiones en el pool
     max_overflow=20,  # Conexiones adicionales si pool está lleno
