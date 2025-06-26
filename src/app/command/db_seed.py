@@ -1,11 +1,13 @@
 import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../')))
-from src.app.command.config.base import BaseCommandAsync
-from src.app.seeders.paramert_attribute_seeder import ParameterAttributeSeeder
-from src.app.seeders.enty_type_seeder import EntityTypeSeeder
-from src.app.seeders.project_seeder import ProjectSeeder
 
+from src.app.command.config.base import BaseCommandAsync
+from src.app.modules.ubication_module.seeders.country_seeder import CountrySeeder
+from src.app.modules.ubication_module.seeders.department_seeder import DepartmentSeeder
+from src.app.modules.ubication_module.seeders.municipality_seeder import MunicipalitySeeder
+from src.app.modules.permission_module.seeders.security_seeder import SecuritySeeder
+from src.app.modules.user_module.seeders.user_seeder import UserSeeder
 class Command(BaseCommandAsync):
     help = "Corre los seeders necesarios para el funcionamiento de la aplicación"
 
@@ -21,10 +23,11 @@ class Command(BaseCommandAsync):
             class_seeder = options.get('class', None)
 
             seeders = {
-                "ParameterAttributeSeeder": ParameterAttributeSeeder(),
-                "ProjectSeeder": ProjectSeeder(),
-                "EntityTypeSeeder": EntityTypeSeeder(),
-                # añade otros seeders aquí...
+                "CountrySeeder": CountrySeeder(),
+                "DepartmentSeeder": DepartmentSeeder(),
+                "MunicipalitySeeder": MunicipalitySeeder(),
+                "SecuritySeeder": SecuritySeeder(),
+                "UserSeeder": UserSeeder(),
             }
 
             if class_seeder:

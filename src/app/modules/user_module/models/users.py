@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, Text, DateTime, ForeignKey, JSON
+from sqlalchemy import Column, Integer, Text, DateTime, String
 from src.app.shared.bases.base_model import BaseModel
 from sqlalchemy.orm import relationship
 from datetime import datetime
@@ -11,16 +11,15 @@ class User(BaseModel):
     name = Column(Text, nullable=False, comment="Nombre del usuario.")
     last_name = Column(Text, nullable=False, comment="Apellido del usuario.")
     email = Column(Text, nullable=False)
-    password = Column(Text, nullable=False)
-    phone = Column(Text, nullable=False, comment="Teléfono del usuario.")
-    address = Column(Text, nullable=False, comment="Dirección del usuario.")
-    city = Column(Text, nullable=False, comment="Ciudad del usuario.")
-    country = Column(Text, nullable=False, comment="País del usuario.")
-    zip_code = Column(Text, nullable=False, comment="Código postal del usuario.")
-    role = Column(Text, nullable=False, comment="Rol del usuario.")
-    status = Column(Text, nullable=False, comment="Estado del usuario.")
-    created_by = Column(Integer, nullable=False, comment="Usuario que creó el usuario.")
-    state = Column(Integer, nullable=False, default=1)
+    password = Column(String, nullable=False)
+    phone = Column(Text, nullable=True, comment="Teléfono del usuario.")
+    address = Column(Text, nullable=True, comment="Dirección del usuario.")
+    city_id = Column(Integer, nullable=True, comment="Ciudad del usuario.")
+    country_id = Column(Integer, nullable=False, comment="País del usuario.")
+    zip_code = Column(Text, nullable=True, comment="Código postal del usuario.")
+    role_id = Column(Integer, nullable=False, comment="Rol del usuario.")
+    created_by = Column(Integer, nullable=True, comment="Usuario que creó el usuario.")
+    state = Column(Integer, nullable=True, default=1)
     created_at = Column(DateTime(timezone=True), default=datetime.now(pytz.timezone('America/Bogota')))
     updated_at = Column(DateTime(timezone=True), onupdate=datetime.now(pytz.timezone('America/Bogota')))
     deleted_at = Column(DateTime(timezone=True), nullable=True)

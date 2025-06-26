@@ -7,52 +7,60 @@ Este es un microservicio para la Gestión Documental de todos los proyectos de N
 Version de Python requerida: Python 3.12.x
 
 - Eliminar migraciones anteriores:
+
 ```bash
 python src/app/command/delete_migrations.py
 ```
 
 - Ejecutar docker compose:
+
 ```bash
 docker compose up -d --build
 ```
 
-## 🧩 Crear Base de Datos: master-documents
+## 🧩 Crear Base de Datos: master-documents docker exec -it micro_lvr_api bash
 
 - Ejecutar migracion inicial:
-Es necesario ejecutar el comando desde el contenedor del 
-api en el docker, sobre la carpeta src
+  Es necesario ejecutar el comando desde el contenedor del
+  api en el docker, sobre la carpeta src
+
 ```bash
 alembic revision --autogenerate -m "initial migration"
 ```
 
 - Aplicar cambios de la migracion en la DB:
-Es necesario ejecutar el comando desde el contenedor del 
-api en el docker, sobre la carpeta src
+  Es necesario ejecutar el comando desde el contenedor del
+  api en el docker, sobre la carpeta src
+
 ```bash
 alembic upgrade head
 ```
 
-## 🚀 Iniciar proyecto sin docker 
+## 🚀 Iniciar proyecto sin docker
+
 - Ejecutar proyecto en local:
+
 ```bash
 uvicorn src.app.main:app --reload
 ```
 
 - Ejecutar analisis de codigo:
+
 ```bash
 ./check_quality.sh
 ```
 
-
 ## 🧩 Migraciones con Alembic
+
 - Crear migracion en DB:
-Genera un archivo de migración dentro del directorio alembic/versions/.
+  Genera un archivo de migración dentro del directorio alembic/versions/.
 
 ✅ Alembic compara el modelo actual (definido en tus clases SQLAlchemy) con la estructura actual de la base de datos. Si encuentra diferencias (por ejemplo, una nueva clase Stage), genera SQL para crear la tabla correspondiente.
 
 ```bash
 alembic revision --autogenerate -m "create NAME table"
 ```
+
     ## 📦 Aplicar los cambios a la base de datos
     - Bajar cambios a la DB:
     Ejecuta todas las migraciones pendientes hasta la última versión (head).
@@ -66,6 +74,7 @@ alembic revision --autogenerate -m "create NAME table"
     - alembic upgrade head
 
 ## 🛠️ Agregar un nuevo campo a un modelo existente
+
 - Nuevo campo a la DB: Detecta que agregaste un nuevo campo (por ejemplo, description = Column(String) en Stage) en tu modelo.
 
 ✅ Genera una migración con una instrucción ALTER TABLE para agregar esa columna.
@@ -73,6 +82,7 @@ alembic revision --autogenerate -m "create NAME table"
 ```bash
 alembic revision --autogenerate -m "add description column to stage"
 ```
+
     ## 📦 Aplicar los cambios tras agregar una columna
 
     - ✅ Ejecuta el script de migración generado y aplica el ALTER TABLE a la base de   datos.
@@ -80,19 +90,25 @@ alembic revision --autogenerate -m "add description column to stage"
     COMANDO A EJECUTAR:
     - alembic upgrade head
 
-
 ## 📁 Estructura generada para modulos
+
 - Este comando ejecuta el script generate_module.py y crea automáticamente la estructura de carpetas y archivos para un nuevo módulo llamado vehicles, siguiendo una convención predefinida para proyectos modulares en Python (como FastAPI, Flask, etc.).
 
 ```bash
 python3 src/app/command/generate_module.py vehicles
 ```
+
 - 🔁 Alternativa: Si python3 no funciona en tu entorno, prueba con:
+
 ```bash
 python src/app/command/generate_module.py vehicles
 ```
 
 ## Ejecutar seeders
+
+## correr dentro de docker docker exec -it micro_lvr_api bash
+
 ```bash
+
 python3 src/app/command/db_seed.py
 ```

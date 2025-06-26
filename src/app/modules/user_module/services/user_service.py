@@ -1,26 +1,37 @@
 
-from dotenv import load_dotenv
-from datetime import datetime, timedelta
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import List, Optional, Dict, Any,Tuple
-from sqlalchemy.future import select
-from sqlalchemy import and_, or_
-from fastapi import HTTPException, status
-from src.app.modules.projects_module.services.projects_service import ProjectService
-from src.app.shared.constants.project_enum import Projectds, Setting
-from src.app.modules.access_tokens_module.models.access_tokens import AccessToken
-from src.app.modules.access_tokens_module.repositories.access_tokens_repository import AccessTokenRepository
-from src.app.modules.access_tokens_module.schemas.access_tokens_schemas import AccessTokenOut
 from src.app.shared.bases.base_service import BaseService
-load_dotenv()
+from src.app.modules.user_module.models.users import User
+from src.app.modules.user_module.repositories.user_repository import UserRepository
+from src.app.modules.user_module.schemas.users_schemas import UserOut, ValidateLogin, AccessTokenOut
+from src.app.shared.security.jwt import create_access_token
+from src.app.modules.user_module.repositories.user_repository import UserRepository
+from passlib.context import CryptContext
+from fastapi import HTTPException, status
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 class UserService(BaseService[User, UserOut]):
     def __init__(self, db_session: AsyncSession):
+        self.repository = UserRepository(User, db_session)
         super().__init__(
             model=User,
             repository_cls=UserRepository,
             db_session=db_session,
             out_schema=UserOut,
         )
-        self.db_session = db_session  # << ¡Esto es lo que falta!
-        self.project_service = ProjectService(db_session)
+        
+        
+        
+    async def login(self, data: dict) -> AccessTokenOut:
+        credentials = ValidateLogin(**data)
+        user = await self.repository.get_by_email(credentials.email)
+
+        if not user or not pwd_context.verify(credentials.password, str(user.password)):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Correo o contraseña incorrecta",
+            )
+
+        token = create_access_token(data={"sub": str(user.id)})
+        return AccessTokenOut(access_token=token)

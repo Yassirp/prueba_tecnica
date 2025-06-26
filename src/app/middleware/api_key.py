@@ -15,12 +15,7 @@ from fastapi import HTTPException
 
 class APIKeyMiddleware(BaseHTTPMiddleware):
     excluded_paths = {
-        "/auth/login",
-        "/docs",
-        "/redoc", 
-        "/openapi.json", 
-        "/favicon.ico",
-        "/"
+        "/user/login",
     }
     async def dispatch(
         self, request: Request, call_next: Callable[[Request], Awaitable[Response]]
@@ -63,7 +58,7 @@ class APIKeyMiddleware(BaseHTTPMiddleware):
         except Exception as e:
             return http_response(
                 message="Middleware de autenticacion",
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                status=status.HTTP_401_UNAUTHORIZED,
                 data=[],
                 errors=[f"{str(e)}"]
             )

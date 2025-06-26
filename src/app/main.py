@@ -4,7 +4,6 @@ from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from fastapi.exceptions import RequestValidationError
-from src.app.middleware.api_key import APIKeyMiddleware
 from src.app.shared.constants.settings import Settings
 from src.app.routes import router as main_router
 from src.app.shared.utils.request_utils import http_response, get_errors_validations
@@ -75,7 +74,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-app.add_middleware(APIKeyMiddleware)
+
 
 # MANEJO DE ERRORES GLOBALES
 @app.exception_handler(RequestValidationError)

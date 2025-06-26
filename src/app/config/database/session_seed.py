@@ -8,11 +8,22 @@ import os
 dotenv_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../.env'))
 load_dotenv(dotenv_path)
 
-DATABASE_URL = f'postgresql+asyncpg://{os.getenv("PG_USER")}:{os.getenv("PG_PASSWORD")}@{os.getenv("PG_HOST")}:{os.getenv("PG_PORT")}/{os.getenv("PG_NAME")}'
+# Casting a entero con default
+DB_HOST     = os.getenv("PG_HOST", "localhost")
+DB_PORT = int(os.getenv("PG_PORT", 5432))  
+DB_USER     = os.getenv("PG_USER", "postgres")
+DB_PASS     = os.getenv("PG_PASSWORD", "postgres")
+DB_NAME     = os.getenv("PG_NAME", "lvr_db")
 
+DATABASE_URL = (
+    f"postgresql+asyncpg://{DB_USER}:{DB_PASS}"
+    f"@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+)
+
+print("Conectando a:", DATABASE_URL)
 # Crear el engine asíncrono
 ENGINE_SEED = create_async_engine(
-    Connection.URL, 
+    DATABASE_URL, 
     echo=True,
     pool_size=10,  # Máximo de conexiones en el pool
     max_overflow=20,  # Conexiones adicionales si pool está lleno
@@ -20,6 +31,7 @@ ENGINE_SEED = create_async_engine(
     pool_recycle=1800,  # Recicla conexiones cada 30 min (evita idle)
 )
 
+print(ENGINE_SEED)
 # Crear sessionmaker asíncrono
 SessionLocalSeed = async_sessionmaker(
     ENGINE_SEED,

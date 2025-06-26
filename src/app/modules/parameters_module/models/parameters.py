@@ -1,5 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, func
-from src.app.modules.attributes_module.models.attributes import Attribute
+from sqlalchemy import Column, Integer, String, DateTime
 from sqlalchemy.orm import relationship
 from src.app.shared.bases.base_model import BaseModel
 from datetime import datetime
@@ -17,7 +16,7 @@ class Parameter(BaseModel):
     updated_at = Column(DateTime(timezone=True), onupdate=datetime.now(pytz.timezone('America/Bogota')))
     deleted_at = Column(DateTime(timezone=True), nullable=True)
     
-    values = relationship("ParameterValue", back_populates="getParameter", foreign_keys="MParameterValue.parameter_id")
+    values = relationship("ParameterValue", back_populates="getParameter", foreign_keys="ParameterValue.parameter_id")
 
 
 

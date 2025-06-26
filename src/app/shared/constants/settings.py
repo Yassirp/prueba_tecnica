@@ -17,6 +17,6 @@ class Settings:
     APP_KEY = os.getenv("APP_KEY", "")
     ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "")
 
-    APP_NAME = "Micro Lv API"
-    APP_DESCRIPTION = "API for lv management"
+    APP_NAME = "Micro LVR API"
+    APP_DESCRIPTION = "API for LVR management"
     APP_VERSION = "0.0.1"
