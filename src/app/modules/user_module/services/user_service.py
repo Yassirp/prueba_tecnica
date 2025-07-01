@@ -1,4 +1,3 @@
-
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.app.shared.bases.base_service import BaseService
 from src.app.modules.user_module.models.users import User
@@ -11,6 +10,7 @@ from fastapi import HTTPException, status
 import random
 from fastapi.responses import JSONResponse
 from typing import Optional
+import string
 
 from src.app.shared.utils.request_utils import http_response
 from src.app.shared.utils.service_token import send_email_token, send_sms_token
@@ -60,7 +60,7 @@ class UserService(BaseService[User, UserOut]):
         data["password"] = pwd_context.hash(data["password"])
 
         if validation_method == "mail":
-            response = await send_email_token(data["email"], code)
+            response = await send_email_token(data["email"],"su codigo de verificacion es: " + code)
         elif validation_method == "cellphone":
             response = await send_sms_token(data["phone"], code)
         else:
@@ -116,3 +116,28 @@ class UserService(BaseService[User, UserOut]):
         if updated_user:
             return self.out_schema.model_validate(updated_user).model_dump()
         return None
+    
+    
+    async def create_user(self, data: dict) -> JSONResponse:
+        # 1. Generar contraseña aleatoria
+        password_length = 10
+        random_password = ''.join(random.choices(string.ascii_letters + string.digits, k=password_length))
+        
+        # 2. Hashear la contraseña y asignarla
+        data['password'] = pwd_context.hash(random_password)
+        
+        if "role_id" not in data:
+            data["role_id"] = 2
+            
+            
+        user = UserCreate(**data)
+        new_user = await self.repository.create(user.model_dump())
+        
+        # 3. Enviar la contraseña por correo
+        await send_email_token(data['email'], f"Su contraseña temporal es: {random_password}", subject="Contraseña temporal")
+        
+        # 4. Retornar respuesta
+        return http_response(
+            message="Usuario creado correctamente. Se ha enviado la contraseña por correo electrónico.",
+            data={"user": new_user}
+        )

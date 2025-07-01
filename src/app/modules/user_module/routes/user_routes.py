@@ -4,6 +4,8 @@ from src.app.config.database.session import get_db
 from src.app.modules.user_module.schemas.users_schemas import AccessTokenOut, CodeVerification, ValidateLogin, UserCreate, UserOut, UserUpdate
 from src.app.modules.user_module.services.user_service import UserService
 from src.app.shared.utils.request_utils import paginated_response, http_response
+from src.app.middleware.api_auth import require_auth, User 
+
 
 router = APIRouter(prefix="/user", tags=["User"])
 
@@ -18,7 +20,8 @@ async def login(
 
 
 @router.get("/all", status_code=status.HTTP_200_OK)
-async def get_users(db: AsyncSession = Depends(get_db)):
+async def get_users(db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_auth)):
     service = UserService(db)
     register, total= await service.get_all(limit=10,offset=0, order_by="id:asc", filters={"state": 1})
     paginate_ =  paginated_response(register,total,limit=10,offset=0)
@@ -37,8 +40,23 @@ async def verify_code(data: CodeVerification, db: AsyncSession = Depends(get_db)
     return await service.verify_user_code(data)
 
 
+@router.post("/create", response_model=dict)
+async def create_user(
+    data: dict,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_auth)
+):
+    service = UserService(db)
+    return await service.create_user(data)
+
+
 @router.put("/{user_id}", response_model=UserOut, status_code=status.HTTP_200_OK)
-async def update_user(user_id: int, data: UserUpdate, db: AsyncSession = Depends(get_db)):
+async def update_user(
+    user_id: int,
+    data: UserUpdate,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_auth)
+):
     service = UserService(db)
     updated_user = await service.update(user_id, data.model_dump(exclude_unset=True))
     if not updated_user:

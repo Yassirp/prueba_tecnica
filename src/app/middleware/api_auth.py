@@ -2,6 +2,8 @@ from fastapi import Depends, HTTPException, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import JWTError, jwt
 from src.app.shared.constants.settings import Settings
+from fastapi import HTTPException, Depends, status
+
 
 security = HTTPBearer()
 
@@ -40,3 +42,13 @@ def set_current_user(request: Request, credentials: HTTPAuthorizationCredentials
 
     token = credentials.credentials
     return get_user_from_token(token)
+
+
+
+def require_auth(current_user=Depends(set_current_user)):
+    if not current_user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authentication required",
+        )
+    return current_user

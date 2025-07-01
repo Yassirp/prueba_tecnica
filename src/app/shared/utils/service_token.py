@@ -52,7 +52,7 @@ async def send_sms_token(phone_number: str, code: str) -> dict:
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
-async def send_email_token(to_email: str, code: str) -> dict:
+async def send_email_token(to_email: str, code: str, subject: str="Código de verificación") -> dict:
     try:
         mail_host = Settings.MAIL_HOST
         mail_port = int(Settings.MAIL_PORT)
@@ -63,10 +63,10 @@ async def send_email_token(to_email: str, code: str) -> dict:
         mail_encryption = Settings.MAIL_ENCRYPTION
 
         msg = EmailMessage()
-        msg['Subject'] = "Código de verificación"
+        msg['Subject'] = subject
         msg['From'] = f"{mail_name} <{mail_from}>"
         msg['To'] = to_email
-        msg.set_content(f"Su código de verificación es: {code}")
+        msg.set_content(f"{code}")
 
         if mail_encryption == "ssl":
             server = smtplib.SMTP_SSL(mail_host, mail_port)
