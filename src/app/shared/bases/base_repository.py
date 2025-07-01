@@ -29,7 +29,7 @@ class BaseRepository(Generic[T]):
 
     async def get_by_id(self, id: Any) -> Optional[T]:
         try:
-            query = select(self.model).where(self.model.id == id, self.model.state == 1)
+            query = select(self.model).where(self.model.id == id)
             result = await self.db_session.execute(query)
             return result.scalar_one_or_none()
         except Exception as e:

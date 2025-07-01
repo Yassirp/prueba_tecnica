@@ -27,7 +27,9 @@ class BaseService(Generic[Model, OutSchema]):
     ) -> Tuple[List[Dict[str, Any]], int]:
         try:
             items, total = await self.repo.get_all(limit, offset, order_by, filters)
+            print(repr(items))
             serialized_items = [
+               
                 self.out_schema.model_validate(item).model_dump() for item in items
             ]
             return serialized_items, total
