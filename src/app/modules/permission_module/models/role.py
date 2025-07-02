@@ -8,10 +8,6 @@ class Role(BaseModel):
     id = Column(Integer, primary_key=True)
     code = Column(String)
     name = Column(String)
-    old_id = Column(Integer)
     active = Column(Boolean)
     created_at = Column(TIMESTAMP, default=func.now(), nullable=False)
     updated_at = Column(TIMESTAMP, default=func.now(), onupdate=func.now(), nullable=False)
-
-
-    permissions = relationship("Permission", back_populates="role")

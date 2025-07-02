@@ -3,7 +3,8 @@ from sqlalchemy.orm import relationship
 from src.app.shared.bases.base_model import BaseModel
 from datetime import datetime
 import pytz
- 
+from ..models.parameters import Parameter
+
 class ParameterValue(BaseModel):
     __tablename__ = 'm_parameters_values'
 

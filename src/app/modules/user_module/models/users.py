@@ -1,8 +1,12 @@
-from sqlalchemy import Column, Integer, Text, DateTime, String
-from src.app.shared.bases.base_model import BaseModel
+from sqlalchemy import Column, Integer, Text, DateTime, String, ForeignKey, JSON
+from src.app.shared.bases.base_model import BaseModel   
 from sqlalchemy.orm import relationship
 from datetime import datetime
 import pytz
+from src.app.modules.ubication_module.models.countries import Country
+from src.app.modules.ubication_module.models.departments import Department
+from src.app.modules.ubication_module.models.municipalities import Municipality
+from src.app.modules.permission_module.models.role import Role
 
 class User(BaseModel):
     __tablename__ = "m_users"
@@ -10,17 +14,36 @@ class User(BaseModel):
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(Text, nullable=False, comment="Nombre del usuario.")
     last_name = Column(Text, nullable=False, comment="Apellido del usuario.")
+    document_type = Column(Integer, ForeignKey("m_parameters_values.id"), nullable=True, comment="Tipo de documento del usuario.")
+    document_number = Column(Text, nullable=False, comment="Número de documento del usuario.")
     email = Column(Text, nullable=False, unique=True)
     password = Column(String, nullable=False)
     phone = Column(Text, nullable=True, comment="Teléfono del usuario.")
     address = Column(Text, nullable=True, comment="Dirección del usuario.")
-    city_id = Column(Integer, nullable=True, comment="Ciudad del usuario.")
-    country_id = Column(Integer, nullable=False, comment="País del usuario.")
+    country_id = Column(Integer, ForeignKey("countries.id"), nullable=False, comment="País del usuario.")
+    department_id = Column(Integer, ForeignKey("departments.id"), nullable=False, comment="Departamento del usuario.")
+    municipality_id = Column(Integer, ForeignKey("municipalities.id"), nullable=False, comment="Municipio del usuario.")
     zip_code = Column(Text, nullable=True, comment="Código postal del usuario.")
-    role_id = Column(Integer, nullable=False, comment="Rol del usuario.")
-    created_by = Column(Integer, nullable=True, comment="Usuario que creó el usuario.")
+    role_id = Column(Integer, ForeignKey("m_roles.id"), comment="Rol del usuario.")
+    created_by = Column(Integer, ForeignKey("m_users.id"), nullable=True, comment="Usuario que creó el usuario.")
     state = Column(Integer, nullable=True, default=1)
     code = Column(String, nullable=True, comment="Código del usuario.")
     created_at = Column(DateTime(timezone=True), default=datetime.now(pytz.timezone('America/Bogota')))
     updated_at = Column(DateTime(timezone=True), onupdate=datetime.now(pytz.timezone('America/Bogota')))
     deleted_at = Column(DateTime(timezone=True), nullable=True)
+    
+    
+    campus = Column(String, nullable=True, comment="Campus al que pertenece el usuario.")
+    time = Column(String, nullable=True, comment="Tiempo que lleva en LivingRoom.")
+    courses = Column(Text, nullable=True, comment="Cursos realizados por el usuario (lista separada por comas).")
+    participated_in_living_group = Column(Integer, nullable=True, comment="1 si sí, 0 si no.")
+    living_group_name = Column(String, nullable=True, comment="Nombre del grupo (si aplica).")
+    did_camp = Column(Integer, nullable=True, comment="1 si sí, 0 si no.")
+    
+    data = Column(JSON, nullable=True, comment="Datos complementarios del usuario.")
+    
+    country = relationship("Country", backref="users", foreign_keys=[country_id])
+    department = relationship("Department", backref="users", foreign_keys=[department_id])
+    municipality = relationship("Municipality", backref="users", foreign_keys=[municipality_id])
+    role = relationship("Role", backref="users", foreign_keys=[role_id])
+    created_by_user = relationship("User", remote_side="User.id", backref="created_users")

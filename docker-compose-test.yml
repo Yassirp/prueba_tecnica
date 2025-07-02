@@ -1,12 +1,11 @@
 services:
-
-  micro_documents_api:
-    container_name: micro_documents_api
+  micro_lvr_api:
+    container_name: micro_lvr_api
     build: ./src/
     env_file:
       - ./src/.env
     ports:
-      - "5001:8000"
+      - '5001:8000'
     volumes:
       - .:/src
     restart: always
@@ -16,6 +15,6 @@ services:
 networks:
   api_network:
     driver: bridge
-    
+
 volumes:
   db-micro-documents-volume:

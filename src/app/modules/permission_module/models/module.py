@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, String, Boolean, TIMESTAMP,func
 from src.app.shared.bases.base_model import BaseModel
 from sqlalchemy.orm import relationship
+from src.app.modules.permission_module.models.module_actions import ModuleAction
 
 class Module(BaseModel):
     __tablename__ = 'm_modules'

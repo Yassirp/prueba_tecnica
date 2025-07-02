@@ -8,6 +8,8 @@ from src.app.modules.ubication_module.seeders.department_seeder import Departmen
 from src.app.modules.ubication_module.seeders.municipality_seeder import MunicipalitySeeder
 from src.app.modules.permission_module.seeders.security_seeder import SecuritySeeder
 from src.app.modules.user_module.seeders.user_seeder import UserSeeder
+from src.app.modules.parameters_module.seeders.attribute_seeder import AttributeSeeder
+from src.app.modules.parameters_module.seeders.type_documents_seeder import parameters as type_documents_parameters
 class Command(BaseCommandAsync):
     help = "Corre los seeders necesarios para el funcionamiento de la aplicación"
 
@@ -28,6 +30,7 @@ class Command(BaseCommandAsync):
                 "MunicipalitySeeder": MunicipalitySeeder(),
                 "SecuritySeeder": SecuritySeeder(),
                 "UserSeeder": UserSeeder(),
+                "AttributeSeeder": AttributeSeeder(type_documents_parameters),
             }
 
             if class_seeder:

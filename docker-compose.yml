@@ -1,12 +1,11 @@
 services:
-
-  micro_documents_api:
+  micro_lvr_api:
     container_name: micro_lvr_api
     build: ./src/
     env_file:
       - ./src/.env
     ports:
-      - "5001:8000"
+      - '5001:8000'
     volumes:
       - .:/src
     depends_on:
@@ -19,7 +18,7 @@ services:
     image: docker.io/bitnami/postgresql:16
     container_name: micro_lvr_db
     ports:
-      - "5434:5432"
+      - '5434:5432'
     env_file:
       - ./src/.env
     volumes:
@@ -30,6 +29,6 @@ services:
 networks:
   api_network:
     driver: bridge
-    
+
 volumes:
   db-micro-lvr-volume:

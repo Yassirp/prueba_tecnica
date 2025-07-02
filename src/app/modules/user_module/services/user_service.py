@@ -129,8 +129,16 @@ class UserService(BaseService[User, UserOut]):
         if "role_id" not in data:
             data["role_id"] = 2
             
-            
+        
         user = UserCreate(**data)
+        if "email" in data:
+            existing_user = await self.repository.get_by_email(data["email"])
+            if existing_user is not None:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="El email ya está registrado por otro usuario"
+                )
+            
         new_user = await self.repository.create(user.model_dump())
         
         # 3. Enviar la contraseña por correo

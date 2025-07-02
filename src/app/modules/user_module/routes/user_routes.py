@@ -28,6 +28,14 @@ async def get_users(db: AsyncSession = Depends(get_db),
     return http_response(message="Usuarios obtenidos correctamente", data=paginate_)
 
 
+@router.get("/{user_id}", status_code=status.HTTP_200_OK)
+async def get_user(user_id: int, db: AsyncSession = Depends(get_db), current_user: User = Depends(require_auth)):
+    service = UserService(db)
+    user = await service.get_by_id(user_id)
+    
+    return http_response(message="Usuario obtenido correctamente", data=user)
+
+
 @router.post("/register", status_code=status.HTTP_201_CREATED)
 async def register(data: dict, db: AsyncSession = Depends(get_db)):
     service = UserService(db)
