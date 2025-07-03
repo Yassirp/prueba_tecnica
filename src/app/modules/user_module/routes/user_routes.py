@@ -3,9 +3,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.app.config.database.session import get_db
 from src.app.modules.user_module.schemas.users_schemas import AccessTokenOut, CodeVerification, ValidateLogin, UserCreate, UserOut, UserUpdate
 from src.app.modules.user_module.services.user_service import UserService
-from src.app.shared.utils.request_utils import paginated_response, http_response
+from src.app.shared.utils.request_utils import get_filter_params, paginated_response, http_response
 from src.app.middleware.api_auth import require_auth, User 
-
+from typing import Dict
 
 router = APIRouter(prefix="/user", tags=["User"])
 
@@ -21,9 +21,11 @@ async def login(
 
 @router.get("/all", status_code=status.HTTP_200_OK)
 async def get_users(db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_auth)):
+    current_user: User = Depends(require_auth),
+    filters: Dict[str, str] = Depends(get_filter_params)):
+    print(filters, "filters received")
     service = UserService(db)
-    register, total= await service.get_all(limit=10,offset=0, order_by="id:asc", filters={"state": 1})
+    register, total= await service.get_all_with_relationships(limit=10,offset=0, order_by="id:asc", filters=filters)
     paginate_ =  paginated_response(register,total,limit=10,offset=0)
     return http_response(message="Usuarios obtenidos correctamente", data=paginate_)
 
@@ -31,9 +33,13 @@ async def get_users(db: AsyncSession = Depends(get_db),
 @router.get("/{user_id}", status_code=status.HTTP_200_OK)
 async def get_user(user_id: int, db: AsyncSession = Depends(get_db), current_user: User = Depends(require_auth)):
     service = UserService(db)
-    user = await service.get_by_id(user_id)
-    
-    return http_response(message="Usuario obtenido correctamente", data=user)
+    user = await service.get_by_id_with_relations(user_id)
+
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+
+    user_out = UserOut.model_validate(user)
+    return http_response(message="Usuario obtenido correctamente", data=user_out.model_dump())
 
 
 @router.post("/register", status_code=status.HTTP_201_CREATED)

@@ -2,6 +2,7 @@ from fastapi.responses import JSONResponse
 from typing import Any, Dict, List, Optional, Callable, TypeVar, Sequence, Union
 from pydantic import ValidationError
 from fastapi.encoders import jsonable_encoder
+from fastapi import Request
 
 T = TypeVar("T")
 
@@ -20,6 +21,14 @@ def paginated_response(
     }
     return response
 
+
+def get_filter_params(request: Request) -> Dict[str, str]:
+    skip = {"limit", "offset", "order_by"}
+    return {
+        key: value
+        for key, value in request.query_params.items()
+        if key not in skip and value is not None
+    }
 
 def get_errors_validations(e: ValidationError) -> List[Dict[str, str]]:
     errors: List[Dict[str, str]] = []

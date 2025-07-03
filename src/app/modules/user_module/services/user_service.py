@@ -27,8 +27,14 @@ class UserService(BaseService[User, UserOut]):
             out_schema=UserOut,
         )
         
+    async def get_all_with_relationships(self, limit: int = 10, offset: int = 0, order_by: str = 'asc', filters: dict = {}) -> tuple:
+        return await self.repository.get_all_with_relationships(limit, offset, order_by, filters)
+    
+    async def get_by_id_with_relations(self, user_id: int) -> User | None:
+        return await self.repository.get_by_id_with_relations(user_id)
         
         
+    
     async def login(self, data: dict) -> AccessTokenOut:
         credentials = ValidateLogin(**data)
         user = await self.repository.get_by_email(credentials.email)

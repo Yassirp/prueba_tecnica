@@ -6,55 +6,41 @@ from fastapi import HTTPException
 
 T = TypeVar("T")
 
-def apply_filters(
-    query: Select, model: Any, filters: Union[Dict[str, Any], str]
-) -> Select:
-    """
-    Ejemplo de uso:
-
-    # Filtro exacto
-    filters = {
-        "name": "John",
-        "age": 25
-    }
-
-    # Filtro con LIKE
-    filters = {
-        "name": "%john%",  # Busca nombres que contengan "john"
-        "email": "john%"   # Busca emails que empiecen con "john"
-    }
-
-    # Combinación de filtros
-    filters = {
-        "name": "%john%",
-        "age": 25,
-        "city": "New York"
-    }
-    """
+def apply_filters(query: Select, model: Any, filters: Union[Dict[str, Any], str]) -> Select:
     if isinstance(filters, str):
         try:
             filters = json.loads(filters)
         except json.JSONDecodeError:
-            raise HTTPException(
-                status_code=400, detail="Invalid JSON in filters parameter"
-            )
+            raise HTTPException(status_code=400, detail="Invalid JSON in filters parameter")
 
     if not isinstance(filters, dict):
-        return query
+        try:
+            filters = dict(filters)
+        except Exception:
+            return query
 
     conditions = []
+
     for key, value in filters.items():
-        if hasattr(model, key):
-            column = getattr(model, key)
-            if isinstance(value, str) and "%" in value:
-                conditions.append(column.ilike(value))
-            else:
-                conditions.append(column == value)
+        if not hasattr(model, key):
+            continue
+
+        column = getattr(model, key)
+
+        # Busqueda parcial con ILIKE
+        if isinstance(value, str) and "%" in value:
+            conditions.append(column.ilike(value))
+        # Búsqueda específica en columna especial
+        elif key == "search_text":
+            conditions.append(column.ilike(value))
+        # Comparación exacta
+        else:
+            conditions.append(column == value)
 
     if conditions:
         query = query.where(and_(*conditions))
-    return query
 
+    return query
 
 def apply_order_by(query: Select, model: Any, order_by: Optional[str]) -> Select:
     """

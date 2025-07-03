@@ -67,8 +67,11 @@ class UserOut(UserBase):
     created_at: Optional[datetime]
     updated_at: Optional[datetime]
     deleted_at: Optional[datetime]
-
-
+    country: CountryOut
+    department: DepartmentOut
+    municipality: MunicipalityOut
+    role: RoleOut
+    associated_documents: list[DocumentOut]
     model_config = {
         "from_attributes": True
     }
@@ -79,12 +82,16 @@ class UserOutAll(UserBase):
     created_at: Optional[datetime]
     updated_at: Optional[datetime]
     deleted_at: Optional[datetime]
-    documents: list[DocumentOut]
     country: CountryOut
     department: DepartmentOut
     municipality: MunicipalityOut
     role: RoleOut
-    created_by_user: Optional[UserOut] = None
+    created_by_user: Optional[UserBase] = None
+    associated_documents: list[DocumentOut]
+    
+    model_config = {
+        "from_attributes": True
+    }
 
 
 class ValidateLogin(BaseModel):

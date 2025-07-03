@@ -12,6 +12,7 @@ class User(BaseModel):
     __tablename__ = "m_users"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
+    search_text = Column(Text)
     name = Column(Text, nullable=False, comment="Nombre del usuario.")
     last_name = Column(Text, nullable=False, comment="Apellido del usuario.")
     document_type = Column(Integer, ForeignKey("m_parameters_values.id"), nullable=True, comment="Tipo de documento del usuario.")
@@ -47,3 +48,9 @@ class User(BaseModel):
     municipality = relationship("Municipality", backref="users", foreign_keys=[municipality_id])
     role = relationship("Role", backref="users", foreign_keys=[role_id])
     created_by_user = relationship("User", remote_side="User.id", backref="created_users")
+    associated_documents = relationship(
+        "Document",
+        primaryjoin="and_(foreign(Document.associate_id) == User.id, Document.associate_to == 'users')",
+        viewonly=True,
+        lazy="selectin"
+    )
