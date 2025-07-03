@@ -8,12 +8,13 @@ from src.app.modules.ubication_module.models.countries import Country
 from src.app.modules.ubication_module.models.departments import Department
 from src.app.modules.ubication_module.models.municipalities import Municipality
 from src.app.modules.permission_module.models.role import Role
+from sqlalchemy import Computed
 
 class User(BaseModel):
     __tablename__ = "m_users"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    search_text = Column(Text)
+    search_text = Column(Text, Computed("lower(name || ' ' || last_name || ' ' || email || ' ' || document_number)"), nullable=True)
     name = Column(Text, nullable=False, comment="Nombre del usuario.")
     last_name = Column(Text, nullable=False, comment="Apellido del usuario.")
     document_type = Column(Integer, ForeignKey("m_parameters_values.id"), nullable=True, comment="Tipo de documento del usuario.")
