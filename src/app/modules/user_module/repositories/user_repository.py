@@ -42,7 +42,8 @@ class UserRepository(BaseRepository[User]):
                 selectinload(self.model.municipality),
                 selectinload(self.model.role),
                 selectinload(self.model.created_by_user),
-                selectinload(self.model.associated_documents)
+                selectinload(self.model.associated_documents),
+                selectinload(self.model.user_relationships)
             )
             result = await self.db_session.execute(stmt)
             return result.scalars().all(), total
@@ -59,7 +60,8 @@ class UserRepository(BaseRepository[User]):
                 selectinload(self.model.municipality),
                 selectinload(self.model.role),
                 selectinload(self.model.created_by_user),
-                selectinload(self.model.associated_documents)
+                selectinload(self.model.associated_documents),
+                selectinload(self.model.user_relationships)
             )
         )
         return result.scalars().first()

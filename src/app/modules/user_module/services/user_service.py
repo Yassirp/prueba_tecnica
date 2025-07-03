@@ -80,7 +80,7 @@ class UserService(BaseService[User, UserOut]):
 
         return http_response(
             message="Usuario registrado correctamente",
-            data={"code": code, "user": new_user, "validation_method": validation_method}
+            data={"user": new_user, "validation_method": validation_method}
         )
     
     async def verify_user_code(self, data: CodeVerification) -> JSONResponse:

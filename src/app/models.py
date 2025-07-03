@@ -22,7 +22,10 @@ from src.app.modules.flow_module.models.flows import Flow
 from src.app.modules.flow_module.models.object_states import ObjectState
 from src.app.modules.flow_module.models.flow_object_states import FlowObjectState
 
+
 # Finalmente: User (que depende de todo lo anterior)
 from src.app.modules.user_module.models.users import User
+from src.app.modules.user_module.models.user_relationship import UserRelationship
+
 
 from src.app.shared.bases.base_model import BaseModel

@@ -46,7 +46,7 @@ class ObjectStateUpdate(BaseModel):
             raise Exception("La referencia sólo puede contener letras, números y guiones bajos")
         return values
 
-class ObjectStateInDB(ObjectStateBase):
+class ObjectStateOut(ObjectStateBase):
     id: int
     created_at: Optional[datetime]
     updated_at: Optional[datetime]

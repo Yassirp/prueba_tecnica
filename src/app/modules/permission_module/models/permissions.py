@@ -7,7 +7,7 @@ class Permission(BaseModel):
 
     id = Column(Integer, primary_key=True)
     associate_to = Column(String)
-    associate_id = Column(Integer, ForeignKey('m_roles.id'))
+    associate_id = Column(Integer)
     module_action_id = Column(Integer, ForeignKey('c_modules_actions.id'))
     created_at = Column(TIMESTAMP, default=func.now(), nullable=False)
     updated_at = Column(TIMESTAMP, default=func.now(), onupdate=func.now(), nullable=False)

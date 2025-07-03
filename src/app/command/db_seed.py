@@ -9,7 +9,10 @@ from src.app.modules.ubication_module.seeders.municipality_seeder import Municip
 from src.app.modules.permission_module.seeders.security_seeder import SecuritySeeder
 from src.app.modules.user_module.seeders.user_seeder import UserSeeder
 from src.app.modules.parameters_module.seeders.attribute_seeder import AttributeSeeder
-from src.app.modules.parameters_module.seeders.type_documents_seeder import parameters as type_documents_parameters
+from src.app.modules.parameters_module.seeders.documents_media_type_seeder import parameters as document_type_parameters
+from src.app.modules.flow_module.seeders.state_user_relationship_seed import StateUserRelationshipSeeder
+from src.app.modules.parameters_module.seeders.type_parent_seeder import parameters as type_parent_parameters
+
 class Command(BaseCommandAsync):
     help = "Corre los seeders necesarios para el funcionamiento de la aplicación"
 
@@ -30,7 +33,9 @@ class Command(BaseCommandAsync):
                 "MunicipalitySeeder": MunicipalitySeeder(),
                 "SecuritySeeder": SecuritySeeder(),
                 "UserSeeder": UserSeeder(),
-                "AttributeSeeder": AttributeSeeder(type_documents_parameters),
+                "AttributeSeeder": AttributeSeeder(document_type_parameters),
+                "AttributeSeeder": AttributeSeeder(type_parent_parameters),
+                "StateUserRelationshipSeeder": StateUserRelationshipSeeder(),
             }
 
             if class_seeder:

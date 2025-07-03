@@ -75,7 +75,7 @@ class SecuritySeeder:
                 Permission(
                     associate_to="role", 
                     associate_id=1,
-                    action_id=mod_act.id,
+                    module_action_id=mod_act.id,
                     created_at=datetime.utcnow()
                 )
                 for mod_act in module_actions

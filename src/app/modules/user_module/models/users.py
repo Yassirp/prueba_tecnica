@@ -9,6 +9,7 @@ from src.app.modules.ubication_module.models.departments import Department
 from src.app.modules.ubication_module.models.municipalities import Municipality
 from src.app.modules.permission_module.models.role import Role
 from sqlalchemy import Computed
+from src.app.modules.user_module.models.user_relationship import UserRelationship
 
 class User(BaseModel):
     __tablename__ = "m_users"
@@ -59,4 +60,11 @@ class User(BaseModel):
         ),
         viewonly=True,
         lazy="selectin"
+    )
+    
+    user_relationships = relationship(
+        "UserRelationship",
+        foreign_keys="[UserRelationship.user_id]",
+        back_populates="user",
+        cascade="all, delete-orphan"
     )

@@ -10,7 +10,7 @@ from src.app.modules.parameters_module.schemas.parameters_schemas import (
     )
 from src.app.modules.parameters_module.services.parameters_service import ParameterService
 from src.app.shared.constants.messages import AttributeMessages, ParameterMessages
-from src.app.shared.utils.request_utils import paginated_response
+from src.app.shared.utils.request_utils import get_filter_params, paginated_response
 from src.app.decorators.route_responses import handle_route_responses
 
 router = APIRouter(prefix="/parameters", tags=["Parameters"])
@@ -32,10 +32,7 @@ async def get_all_parameter(
     order_by: Optional[str] = Query(
         None, description="Campo para ordenar (ej: 'id:asc' o 'name:desc')"
     ),
-    filters: Optional[str] = Query(
-        None,
-        description="Criterios de filtrado en formato JSON (ej: {'name': '%john%', 'state': 0})",
-    ),
+    filters: Dict[str, str] = Depends(get_filter_params)
 ) -> Dict[str, Any]:
     try:
         service = ParameterService(db)
@@ -54,7 +51,7 @@ async def get_all_parameter(
 )
 async def get_parameter_by_id(
     parameter_id: int, db: AsyncSession = Depends(get_db)
-) -> Dict[str, Any]:
+):
     try:
         service = ParameterService(db)
         return await service.get_by_id(parameter_id)
@@ -83,7 +80,7 @@ async def create_parameter(
 )
 async def update_parameter(
     parameter_id: int, data: ParameterUpdate, db: AsyncSession = Depends(get_db)
-) -> Dict[str, Any]:
+):
     try:
         service = ParameterService(db)
         return await service.update(parameter_id, data.model_dump(exclude_unset=True))
@@ -99,7 +96,7 @@ async def update_parameter(
 )
 async def delete_parameter(
     parameter_id: int, db: AsyncSession = Depends(get_db)
-) -> None:
+):
     try:
         service = ParameterService(db)
         return await service.delete(parameter_id)

@@ -23,7 +23,6 @@ async def login(
 async def get_users(db: AsyncSession = Depends(get_db),
     current_user: User = Depends(require_auth),
     filters: Dict[str, str] = Depends(get_filter_params)):
-    print(filters, "filters received")
     service = UserService(db)
     register, total= await service.get_all_with_relationships(limit=10,offset=0, order_by="id:asc", filters=filters)
     paginate_ =  paginated_response(register,total,limit=10,offset=0)

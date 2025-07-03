@@ -16,12 +16,14 @@ class UserSeeder:
                     email="adminlvr@naoweesuite.com",
                     password="$2a$10$U8e6SNzUfltfo2qeIrc4VePyVASevTuVvRKfTN4rtk18ftoy0O96e",  # ⚠️ Usa hashing real en prod
                     phone="3001234567",
+                    department_id=1,
+                    municipality_id=1,
+                    country_id=1,
                     address="Cra 1 # 2-34",
-                    city_id=1,  # Asegúrate que la ciudad con ID=1 exista
-                    country_id=1,  # Asegúrate que el país con ID=1 exista
+                    document_type=1,
+                    document_number="1234567890",
                     zip_code="110111",
                     role_id=1,  # Asegúrate que el rol con ID=1 sea Admin
-                    created_by=None,
                     state=1,
                     created_at=now,
                 ),
@@ -32,11 +34,13 @@ class UserSeeder:
                     password="$2a$10$U8e6SNzUfltfo2qeIrc4VePyVASevTuVvRKfTN4rtk18ftoy0O96e",  # ⚠️ Hasheado
                     phone="3109876543",
                     address="Calle 45 # 10-20",
-                    city_id=2,
+                    department_id=1,
+                    municipality_id=1,
                     country_id=1,
+                    document_type=1,
+                    document_number="1234567890",
                     zip_code="110112",
                     role_id=2,
-                    created_by=1,
                     state=1,
                     created_at=now,
                 ),
