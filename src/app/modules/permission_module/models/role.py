@@ -11,3 +11,5 @@ class Role(BaseModel):
     active = Column(Boolean)
     created_at = Column(TIMESTAMP, default=func.now(), nullable=False)
     updated_at = Column(TIMESTAMP, default=func.now(), onupdate=func.now(), nullable=False)
+
+    permissions = relationship("Permission", back_populates="role", cascade="all, delete-orphan")

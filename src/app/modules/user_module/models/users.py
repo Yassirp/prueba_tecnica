@@ -1,8 +1,9 @@
-from sqlalchemy import Column, Integer, Text, DateTime, String, ForeignKey, JSON
+from sqlalchemy import Column, Integer, Text, DateTime, String, ForeignKey, JSON,and_
 from src.app.shared.bases.base_model import BaseModel   
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, foreign
 from datetime import datetime
 import pytz
+from src.app.modules.document_module.models.documents import Document
 from src.app.modules.ubication_module.models.countries import Country
 from src.app.modules.ubication_module.models.departments import Department
 from src.app.modules.ubication_module.models.municipalities import Municipality
@@ -48,9 +49,13 @@ class User(BaseModel):
     municipality = relationship("Municipality", backref="users", foreign_keys=[municipality_id])
     role = relationship("Role", backref="users", foreign_keys=[role_id])
     created_by_user = relationship("User", remote_side="User.id", backref="created_users")
+
     associated_documents = relationship(
         "Document",
-        primaryjoin="and_(foreign(Document.associate_id) == User.id, Document.associate_to == 'users')",
+        primaryjoin=lambda: and_(
+            foreign(Document.associate_id) == User.id,
+            Document.associate_to == 'users'
+        ),
         viewonly=True,
         lazy="selectin"
     )

@@ -13,8 +13,10 @@ class SecuritySeeder:
         try:
             # 1️⃣ Crear roles
             roles = [
-                Role(code="ADMIN", name="Administrador", active=True, created_at=datetime.utcnow()),
-                Role(code="USER", name="Usuario", active=True, created_at=datetime.utcnow()),
+                Role(code="admin", name="Administrador", active=True, created_at=datetime.utcnow()),
+                Role(code="user", name="Usuario", active=True, created_at=datetime.utcnow()),
+                Role(code="builder", name="Builder", active=True, created_at=datetime.utcnow()),
+                Role(code="leader", name="Líder", active=True, created_at=datetime.utcnow()),
             ]
             session.add_all(roles)
             await session.flush()  # Para obtener los IDs
