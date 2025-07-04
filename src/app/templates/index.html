@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ app_name }}</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #f5f7fa 0%, #f1f1f1 100%);
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+
+        .container {
+            text-align: center;
+            padding: 3rem 4rem;
+            background: white;
+            border-radius: 5px;
+            box-shadow: 0 0px 29px rgb(35 16 16 / 10%);
+            max-width: 450px;
+            width: 90%;
+        }
+
+        .title {
+            color: #2C3E50;
+            margin-bottom: 1rem;
+            font-size: 1.7rem;
+            font-style: italic;
+            font-weight: 500;
+        }
+
+        .description {
+            color: #7e7e7e;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+            font-size: 17px;
+        }
+
+        .doc-button {
+            display: inline-block;
+            padding: 1rem 2rem;
+            background: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .doc-button:hover {
+            background: #388E3C;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0,0,0,0.15);
+        }
+
+        .status-indicator {
+            margin: 2rem 0;
+        }
+
+        .version {
+            margin-top: 1.5rem;
+            color: #2C3E50;
+            font-size: 1.2rem;
+        }
+
+        .server-info {
+            margin-top: 1rem;
+            font-size: 0.8rem;
+            color: #2C3E50;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">
+            {{ app_name }}
+        </h1>
+        <p class="description">
+            Bienvenido a la <b>{{ app_description }}</b>. Aquí puedes encontrar toda la documentación
+            y herramientas necesarias para interactuar con nuestros servicios.
+        </p>
+        
+        <div class="status-indicator">
+            <img src="/static/status.svg" alt="API Status" width="150">
+        </div>
+
+        <a href="/docs" class="doc-button">
+            Ver Documentación
+        </a>
+
+        <div class="server-info">
+            <p class="version">Versión <b>{{ version }}</b></p>
+        </div>
+    </div>
+</body>
+</html> 
