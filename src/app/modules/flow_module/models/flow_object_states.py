@@ -1,5 +1,8 @@
-from sqlalchemy import Column, Integer, String, TIMESTAMP,ForeignKey,func
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
 from src.app.shared.bases.base_model import BaseModel
+from datetime import datetime
+import pytz
+
 
 class FlowObjectState(BaseModel):
     __tablename__ = 'm_flow_object_states'
@@ -11,5 +14,6 @@ class FlowObjectState(BaseModel):
     order_state = Column(Integer)
     role_assigned_id = Column(String, nullable=True)
     user_assigned_id = Column(String, nullable=True)
-    created_at = Column(TIMESTAMP, default=func.now(), nullable=False)
-    updated_at = Column(TIMESTAMP, default=func.now(), onupdate=func.now(), nullable=False)
+    created_at = Column(DateTime(timezone=True), default=datetime.now(pytz.timezone('America/Bogota')))
+    updated_at = Column(DateTime(timezone=True), onupdate=datetime.now(pytz.timezone('America/Bogota')))
+    deleted_at = Column(DateTime(timezone=True), nullable=True)

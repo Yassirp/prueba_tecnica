@@ -29,7 +29,7 @@ class BaseRepository(Generic[T]):
 
     async def get_by_id(self, id: Any) -> Optional[T]:
         try:
-            query = select(self.model).where(self.model.id == id)
+            query = select(self.model).where(self.model.id == id, self.model.deleted_at.is_(None))
             result = await self.db_session.execute(query)
             return result.scalar_one_or_none()
         except Exception as e:
@@ -44,7 +44,7 @@ class BaseRepository(Generic[T]):
     ) -> Tuple[Sequence[T], int]:
         try:
             stmt = select(self.model).where(self.model.state == Setting.STATUS.value)
-            conditions = []
+            conditions = [deleted_at.is_(None)]
 
             stmt = stmt.where(and_(*conditions))
             if filters:
@@ -93,7 +93,6 @@ class BaseRepository(Generic[T]):
             .where(self.model.id == id)
             .values(
                 deleted_at=datetime.utcnow(),
-                state=0
             )
             )
             result = await self.db_session.execute(query)
