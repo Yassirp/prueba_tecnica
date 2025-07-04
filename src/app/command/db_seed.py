@@ -32,10 +32,10 @@ class Command(BaseCommandAsync):
                 "DepartmentSeeder": DepartmentSeeder(),
                 "MunicipalitySeeder": MunicipalitySeeder(),
                 "SecuritySeeder": SecuritySeeder(),
-                "UserSeeder": UserSeeder(),
                 "AttributeSeeder": AttributeSeeder(document_type_parameters),
                 "AttributeSeeder": AttributeSeeder(type_parent_parameters),
                 "StateUserRelationshipSeeder": StateUserRelationshipSeeder(),
+                "UserSeeder": UserSeeder(),
             }
 
             if class_seeder:

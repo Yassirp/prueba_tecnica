@@ -50,7 +50,8 @@ async def update_user_relationship(
     db: AsyncSession = Depends(get_db)
 ):
     service = UserRelationshipService(db)
-    return await service.update(id, data.model_dump())
+    user_relationship = await service.update(id, data.model_dump())
+    return http_response(message="Relación actualizada correctamente", data=user_relationship)
 
 @router.post("/update-massive", status_code=status.HTTP_200_OK)
 async def update_user_relationship_massive(

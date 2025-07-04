@@ -24,7 +24,9 @@ class AuthService(UserService):
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Correo o contraseña incorrecta",
             )
-        await self.repository.update(user.id, {"last_login": datetime.now(timezone("America/Bogota")), "is_active": True})
+            
+        now_bogota = datetime.now(timezone("America/Bogota")).replace(tzinfo=None)
+        await self.repository.update(user.id, {"last_login": now_bogota, "is_active": True})
         data_token = {
             "id": user.id, 
             "role_id": user.role_id, 
