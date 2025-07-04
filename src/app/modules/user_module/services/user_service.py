@@ -83,7 +83,7 @@ class UserService(BaseService[User, UserOut]):
             data={"user": new_user, "validation_method": validation_method}
         )
     
-    async def verify_user_code(self, data: CodeVerification) -> JSONResponse:
+    async def verify_user_code(self, data: CodeVerification):
 
         user = await self.repository.get_by_id(data.user_id)
         print("user", user)
@@ -101,7 +101,7 @@ class UserService(BaseService[User, UserOut]):
             data={"user": user}
         )
     
-    async def update(self, entity_id: int, data: dict) -> Optional[dict]:
+    async def update(self, entity_id: int, data: dict) :
         # Validar que el email sea único si se está actualizando
         if "email" in data:
             existing_user = await self.repository.get_by_email(data["email"])
@@ -119,10 +119,18 @@ class UserService(BaseService[User, UserOut]):
             data["password"] = pwd_context.hash(data["password"])
         
         updated_user = await self.repository.update(entity_id, data)
-        if updated_user:
-            return self.out_schema.model_validate(updated_user).model_dump()
-        return None
+        
+        
+        if not updated_user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Usuario no encontrado"
+            )
     
+        return http_response(
+            message="Usuario actualizado correctamente",
+            data={"user": updated_user}
+        )
     
     async def create_user(self, data: dict) -> JSONResponse:
         # 1. Generar contraseña aleatoria

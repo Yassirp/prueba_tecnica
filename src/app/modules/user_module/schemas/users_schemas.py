@@ -45,18 +45,11 @@ class UserOut(UserBase):
     created_at: Optional[datetime]
     updated_at: Optional[datetime]
     deleted_at: Optional[datetime]
-    country: CountryOut
-    department: DepartmentOut
-    municipality: MunicipalityOut
-    role: RoleOut
-    associated_documents: list[DocumentOut]
-    user_relationships: list[UserRelationshipOut]
     model_config = {
         "from_attributes": True
     }
-    
-    
-class UserOutAll(UserBase):
+
+class UserOutWithRelationships(UserBase):
     id: int
     created_at: Optional[datetime]
     updated_at: Optional[datetime]
@@ -66,11 +59,10 @@ class UserOutAll(UserBase):
     municipality: MunicipalityOut
     role: RoleOut
     associated_documents: list[DocumentOut]
-    
+    user_relationships: list[UserRelationshipOut]
     model_config = {
         "from_attributes": True
     }
-
 
 class ValidateLogin(BaseModel):
     email: str

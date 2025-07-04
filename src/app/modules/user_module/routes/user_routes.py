@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, status, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.app.config.database.session import get_db
-from src.app.modules.user_module.schemas.users_schemas import AccessTokenOut, CodeVerification, ValidateLogin, UserCreate, UserOut, UserUpdate
+from src.app.modules.user_module.schemas.users_schemas import AccessTokenOut, CodeVerification, ValidateLogin, UserOut, UserUpdate, UserOutWithRelationships
 from src.app.modules.user_module.services.user_service import UserService
 from src.app.shared.utils.request_utils import get_filter_params, paginated_response, http_response
 from src.app.middleware.api_auth import require_auth, User 
@@ -37,7 +37,7 @@ async def get_user(user_id: int, db: AsyncSession = Depends(get_db), current_use
     if not user:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
 
-    user_out = UserOut.model_validate(user)
+    user_out = UserOutWithRelationships.model_validate(user)
     return http_response(message="Usuario obtenido correctamente", data=user_out.model_dump())
 
 
