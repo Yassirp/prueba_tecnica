@@ -30,10 +30,10 @@ def apply_filters(query: Select, model: Any, filters: Union[Dict[str, Any], str]
         # Busqueda parcial con ILIKE
         if isinstance(value, str) and "%" in value:
             conditions.append(column.ilike(value))
-        # Búsqueda específica en columna especial
+
         elif key == "search_text":
-            conditions.append(column.ilike(value))
-        # Comparación exacta
+            conditions.append(column.ilike(f"%{value}%"))
+
         else:
             conditions.append(column == value)
 
