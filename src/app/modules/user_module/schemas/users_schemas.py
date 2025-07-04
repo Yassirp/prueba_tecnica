@@ -18,21 +18,21 @@ class UserCreate(UserBase):
 
 
 class UserUpdate(BaseModel):
-    name: Optional[str]
-    last_name: Optional[str]
-    email: Optional[EmailStr]
-    phone: Optional[str]
-    address: Optional[str]
-    country_id: Optional[int]
-    department_id: Optional[int]
-    municipality_id: Optional[int]
-    document_type: Optional[int]
-    document_number: Optional[str]
-    created_by: Optional[int]
-    zip_code: Optional[str]
-    role_id: Optional[int]
-    password: Optional[str]
-    state: Optional[int]
+    name: Optional[str] = Field(default=None, description="Nombre del usuario.")
+    last_name: Optional[str] = Field(default=None, description="Apellido del usuario.")
+    email: Optional[EmailStr] = Field(default=None, description="Email del usuario (debe ser único).")
+    phone: Optional[str] = Field(default=None, description="Teléfono del usuario.")
+    address: Optional[str] = Field(default=None, description="Dirección del usuario.")
+    country_id: Optional[int] = Field(default=None, description="País del usuario.")
+    department_id: Optional[int] = Field(default=None, description="Departamento del usuario.")
+    municipality_id: Optional[int] = Field(default=None, description="Municipio del usuario.")
+    document_type: Optional[int] = Field(default=None, description="Tipo de documento del usuario.")
+    document_number: Optional[str] = Field(default=None, description="Número de documento del usuario.")
+    created_by: Optional[int] = Field(default=None, description="ID del usuario que creó el usuario.")
+    zip_code: Optional[str] = Field(default=None, description="Código postal del usuario.")
+    role_id: Optional[int] = Field(default=None, description="Rol del usuario.")
+    password: Optional[str] = Field(default=None, description="Contraseña del usuario.")
+    state: Optional[int] = Field(default=None, description="Estado lógico del usuario.")
     
     @model_validator(mode='after')
     def validate_email_unique_update(cls, values):
