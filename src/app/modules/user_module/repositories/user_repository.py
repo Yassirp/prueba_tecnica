@@ -5,7 +5,7 @@ from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
 from src.app.shared.utils.query_utils import apply_filters, apply_order_by
 from sqlalchemy import and_
-from src.app.shared.constants.project_enum import Setting
+
 
 class UserRepository(BaseRepository[User]):
     def __init__(self, model: type[User], db_session: AsyncSession):
@@ -36,25 +36,25 @@ class UserRepository(BaseRepository[User]):
             if limit is not None:
                 stmt = stmt.limit(limit)
 
-            stmt = stmt.options(
-                selectinload(self.model.country),
-                selectinload(self.model.department),
-                selectinload(self.model.municipality),
-                selectinload(self.model.role),
-                selectinload(self.model.created_by_user),
-                selectinload(self.model.associated_documents),
-                selectinload(self.model.user_relationships)
-            )
+            stmt = self._load_relations(stmt)
             result = await self.db_session.execute(stmt)
             return result.scalars().all(), total
         except Exception as e:
             raise e
-    
+
     async def get_by_id_with_relations(self, user_id: int) -> User | None:
-        result = await self.db_session.execute(
-            select(self.model)
-            .where(self.model.id == user_id)
-            .options(
+        
+        stmt = select(self.model)
+        stmt = stmt.where(self.model.id == user_id)
+        stmt = self._load_relations(stmt)
+        result = await self.db_session.execute(stmt)
+        return result.scalars().first()
+
+    
+    
+    
+    def _load_relations(self, query):
+        return query.options(
                 selectinload(self.model.country),
                 selectinload(self.model.department),
                 selectinload(self.model.municipality),
@@ -63,5 +63,3 @@ class UserRepository(BaseRepository[User]):
                 selectinload(self.model.associated_documents),
                 selectinload(self.model.user_relationships)
             )
-        )
-        return result.scalars().first()

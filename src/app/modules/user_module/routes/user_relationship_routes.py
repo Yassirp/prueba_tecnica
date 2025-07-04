@@ -42,7 +42,7 @@ async def create_user_relationship_massive(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
 
-@router.put("/update/{id}", status_code=status.HTTP_200_OK)
+@router.put("/{id}", status_code=status.HTTP_200_OK)
 async def update_user_relationship(
     id: int,
     data: UserRelationshipUpdate,
@@ -51,3 +51,46 @@ async def update_user_relationship(
 ):
     service = UserRelationshipService(db)
     return await service.update(id, data.model_dump())
+
+@router.post("/update-massive", status_code=status.HTTP_200_OK)
+async def update_user_relationship_massive(
+    data: List[dict],
+    current_user: User = Depends(require_auth),
+    db: AsyncSession = Depends(get_db)
+):
+    service = UserRelationshipService(db)
+    data_list = []
+    try:
+        for item in data:
+            await service.update(item["id"], item)
+            data_list.append(item)
+        return http_response(message="Relaciones actualizadas correctamente", data={"items": data_list})
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+@router.delete("/{id}", status_code=status.HTTP_200_OK)
+async def delete_user_relationship(
+    id: int,
+    current_user: User = Depends(require_auth),
+    db: AsyncSession = Depends(get_db)
+):
+    service = UserRelationshipService(db)
+    await service.delete(id)
+    return http_response(message="Relación eliminada correctamente")
+
+
+@router.post("/delete-massive", status_code=status.HTTP_200_OK)
+async def delete_user_relationship_massive(
+    data: List[int],
+    current_user: User = Depends(require_auth),
+    db: AsyncSession = Depends(get_db)
+):
+    service = UserRelationshipService(db)
+    data_list = []
+    try:
+        for item in data:
+            await service.delete(item)
+            data_list.append(item)
+        return http_response(message="Relaciones eliminadas correctamente", data={"items": data_list})
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))

@@ -1,8 +1,7 @@
-from modules.FlowModule.models.m_object_states import MObjectState
-from repositories.base_repository import BaseRepository
+from src.app.modules.flow_module.models.object_states import ObjectState
+from src.app.shared.bases.base_repository import BaseRepository
+from sqlalchemy.ext.asyncio import AsyncSession
 
-
-class ObjectStateRepository(BaseRepository):
-    def __init__(self, db):
-        super().__init__(db, MObjectState)
-
+class ObjectStateRepository(BaseRepository[ObjectState]):
+    def __init__(self, model: type[ObjectState], db_session: AsyncSession):
+        super().__init__(model, db_session)

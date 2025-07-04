@@ -19,7 +19,7 @@ class UserRelationship(BaseModel):
     deleted_at = Column(DateTime(timezone=True), nullable=True)
     
     user = relationship("User", back_populates="user_relationships", foreign_keys=[user_id])
-    #user_relationship = relationship("User", foreign_keys=[user_relationship_id])
+    user_relationship = relationship("User", foreign_keys=[user_relationship_id])
     relationship_status = relationship("ObjectState", backref="user_relationships", foreign_keys=[relationship_status_id]) 
     relationship_type = relationship("ParameterValue", backref="user_relationships", foreign_keys=[relationship_type_id])
     

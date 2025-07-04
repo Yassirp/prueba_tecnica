@@ -3,6 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.app.config.database.session import get_db
 from src.app.modules.user_module.schemas.users_schemas import AccessTokenOut, CodeVerification, ValidateLogin, UserOut, UserUpdate, UserOutWithRelationships
 from src.app.modules.user_module.services.user_service import UserService
+from src.app.modules.user_module.services.auth_services import AuthService
 from src.app.shared.utils.request_utils import get_filter_params, paginated_response, http_response
 from src.app.middleware.api_auth import require_auth, User 
 from typing import Dict
@@ -14,7 +15,7 @@ router = APIRouter(prefix="/user", tags=["User"])
 async def login(
     data: ValidateLogin, db: AsyncSession = Depends(get_db),
 ) -> AccessTokenOut:
-    service = UserService(db)
+    service = AuthService(db)
     return await service.login(data.model_dump())
 
 
@@ -37,8 +38,7 @@ async def get_user(user_id: int, db: AsyncSession = Depends(get_db), current_use
     if not user:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
 
-    user_out = UserOutWithRelationships.model_validate(user)
-    return http_response(message="Usuario obtenido correctamente", data=user_out.model_dump())
+    return http_response(message="Usuario obtenido correctamente", data={"user": user})
 
 
 @router.post("/register", status_code=status.HTTP_201_CREATED)
@@ -49,7 +49,7 @@ async def register(data: dict, db: AsyncSession = Depends(get_db)):
 
 @router.post("/verify", response_model=dict)
 async def verify_code(data: CodeVerification, db: AsyncSession = Depends(get_db)):
-    service = UserService(db)
+    service = AuthService(db)
     return await service.verify_user_code(data)
 
 
@@ -62,6 +62,11 @@ async def create_user(
     service = UserService(db)
     return await service.create_user(data)
 
+
+@router.post("/logout")
+async def logout(current_user: User = Depends(require_auth), db: AsyncSession = Depends(get_db)):
+    service = AuthService(db)
+    return await service.logout(current_user.id)
 
 @router.put("/{user_id}", response_model=UserOut, status_code=status.HTTP_200_OK)
 async def update_user(

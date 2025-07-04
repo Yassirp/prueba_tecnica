@@ -8,13 +8,13 @@ from fastapi import UploadFile
 from uuid import uuid4
 from fastapi import HTTPException
 from src.app.modules.parameters_module.models.parameters_values import ParameterValue
-from src.app.modules.parameters_module.repositories.parameter_values_repository import ParameterRepository
+from src.app.modules.parameters_module.repositories.parameter_values_repository import ParameterValueRepository
 
 class DocumentService(BaseService[Document, DocumentOut]):
     def __init__(self, db_session: AsyncSession):
         self.db_session = db_session
         self.repository = DocumentRepository(Document, self.db_session)
-        self.parameter_repository = ParameterRepository(ParameterValue, self.db_session)
+        self.parameter_value_repository = ParameterValueRepository(ParameterValue, self.db_session)
         super().__init__(
             model=Document,
             repository_cls=DocumentRepository,
@@ -24,7 +24,7 @@ class DocumentService(BaseService[Document, DocumentOut]):
         
     async def create_and_upload(self, data: dict, file: UploadFile):
         try:
-            type = await self.parameter_repository.get_by_id(data["document_type"])
+            type = await self.parameter_value_repository.get_by_id(data["document_type"])
             if not type:
                 raise HTTPException(status_code=404, detail="Tipo de documento no encontrado")
             

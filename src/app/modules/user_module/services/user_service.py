@@ -5,13 +5,19 @@ from src.app.modules.user_module.repositories.user_repository import UserReposit
 from src.app.modules.user_module.schemas.users_schemas import UserOut, ValidateLogin, AccessTokenOut, UserCreate, CodeVerification
 from src.app.shared.security.jwt import create_access_token
 from src.app.modules.user_module.repositories.user_repository import UserRepository
+from src.app.modules.parameters_module.repositories.parameter_values_repository import ParameterValueRepository
+from src.app.modules.parameters_module.models.parameters_values import ParameterValue
+from src.app.modules.flow_module.repositories.object_state_repository import ObjectStateRepository
+from src.app.modules.flow_module.models.object_states import ObjectState
 from passlib.context import CryptContext
 from fastapi import HTTPException, status
 import random
 from fastapi.responses import JSONResponse
 from typing import Optional
 import string
-
+import asyncio
+from datetime import datetime
+from pytz import timezone
 from src.app.shared.utils.request_utils import http_response
 from src.app.shared.utils.service_token import send_email_token, send_sms_token
 
@@ -20,6 +26,8 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 class UserService(BaseService[User, UserOut]):
     def __init__(self, db_session: AsyncSession):
         self.repository = UserRepository(User, db_session)
+        self.parameter_value_repository = ParameterValueRepository(ParameterValue, db_session)
+        self.object_state_repository = ObjectStateRepository(ObjectState, db_session)
         super().__init__(
             model=User,
             repository_cls=UserRepository,
@@ -28,27 +36,35 @@ class UserService(BaseService[User, UserOut]):
         )
         
     async def get_all_with_relationships(self, limit: int = 10, offset: int = 0, order_by: str = 'asc', filters: dict = {}) -> tuple:
-        return await self.repository.get_all_with_relationships(limit, offset, order_by, filters)
+        users, total = await self.repository.get_all_with_relationships(limit, offset, order_by, filters)
+        if users:
+            users_with_relations = await asyncio.gather(*(self._assigment_relationship(user) for user in users))
+        else:
+            users_with_relations = []
+        return users_with_relations, total
+    
     
     async def get_by_id_with_relations(self, user_id: int) -> User | None:
-        return await self.repository.get_by_id_with_relations(user_id)
-        
-        
-    
-    async def login(self, data: dict) -> AccessTokenOut:
-        credentials = ValidateLogin(**data)
-        user = await self.repository.get_by_email(credentials.email)
-
-        if not user or not pwd_context.verify(credentials.password, str(user.password)):
+        user =  await self.repository.get_by_id_with_relations(user_id)
+        if user:
+            user_with_relations = await self._assigment_relationship(user)
+        else:
             raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Correo o contraseña incorrecta",
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Usuario no encontrado"
             )
+        return user_with_relations
 
-        token = create_access_token(data={"sub": str(user.id)})
-        return AccessTokenOut(access_token=token)
-    
-    
+    async def _assigment_relationship(self, user: User) -> User:
+        if user:
+            user_relationship = user.user_relationships
+            for relationship in user_relationship:
+                relationship.user_relationship = await self.repository.get_by_id(relationship.user_relationship_id)
+                relationship.relationship_status = await self.object_state_repository.get_by_id(relationship.relationship_status_id)
+                relationship.relationship_type = await self.parameter_value_repository.get_by_id(relationship.relationship_type_id)
+        return user
+
+        
     async def register(self, data: dict) -> JSONResponse:
         # Validar que el email sea único
         existing_user = await self.repository.get_by_email(data["email"])
@@ -83,24 +99,7 @@ class UserService(BaseService[User, UserOut]):
             data={"user": new_user, "validation_method": validation_method}
         )
     
-    async def verify_user_code(self, data: CodeVerification):
 
-        user = await self.repository.get_by_id(data.user_id)
-        print("user", user)
-        if not user:
-            return http_response(status=404, message="Usuario no encontrado")
-
-        if str(user.code) != data.code:
-            return http_response(status=400, message="Código incorrecto")
-
-
-        await self.repository.update(user.id, {"state": 1})
-        
-        return http_response(
-            message="Usuario verificado correctamente",
-            data={"user": user}
-        )
-    
     async def update(self, entity_id: int, data: dict) :
         # Validar que el email sea único si se está actualizando
         if "email" in data:

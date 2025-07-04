@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, Text, DateTime, String, ForeignKey, JSON,and_
+from sqlalchemy import Column, Integer, Text, DateTime, String, ForeignKey, JSON,and_, Boolean
 from src.app.shared.bases.base_model import BaseModel   
 from sqlalchemy.orm import relationship, foreign
 from datetime import datetime
@@ -44,6 +44,9 @@ class User(BaseModel):
     living_group_name = Column(String, nullable=True, comment="Nombre del grupo (si aplica).")
     did_camp = Column(Integer, nullable=True, comment="1 si sí, 0 si no.")
     
+    
+    is_active = Column(Boolean, default=True)
+    last_login = Column(DateTime, nullable=True)
     data = Column(JSON, nullable=True, comment="Datos complementarios del usuario.")
     
     country = relationship("Country", backref="users", foreign_keys=[country_id])
