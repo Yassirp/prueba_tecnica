@@ -80,3 +80,10 @@ async def update_user(
     if not updated_user:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
     return updated_user
+
+
+@router.delete("/{user_id}", status_code=status.HTTP_200_OK)
+async def delete_user(user_id: int, db: AsyncSession = Depends(get_db), current_user: User = Depends(require_auth)):
+    service = UserService(db)
+    await service.delete(user_id)
+    return http_response(message="Usuario eliminado correctamente", data=None)
