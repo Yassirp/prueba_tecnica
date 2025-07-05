@@ -5,7 +5,7 @@ services:
     env_file:
       - ./src/.env
     ports:
-      - '5001:8000'
+      - '5006:8000'
     volumes:
       - .:/src
     restart: always
@@ -17,4 +17,4 @@ networks:
     driver: bridge
 
 volumes:
-  db-micro-documents-volume:
+  db-micro-lvr-volume:
