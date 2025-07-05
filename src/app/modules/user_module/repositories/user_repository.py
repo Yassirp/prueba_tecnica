@@ -19,7 +19,7 @@ class UserRepository(BaseRepository[User]):
     async def get_all_with_relationships(self, limit: int = 10, offset: int = 0, order_by: str = 'asc', filters: dict = {}) -> tuple:
         try:
             stmt = select(self.model)
-            conditions = [deleted_at.is_(None)]
+            conditions = [self.model.deleted_at.is_(None)]
             stmt = stmt.where(and_(*conditions))
             if filters:
                 stmt = apply_filters(stmt, self.model, filters)
