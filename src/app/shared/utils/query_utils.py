@@ -3,7 +3,7 @@ from sqlalchemy.sql import Select
 from sqlalchemy import and_
 import json
 from fastapi import HTTPException
-
+from sqlalchemy.sql.sqltypes import Integer, Boolean
 T = TypeVar("T")
 
 def apply_filters(query: Select, model: Any, filters: Union[Dict[str, Any], str]) -> Select:
@@ -26,7 +26,15 @@ def apply_filters(query: Select, model: Any, filters: Union[Dict[str, Any], str]
             continue
 
         column = getattr(model, key)
-
+        column_type = getattr(column, "type", None)
+        if isinstance(column_type, Integer):
+            try:
+                value = int(value)
+            except (ValueError, TypeError):
+                continue  # o lanzar error 400
+        elif isinstance(column_type, Boolean):
+            if isinstance(value, str):
+                value = value.lower() in ("true", "1", "yes")
         # Busqueda parcial con ILIKE
         if isinstance(value, str) and "%" in value:
             conditions.append(column.ilike(value))
