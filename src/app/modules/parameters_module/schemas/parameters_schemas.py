@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Optional, List
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from src.app.shared.bases.base_schema import BaseOutSchema
 from src.app.modules.parameters_module.schemas.parameter_values_schemas import ParameterValueOut
 
@@ -21,8 +21,10 @@ class ParameterUpdate(BaseModel):
     reference: Optional[str] = Field(None, max_length=100)
 
 class ParameterOut(ParameterBase, BaseOutSchema):
+    model_config = ConfigDict(from_attributes=True)
+    
     id: int = Field(ge=1)
-    values: Optional[List[ParameterValueOut]]
+    values: Optional[List[ParameterValueOut]] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
     deleted_at: Optional[datetime] = None

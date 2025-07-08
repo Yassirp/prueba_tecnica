@@ -32,8 +32,8 @@ class Command(BaseCommandAsync):
                 "DepartmentSeeder": DepartmentSeeder(),
                 "MunicipalitySeeder": MunicipalitySeeder(),
                 "SecuritySeeder": SecuritySeeder(),
-                "AttributeSeeder": AttributeSeeder(document_type_parameters),
-                "AttributeSeeder": AttributeSeeder(type_parent_parameters),
+                "AttributeSeederDocumentType": AttributeSeeder(document_type_parameters),
+                "AttributeSeederTypeParent": AttributeSeeder(type_parent_parameters),
                 "StateUserRelationshipSeeder": StateUserRelationshipSeeder(),
                 "UserSeeder": UserSeeder(),
             }

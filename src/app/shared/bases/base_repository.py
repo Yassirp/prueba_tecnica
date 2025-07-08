@@ -93,6 +93,7 @@ class BaseRepository(Generic[T]):
             .where(self.model.id == id)
             .values(
                 deleted_at=datetime.utcnow(),
+                is_active=False
             )
             )
             result = await self.db_session.execute(query)
