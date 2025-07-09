@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, status, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.app.config.database.session import get_db
-from src.app.modules.user_module.schemas.users_schemas import AccessTokenOut, CodeVerification, ValidateLogin, UserOut, UserUpdate, UserOutWithRelationships
+from src.app.modules.user_module.schemas.users_schemas import AccessTokenOut, CodeVerification, ValidateLogin, UserOut, UserUpdate
 from src.app.modules.user_module.services.user_service import UserService
 from src.app.modules.user_module.services.auth_services import AuthService
 from src.app.shared.utils.request_utils import get_filter_params, paginated_response, http_response

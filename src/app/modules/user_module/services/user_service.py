@@ -2,8 +2,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.app.shared.bases.base_service import BaseService
 from src.app.modules.user_module.models.users import User
 from src.app.modules.user_module.repositories.user_repository import UserRepository
-from src.app.modules.user_module.schemas.users_schemas import UserOut, ValidateLogin, AccessTokenOut, UserCreate, CodeVerification
-from src.app.shared.security.jwt import create_access_token
+from src.app.modules.user_module.schemas.users_schemas import UserOut, UserCreate
 from src.app.modules.user_module.repositories.user_repository import UserRepository
 from src.app.modules.parameters_module.repositories.parameter_values_repository import ParameterValueRepository
 from src.app.modules.parameters_module.models.parameters_values import ParameterValue
@@ -13,11 +12,8 @@ from passlib.context import CryptContext
 from fastapi import HTTPException, status
 import random
 from fastapi.responses import JSONResponse
-from typing import Optional
 import string
 import asyncio
-from datetime import datetime
-from pytz import timezone
 from src.app.shared.utils.request_utils import http_response
 from src.app.shared.utils.service_token import send_email_token, send_sms_token
 

@@ -8,7 +8,7 @@ class ParameterBase(BaseModel):
     name: str = Field(max_length=100)
     description: Optional[str] = Field(None, max_length=200)
     state: Optional[int]  = Field(1, ge=0)
-    reference: Optional[str] = Field(None, max_length=100)
+    key: Optional[str] = Field(None, max_length=100)
 
     
 class ParameterCreate(ParameterBase):
@@ -18,15 +18,18 @@ class ParameterUpdate(BaseModel):
     name: Optional[str] = Field(None, max_length=100)
     description: Optional[str] = Field(None, max_length=200)
     state: Optional[int]  = Field(1, ge=0)
-    reference: Optional[str] = Field(None, max_length=100)
+    key: Optional[str] = Field(None, max_length=100)
+    
 
 class ParameterOut(ParameterBase, BaseOutSchema):
-    model_config = ConfigDict(from_attributes=True)
     
     id: int = Field(ge=1)
-    values: Optional[List[ParameterValueOut]] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
     deleted_at: Optional[datetime] = None
+    model_config = {
+        "from_attributes": True
+    }
+
 
 

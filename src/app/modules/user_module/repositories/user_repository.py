@@ -12,7 +12,7 @@ class UserRepository(BaseRepository[User]):
         super().__init__(model, db_session)
 
     async def get_by_email(self, email: str) -> User | None:
-        result = await self.db_session.execute(select(User).where(User.email == email))
+        result = await self.db_session.execute(select(User).where(User.email == email, User.deleted_at.is_(None)))
         return result.scalars().first()
     
     
@@ -49,9 +49,6 @@ class UserRepository(BaseRepository[User]):
         stmt = self._load_relations(stmt)
         result = await self.db_session.execute(stmt)
         return result.scalars().first()
-
-    
-    
     
     def _load_relations(self, query):
         return query.options(

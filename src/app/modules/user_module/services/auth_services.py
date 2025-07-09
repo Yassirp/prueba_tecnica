@@ -24,11 +24,7 @@ class AuthService(UserService):
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Correo o contraseña incorrecta",
             )
-        if user.is_active == False or user.deleted_at:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Usuario no activo",
-            )
+            
         
         now_bogota = datetime.now(timezone("America/Bogota")).replace(tzinfo=None)
         await self.repository.update(user.id, {"last_login": now_bogota, "is_active": True})

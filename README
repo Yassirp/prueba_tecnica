@@ -9,7 +9,7 @@ Version de Python requerida: Python 3.12.x
 - Eliminar migraciones anteriores:
 
 ```bash
-python src/app/command/delete_migrations.py
+python3 src/app/command/delete_migrations.py
 ```
 
 - Ejecutar docker compose:

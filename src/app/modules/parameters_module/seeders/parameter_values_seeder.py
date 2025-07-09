@@ -38,5 +38,17 @@ parameters = {
             {"reference": "other", "value": "Otro"},
         ]
     },
+    "courses_completed": {
+        "name": "Cursos realizados con nosotros",
+        "values": [
+            {"reference": "college", "value": "College"},
+            {"reference": "connection", "value": "Connection"},
+            {"reference": "mensajeros", "value": "Mensajeros"},
+            {"reference": "restore", "value": "Restore"},
+            {"reference": "de_la_carencia_a_la_abundancia", "value": "De la carencia a la abundancia"},
+            {"reference": "los_codigos_de_la_abundancia", "value": "Los códigos de la abundancia"},
+        ]
+    }
+
 }
 

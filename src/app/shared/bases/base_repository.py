@@ -11,7 +11,7 @@ from typing import (
     Protocol,
 )
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, update, delete
+from sqlalchemy import select, update
 from src.app.shared.constants.project_enum import Setting
 from src.app.shared.utils.query_utils import apply_filters, apply_order_by
 from src.app.shared.bases.base_model import BaseModel
@@ -92,8 +92,7 @@ class BaseRepository(Generic[T]):
             update(self.model)
             .where(self.model.id == id)
             .values(
-                deleted_at=datetime.utcnow(),
-                is_active=False
+                deleted_at=datetime.utcnow()
             )
             )
             result = await self.db_session.execute(query)
