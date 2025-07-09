@@ -44,7 +44,7 @@ class BaseRepository(Generic[T]):
     ) -> Tuple[Sequence[T], int]:
         try:
             stmt = select(self.model).where(self.model.state == Setting.STATUS.value)
-            conditions = [deleted_at.is_(None)]
+            conditions = [self.model.deleted_at.is_(None)]
 
             stmt = stmt.where(and_(*conditions))
             if filters:
@@ -93,6 +93,7 @@ class BaseRepository(Generic[T]):
             .where(self.model.id == id)
             .values(
                 deleted_at=datetime.utcnow(),
+                is_active=False
             )
             )
             result = await self.db_session.execute(query)

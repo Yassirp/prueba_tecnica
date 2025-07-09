@@ -33,7 +33,8 @@ class UserUpdate(BaseModel):
     role_id: Optional[int] = Field(default=None, description="Rol del usuario.")
     password: Optional[str] = Field(default=None, description="Contraseña del usuario.")
     state: Optional[int] = Field(default=None, description="Estado lógico del usuario.")
-    
+    is_active: Optional[bool] = Field(default=None, description="Estado activo del usuario.")
+
     @model_validator(mode='after')
     def validate_email_unique_update(cls, values):
         return values
