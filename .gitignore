@@ -124,4 +124,4 @@ migrations/__pycache__/
 migrations/*.pyc
 src/migrations/__pycache__/
 src/migrations/*.pyc
-src/migrations/versions/
+src/migrations/versions/*.py
