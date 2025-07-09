@@ -12,6 +12,7 @@ from src.app.modules.parameters_module.services.parameters_service import Parame
 from src.app.shared.constants.messages import ParameterMessages
 from src.app.shared.utils.request_utils import get_filter_params, paginated_response, http_response
 from src.app.decorators.route_responses import handle_route_responses
+from src.app.middleware.api_auth import require_auth, User
 
 router = APIRouter(prefix="/parameters", tags=["Parameters"])
 
@@ -41,10 +42,40 @@ async def get_all_parameter(
         )
         data= paginated_response(parameters, total, limit, offset)
         return data
-        return http_response(message=ParameterMessages.OK_GET_ALL, data=data)
     except Exception as e:
         raise e
     
+    
+@router.get("/relationships", response_model=List[ParameterOut])
+@handle_route_responses(
+    success_message=ParameterMessages.OK_GET_ALL,
+    error_message=ParameterMessages.ERROR_GET_ALL,
+)
+async def get_all_parameter_relationships(
+    db: AsyncSession = Depends(get_db),
+    limit: Optional[int] = Query(
+        None, ge=1, le=100, description="Número de elementos por página"
+    ),
+    offset: Optional[int] = Query(
+        None, ge=0, description="Número de elementos a omitir"
+    ),
+    order_by: Optional[str] = Query(
+        None, description="Campo para ordenar (ej: 'id:asc' o 'name:desc')"
+    ),
+    filters: Dict[str, str] = Depends(get_filter_params)):
+    try:
+        service = ParameterService(db)
+        parameters, total = await service.get_all_with_relationships(
+        limit=limit or 10,
+        offset=offset or 0, 
+        order_by=order_by or 'id:asc', 
+        filters=filters
+    )
+        paginate_ =  paginated_response(parameters,total,limit,offset)
+        return paginate_
+    except Exception as e:
+        raise e
+
 @router.get("/{parameter_id}", response_model=ParameterOut)
 @handle_route_responses(
     success_message=ParameterMessages.OK_GET,
@@ -58,8 +89,7 @@ async def get_parameter_by_id(
         service = ParameterService(db)
         data = await service.get_by_id(parameter_id)
         return data
-        return http_response(message=ParameterMessages.OK_GET, data=ParameterOut.model_validate(data).model_dump() if data else None)
-    
+
     except Exception as e:
         raise e
     
@@ -69,13 +99,11 @@ async def get_parameter_by_id(
     error_message=ParameterMessages.ERROR_CREATED,
 )
 async def create_parameter(
-    data: ParameterCreate, db: AsyncSession = Depends(get_db)
+    data: ParameterCreate, db: AsyncSession = Depends(get_db), current_user: User = Depends(require_auth)
 ):
     try:    
         service = ParameterService(db)
         return await service.create(data.model_dump())
-        
-        return http_response(message=ParameterMessages.OK_CREATED, data=data)
     except Exception as e:
         raise e
     
@@ -86,13 +114,12 @@ async def create_parameter(
     not_found_message=ParameterMessages.ERROR_NOT_FOUND,
 )
 async def update_parameter(
-    parameter_id: int, data: ParameterUpdate, db: AsyncSession = Depends(get_db)
+    parameter_id: int, data: ParameterUpdate, db: AsyncSession = Depends(get_db),    current_user: User = Depends(require_auth),
 ):
     try:
         service = ParameterService(db)
         return await service.update(parameter_id, data.model_dump(exclude_unset=True))
-        return http_response(message=ParameterMessages.OK_UPDATED, data=data)
-    
+
     except Exception as e:
         raise e
     
@@ -104,11 +131,10 @@ async def update_parameter(
     not_found_message=ParameterMessages.ERROR_NOT_FOUND,
 )
 async def delete_parameter(
-    parameter_id: int, db: AsyncSession = Depends(get_db)
+    parameter_id: int, db: AsyncSession = Depends(get_db), current_user: User = Depends(require_auth)
 ):
     try:
         service = ParameterService(db)
         return await service.delete(parameter_id)
-        return http_response(message=ParameterMessages.OK_DELETED, status=status.HTTP_204_NO_CONTENT)
     except Exception as e: 
         raise e

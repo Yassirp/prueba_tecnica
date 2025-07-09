@@ -17,4 +17,4 @@ class Municipality(BaseModel):
     updated_at = Column(DateTime(timezone=True), onupdate=datetime.now(pytz.timezone('America/Bogota')))
     deleted_at = Column(DateTime(timezone=True), nullable=True)
 
-    department = relationship("Department", backref="municipalities")
+    department = relationship("Department", back_populates="municipalities")  

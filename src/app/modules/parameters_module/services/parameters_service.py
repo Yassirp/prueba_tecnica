@@ -27,6 +27,12 @@ class ParameterService(BaseService[Parameter, ParameterOut]):
         except Exception as e:
             raise e
 
+    async def get_all_with_relationships(self, limit: int = 10, offset: int = 0, order_by: str = "id:asc", filters: dict = {}) -> tuple:
+        try:
+            return await self.repo.get_all_with_relationships(limit, offset, order_by, filters)
+        except Exception as e:
+            raise e
+
     async def get_by_id(self, entity_id: int) -> Optional[Parameter]:
         try:
             item = await self.repo.get_by_id(entity_id)

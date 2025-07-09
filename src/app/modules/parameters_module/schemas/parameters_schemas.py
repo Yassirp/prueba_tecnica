@@ -30,6 +30,11 @@ class ParameterOut(ParameterBase, BaseOutSchema):
     model_config = {
         "from_attributes": True
     }
+    
+class ParameterOutWithRelationships(ParameterOut):
+    parameter_values: List[ParameterValueOut] = []
+
+
 
 
 

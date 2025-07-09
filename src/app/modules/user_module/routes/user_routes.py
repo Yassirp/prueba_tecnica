@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status, HTTPException
+from fastapi import APIRouter, Depends, status, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.app.config.database.session import get_db
 from src.app.modules.user_module.schemas.users_schemas import AccessTokenOut, CodeVerification, ValidateLogin, UserOut, UserUpdate
@@ -6,7 +6,7 @@ from src.app.modules.user_module.services.user_service import UserService
 from src.app.modules.user_module.services.auth_services import AuthService
 from src.app.shared.utils.request_utils import get_filter_params, paginated_response, http_response
 from src.app.middleware.api_auth import require_auth, User 
-from typing import Dict
+from typing import Dict, Optional
 
 router = APIRouter(prefix="/user", tags=["User"])
 
@@ -23,10 +23,24 @@ async def login(
 @router.get("/all", status_code=status.HTTP_200_OK)
 async def get_users(db: AsyncSession = Depends(get_db),
     current_user: User = Depends(require_auth),
+    limit: Optional[int] = Query(
+        None, ge=1, le=100, description="Número de elementos por página"
+    ),
+    offset: Optional[int] = Query(
+        None, ge=0, description="Número de elementos a omitir"
+    ),
+    order_by: Optional[str] = Query(
+        None, description="Campo para ordenar (ej: 'id:asc' o 'name:desc')"
+    ),
     filters: Dict[str, str] = Depends(get_filter_params)):
     service = UserService(db)
-    register, total= await service.get_all_with_relationships(limit=10,offset=0, order_by="id:asc", filters=filters)
-    paginate_ =  paginated_response(register,total,limit=10,offset=0)
+    register, total= await service.get_all_with_relationships(
+        limit=limit or 10,
+        offset=offset or 0, 
+        order_by=order_by or 'id:asc', 
+        filters=filters
+    )
+    paginate_ =  paginated_response(register,total,limit or 10,offset or 0)
     return http_response(message="Usuarios obtenidos correctamente", data=paginate_)
 
 
