@@ -43,7 +43,7 @@ class BaseRepository(Generic[T]):
         filters: Optional[Dict[str, Any]] = None,
     ) -> Tuple[Sequence[T], int]:
         try:
-            stmt = select(self.model).where(self.model.state == Setting.STATUS.value)
+            stmt = select(self.model)
             conditions = [self.model.deleted_at.is_(None)]
 
             stmt = stmt.where(and_(*conditions))

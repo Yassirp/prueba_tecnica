@@ -22,7 +22,7 @@ class MRoleUpdate(MRoleBase):
 class RoleOut(MRoleBase):  
     id: int
     created_at: datetime
-    updated_at: datetime
+    updated_at: Optional[datetime] = None
 
     model_config = {
         "from_attributes": True
