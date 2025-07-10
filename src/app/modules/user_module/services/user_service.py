@@ -37,11 +37,7 @@ class UserService(BaseService[User, UserOut]):
         
     async def get_all_with_relationships(self, limit: int = 10, offset: int = 0, order_by: str = 'asc', filters: dict = {}) -> tuple:
         users, total = await self.repository.get_all_with_relationships(limit, offset, order_by, filters)
-        if users:
-            users_with_relations = await asyncio.gather(*(self._assigment_relationship(user) for user in users))
-        else:
-            users_with_relations = []
-        return users_with_relations, total
+        return users, total
     
     
     async def get_by_id_with_relations(self, user_id: int):
