@@ -1,13 +1,16 @@
 from sqlalchemy.ext.asyncio import AsyncSession
+from src.app.modules.user_module.models import user_relationship
 from src.app.shared.bases.base_service import BaseService
 from src.app.modules.user_module.models.users import User
 from src.app.modules.user_module.repositories.user_repository import UserRepository
-from src.app.modules.user_module.schemas.users_schemas import UserOut, UserCreate
+from src.app.modules.user_module.schemas.users_schemas import UserOut, UserCreate, UserOutWithRelationships
 from src.app.modules.user_module.repositories.user_repository import UserRepository
 from src.app.modules.parameters_module.repositories.parameter_values_repository import ParameterValueRepository
 from src.app.modules.parameters_module.models.parameters_values import ParameterValue
 from src.app.modules.flow_module.repositories.object_state_repository import ObjectStateRepository
 from src.app.modules.flow_module.models.object_states import ObjectState
+from src.app.modules.user_module.repositories.user_relationship_repository import UserRelationshipRepository
+from src.app.modules.user_module.models.user_relationship import UserRelationship
 from passlib.context import CryptContext
 from fastapi import HTTPException, status
 import random
@@ -22,6 +25,7 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 class UserService(BaseService[User, UserOut]):
     def __init__(self, db_session: AsyncSession):
         self.repository = UserRepository(User, db_session)
+        self.user_relationship_repository = UserRelationshipRepository(UserRelationship, db_session)
         self.parameter_value_repository = ParameterValueRepository(ParameterValue, db_session)
         self.object_state_repository = ObjectStateRepository(ObjectState, db_session)
         super().__init__(
@@ -40,26 +44,44 @@ class UserService(BaseService[User, UserOut]):
         return users_with_relations, total
     
     
-    async def get_by_id_with_relations(self, user_id: int) -> User | None:
-        user =  await self.repository.get_by_id_with_relations(user_id)
-        if user:
-            user_with_relations = await self._assigment_relationship(user)
-        else:
+    async def get_by_id_with_relations(self, user_id: int):
+        user =  await self.repository.get_by_id_with_relations(user_id) 
+        if not user:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Usuario no encontrado"
             )
+        user_with_relations = await self._assigment_relationship(user)
         return user_with_relations
 
-    async def _assigment_relationship(self, user: User) -> User:
-        if user:
-            user_relationship = user.user_relationships
-            for relationship in user_relationship:
-                relationship.user_relationship = await self.repository.get_by_id(relationship.user_relationship_id)
+
+    async def _assigment_relationship(self, user: User):
+        if not user:
+            return user
+
+        # Obtener relaciones donde el usuario es el iniciador
+        user_relationships = await self.user_relationship_repository.get_by_user_id(getattr(user, 'id'))
+        user_relationships_2 = await self.user_relationship_repository.get_by_user_relationship_id(getattr(user, 'id'))
+        user_relationships_v2 = []
+        if user_relationships:
+            for relationship in user_relationships:
+                # Asignar las relaciones obtenidas
+                relationship.user_relationship = await self.repository.get_basic_by_id(getattr(relationship, 'user_relationship_id'))
                 relationship.relationship_status = await self.object_state_repository.get_by_id(relationship.relationship_status_id)
                 relationship.relationship_type = await self.parameter_value_repository.get_by_id(relationship.relationship_type_id)
+                user_relationships_v2.append(relationship)
+                
+        if user_relationships_2:
+            for relationship in user_relationships_2:
+                relationship.user_relationship = await self.repository.get_basic_by_id(getattr(relationship, 'user_id'))
+                relationship.relationship_status = await self.object_state_repository.get_by_id(relationship.relationship_status_id)
+                relationship.relationship_type = await self.parameter_value_repository.get_by_id(relationship.relationship_type_id)
+                user_relationships_v2.append(relationship)
+        
+        user.user_relationships_v2 = user_relationships_v2
+            
         return user
-
+            
         
     async def register(self, data: dict) -> JSONResponse:
         # Validar que el email sea único

@@ -17,6 +17,19 @@ class UserRelationshipBase(BaseModel):
             raise ValueError("user_id y user_relationship_id no pueden ser iguales")
         return v
 
+class SimpleUser(BaseModel):
+    id: int
+    name: Optional[str] = None
+    last_name: Optional[str] = None
+    email: Optional[str] = None
+    phone: Optional[str] = None
+    document_number: Optional[str] = None
+    document_type_id: Optional[int] = None
+    document_type: Optional[str] = None
+
+    model_config = {
+        "from_attributes": True
+    }
 
 class UserRelationshipCreate(UserRelationshipBase):
     pass

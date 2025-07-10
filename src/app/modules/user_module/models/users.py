@@ -53,6 +53,7 @@ class User(BaseModel):
     department = relationship("Department", backref="users", foreign_keys=[department_id])
     municipality = relationship("Municipality", backref="users", foreign_keys=[municipality_id])
     role = relationship("Role", backref="users", foreign_keys=[role_id])
+    document_type_relationship = relationship("ParameterValue", backref="users", foreign_keys=[document_type])
     created_by_user = relationship("User", remote_side="User.id", backref="created_users")
 
     associated_documents = relationship(

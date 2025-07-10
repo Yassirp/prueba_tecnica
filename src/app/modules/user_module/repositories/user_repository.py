@@ -15,6 +15,10 @@ class UserRepository(BaseRepository[User]):
         result = await self.db_session.execute(select(User).where(User.email == email, User.deleted_at.is_(None)))
         return result.scalars().first()
     
+    async def get_basic_by_id(self, user_id: int) -> User | None:
+        stmt = select(self.model).where(self.model.id == user_id, self.model.deleted_at.is_(None))
+        result = await self.db_session.execute(stmt)
+        return result.scalars().first()
     
     async def get_all_with_relationships(self, limit: int = 10, offset: int = 0, order_by: str = 'asc', filters: dict = {}) -> tuple:
         try:
@@ -58,5 +62,5 @@ class UserRepository(BaseRepository[User]):
                 selectinload(self.model.role),
                 selectinload(self.model.created_by_user),
                 selectinload(self.model.associated_documents),
-                selectinload(self.model.user_relationships)
+                selectinload(self.model.document_type_relationship)
             )

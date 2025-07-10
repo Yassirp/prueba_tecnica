@@ -8,6 +8,7 @@ from src.app.modules.ubication_module.schemas.minicipality_schemas import Munici
 from src.app.modules.permission_module.schemas.role_schema import RoleOut
 from src.app.modules.user_module.schemas.users_relationship_schemas import UserRelationshipOut
 from src.app.modules.user_module.schemas.user_base_schema import UserBase
+from src.app.modules.parameters_module.schemas.parameter_values_schemas import ParameterValueOut
 
 class UserCreate(UserBase):
     password: str = Field(..., description="Contraseña del usuario.")
@@ -17,7 +18,7 @@ class UserCreate(UserBase):
         return values
 
 
-class UserUpdate(BaseModel):
+class UserUpdate(UserBase):
     name: Optional[str] = Field(default=None, description="Nombre del usuario.")
     last_name: Optional[str] = Field(default=None, description="Apellido del usuario.")
     email: Optional[EmailStr] = Field(default=None, description="Email del usuario (debe ser único).")
@@ -59,8 +60,9 @@ class UserOutWithRelationships(UserBase):
     department: DepartmentOut
     municipality: MunicipalityOut
     role: RoleOut
+    document_type_relationship: ParameterValueOut
     associated_documents: list[DocumentOut]
-    user_relationships: list[UserRelationshipOut]
+
     model_config = {
         "from_attributes": True
     }
