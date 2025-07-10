@@ -12,7 +12,7 @@ class UserRepository(BaseRepository[User]):
         super().__init__(model, db_session)
 
     async def get_by_email(self, email: str) -> User | None:
-        result = await self.db_session.execute(select(User).where(User.email == email, User.deleted_at.is_(None)))
+        result = await self.db_session.execute(select(User).where(User.email == email, User.is_active == True, User.deleted_at.is_(None)))
         return result.scalars().first()
     
     async def get_basic_by_id(self, user_id: int) -> User | None:
