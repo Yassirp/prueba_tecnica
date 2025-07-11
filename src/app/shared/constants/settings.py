@@ -3,6 +3,7 @@ import os
 class Settings:
     """Environmental variables"""
 
+    APP_ENV = os.getenv("APP_ENV", "testing")
     HOST = os.getenv("HOST_IP")
     PORT = os.getenv("HOST_PORT")
     DEBUG = os.getenv("DEBUG", "False").lower() in ("true", "1", "yes")

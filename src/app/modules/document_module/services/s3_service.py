@@ -21,7 +21,7 @@ class S3Service:
                 Body=content,
                 ContentType=file.content_type
             )
-        return f"https://{Settings.S3_BUCKET}.s3.{Settings.AWS_REGION}.amazonaws.com/{filename}"
+        return f"https://{Settings.S3_BUCKET}.s3.{Settings.AWS_REGION}.amazonaws.com/{Settings.APP_ENV}/lvr/{filename}"
     
     @staticmethod
     async def delete_file(filename: str):
