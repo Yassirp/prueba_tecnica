@@ -3,9 +3,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.app.config.database.session import get_db
 from src.app.modules.user_module.schemas.users_relationship_schemas import UserRelationshipCreate, UserRelationshipUpdate
 from src.app.modules.user_module.services.user_relationship_service import UserRelationshipService
-from typing import List
+from typing import List, Optional
 from src.app.shared.utils.request_utils import get_filter_params, paginated_response, http_response
 from src.app.middleware.api_auth import require_auth, User 
+from pydantic import BaseModel, validator
 
 
 router = APIRouter(prefix="/user-relationship", tags=["User Relationship"])
@@ -50,7 +51,7 @@ async def update_user_relationship(
     db: AsyncSession = Depends(get_db)
 ):
     service = UserRelationshipService(db)
-    user_relationship = await service.update(id, data.model_dump())
+    user_relationship = await service.update(id, data.model_dump(exclude_unset=True))
     return http_response(message="Relación actualizada correctamente", data=user_relationship)
 
 @router.post("/update-massive", status_code=status.HTTP_200_OK)

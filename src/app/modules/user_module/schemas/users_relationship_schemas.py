@@ -35,10 +35,10 @@ class UserRelationshipCreate(UserRelationshipBase):
     pass
 
 class UserRelationshipUpdate(BaseModel):
-    user_id: Optional[int]
-    user_relationship_id: Optional[int]
-    relationship_status_id: Optional[int]
-    relationship_type_id: Optional[int]
+    user_id: Optional[int] = None   
+    user_relationship_id: Optional[int] = None
+    relationship_status_id: Optional[int] = None
+    relationship_type_id: Optional[int] = None
     @validator("user_relationship_id")
     def user_ids_must_be_different(cls, v, values):
         if "user_id" in values and values["user_id"] == v:

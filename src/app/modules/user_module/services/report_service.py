@@ -6,43 +6,43 @@ from fastapi.responses import StreamingResponse
 from datetime import datetime
 import pytz
 from typing import Optional
+from reportlab.lib.pagesizes import letter, landscape
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, PageBreak
+from reportlab.lib import colors
+from reportlab.lib.styles import getSampleStyleSheet
+from fastapi import HTTPException
 
 class ReportService:
     def __init__(self, db_session: AsyncSession):
         self.db_session = db_session
 
-    async def generate_users_excel_report(self) -> StreamingResponse:
-        """Genera un reporte de Excel con datos de usuarios y sus relaciones usando consultas SQL puras"""
+    async def generate_users_report(self, format: str = "excel") -> StreamingResponse:
+        """Genera un reporte de usuarios en Excel o PDF según el parámetro 'format'"""
         
-        # Consulta SQL para obtener usuarios con información completa
+        # Consultas SQL (igual que antes)
         users_query = text("""
             SELECT 
                 CONCAT(u.name, ' ', u.last_name) as nombre_completo,
                 u.email as correo_electronico,
+                pv.value as tipo_documento,
                 u.document_number as numero_documento,
                 u.phone as telefono,
                 u.address as direccion,
-                u.is_active as estado_activo,
-                u.created_at as fecha_creacion,
-                u.updated_at as fecha_actualizacion,
+                u.is_active as estado,
                 c.name as pais,
                 d.name as departamento,
                 m.name as municipio,
                 r.name as rol,
-                pv.value as tipo_documento,
-                creator.name || ' ' || creator.last_name as creado_por
+                u.created_at as fecha_creacion
             FROM m_users u
             LEFT JOIN countries c ON u.country_id = c.id
             LEFT JOIN departments d ON u.department_id = d.id
             LEFT JOIN municipalities m ON u.municipality_id = m.id
             LEFT JOIN m_roles r ON u.role_id = r.id
             LEFT JOIN m_parameters_values pv ON u.document_type = pv.id
-            LEFT JOIN m_users creator ON u.created_by = creator.id
             WHERE u.deleted_at IS NULL
             ORDER BY u.id
         """)
-        
-        # Consulta SQL para obtener relaciones de usuarios
         relationships_query = text("""
             SELECT 
                 ur.id,
@@ -59,8 +59,6 @@ class ReportService:
             WHERE ur.deleted_at IS NULL
             ORDER BY ur.id
         """)
-        
-        # Consulta SQL para obtener estadísticas
         stats_query = text("""
             SELECT 
                 COUNT(*) as total_usuarios,
@@ -84,140 +82,279 @@ class ReportService:
         relationships_df = pd.DataFrame(relationships_result.fetchall(), columns=pd.Index(relationships_result.keys()))
         stats_df = pd.DataFrame(stats_result.fetchall(), columns=pd.Index(stats_result.keys()))
         
-        # Convertir fechas con timezone a timezone-naive para Excel
+        # Convertir fechas con timezone a timezone-naive para Excel/PDF
         if not users_df.empty:
             for col in ['fecha_creacion', 'fecha_actualizacion']:
                 if col in users_df.columns:
                     users_df[col] = pd.to_datetime(users_df[col]).dt.tz_localize(None)
-        
         if not relationships_df.empty:
             if 'fecha_creacion' in relationships_df.columns:
                 relationships_df['fecha_creacion'] = pd.to_datetime(relationships_df['fecha_creacion']).dt.tz_localize(None)
         
-        # Crear archivo Excel en memoria
-        output = BytesIO()
-        
-        with pd.ExcelWriter(output, engine='openpyxl') as writer:
-            # Hoja 1: Usuarios
-            users_df.to_excel(writer, sheet_name='Usuarios', index=False)
-            
-            # Hoja 2: Relaciones de Usuarios
-            relationships_df.to_excel(writer, sheet_name='Relaciones', index=False)
-            
-            # Hoja 3: Estadísticas
-            stats_df.to_excel(writer, sheet_name='Estadísticas', index=False)
-            
-            # Hoja 4: Resumen por País
-            country_summary = users_df.groupby('pais').agg({
-                'nombre_completo': 'count',
-                'estado_activo': lambda x: (x == True).sum()
-            })
+        # Resúmenes
+        country_summary = users_df.groupby('pais').agg({
+            'nombre_completo': 'count',
+            'estado': lambda x: (x == True).sum()
+        }) if not users_df.empty else pd.DataFrame()
+        if not country_summary.empty:
             country_summary.columns = ['Total Usuarios', 'Usuarios Activos']
-            country_summary.to_excel(writer, sheet_name='Resumen por País')
-            
-            # Hoja 5: Resumen por Rol
-            role_summary = users_df.groupby('rol').agg({
-                'nombre_completo': 'count',
-                'estado_activo': lambda x: (x == True).sum()
-            })
+        role_summary = users_df.groupby('rol').agg({
+            'nombre_completo': 'count',
+            'estado': lambda x: (x == True).sum()
+        }) if not users_df.empty else pd.DataFrame()
+        if not role_summary.empty:
             role_summary.columns = ['Total Usuarios', 'Usuarios Activos']
-            role_summary.to_excel(writer, sheet_name='Resumen por Rol')
         
-        output.seek(0)
-        
-        # Generar nombre del archivo con timestamp
-        timestamp = datetime.now(pytz.timezone('America/Bogota')).strftime('%Y%m%d_%H%M%S')
-        filename = f"reporte_usuarios_{timestamp}.xlsx"
-        
-        return StreamingResponse(
-            output,
-            media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            headers={"Content-Disposition": f"attachment; filename={filename}"}
-        )
+        if format == "pdf":
+            # Eliminar columnas no deseadas para el PDF
+            cols_ocultar = ["estado", "creado_por", "fecha_actualizacion", "rol", "pais"]
+            users_df_pdf = users_df.drop(columns=[col for col in cols_ocultar if col in users_df.columns])
 
-    async def generate_user_relationships_report(self, user_id: Optional[int] = None) -> StreamingResponse:
-        """Genera un reporte específico de relaciones de usuarios"""
-        
-        if user_id:
-            # Reporte para un usuario específico
-            query = text("""
-                SELECT 
-                    u1.id as usuario_id,
-                    u1.name || ' ' || u1.last_name as usuario_nombre,
-                    u1.email as usuario_correo,
-                    u2.id as relacionado_id,
-                    u2.name || ' ' || u2.last_name as relacionado_nombre,
-                    u2.email as relacionado_correo,
-                    pv.value as tipo_relacion,
-                    os.name as estado_relacion,
-                    ur.created_at as fecha_creacion
-                FROM c_user_relationship ur
-                JOIN m_users u1 ON ur.user_id = u1.id
-                JOIN m_users u2 ON ur.user_relationship_id = u2.id
-                JOIN m_parameters_values pv ON ur.relationship_type_id = pv.id
-                JOIN m_object_states os ON ur.relationship_status_id = os.id
-                WHERE ur.deleted_at IS NULL 
-                AND (ur.user_id = :user_id OR ur.user_relationship_id = :user_id)
-                ORDER BY ur.created_at DESC
-            """)
-            result = await self.db_session.execute(query, {"user_id": user_id})
+            output = BytesIO()
+            doc = SimpleDocTemplate(output, pagesize=landscape(letter))
+            elements = []
+            styles = getSampleStyleSheet()
+            # Usuarios
+            elements.append(Paragraph("Usuarios", styles['Heading1']))
+            if not users_df_pdf.empty:
+                data = [users_df_pdf.columns.tolist()] + users_df_pdf.astype(str).values.tolist()
+                # Ajustar anchos de columna proporcionalmente
+                col_widths = [max(60, min(200, max([len(str(x)) for x in [col] + users_df_pdf[col].astype(str).tolist()]) * 5)) for col in users_df_pdf.columns]
+                t = Table(data, repeatRows=1, colWidths=col_widths)
+                t.setStyle(TableStyle([
+                    ('FONTSIZE', (0,0), (-1,-1), 6),
+                    ('BACKGROUND', (0,0), (-1,0), colors.grey),
+                    ('TEXTCOLOR', (0,0), (-1,0), colors.whitesmoke),
+                    ('ALIGN', (0,0), (-1,-1), 'LEFT'),
+                    ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
+                    ('BOTTOMPADDING', (0,0), (-1,0), 5),
+                    ('BACKGROUND', (0,1), (-1,-1), colors.beige),
+                    ('GRID', (0,0), (-1,-1), 0.5, colors.black),
+                ]))
+                elements.append(t)
+            else:
+                elements.append(Paragraph("Sin datos de usuarios", styles['Normal']))
+            elements.append(PageBreak())
+            # Relaciones
+            elements.append(Paragraph("Relaciones de Usuarios", styles['Heading1']))
+            if not relationships_df.empty:
+                data = [relationships_df.columns.tolist()] + relationships_df.astype(str).values.tolist()
+                t = Table(data, repeatRows=1)
+                t.setStyle(TableStyle([
+                    ('BACKGROUND', (0,0), (-1,0), colors.grey),
+                    ('TEXTCOLOR', (0,0), (-1,0), colors.whitesmoke),
+                    ('ALIGN', (0,0), (-1,-1), 'LEFT'),
+                    ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
+                    ('BOTTOMPADDING', (0,0), (-1,0), 8),
+                    ('BACKGROUND', (0,1), (-1,-1), colors.beige),
+                    ('GRID', (0,0), (-1,-1), 0.5, colors.black),
+                ]))
+                elements.append(t)
+            else:
+                elements.append(Paragraph("Sin datos de relaciones", styles['Normal']))
+            elements.append(PageBreak())
+            # Estadísticas
+            elements.append(Paragraph("Estadísticas", styles['Heading1']))
+            if not stats_df.empty:
+                data = [stats_df.columns.tolist()] + stats_df.astype(str).values.tolist()
+                t = Table(data, repeatRows=1)
+                t.setStyle(TableStyle([
+                    ('BACKGROUND', (0,0), (-1,0), colors.grey),
+                    ('TEXTCOLOR', (0,0), (-1,0), colors.whitesmoke),
+                    ('ALIGN', (0,0), (-1,-1), 'LEFT'),
+                    ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
+                    ('BOTTOMPADDING', (0,0), (-1,0), 8),
+                    ('BACKGROUND', (0,1), (-1,-1), colors.beige),
+                    ('GRID', (0,0), (-1,-1), 0.5, colors.black),
+                ]))
+                elements.append(t)
+            else:
+                elements.append(Paragraph("Sin datos de estadísticas", styles['Normal']))
+            elements.append(PageBreak())
+            # Resumen por País
+            elements.append(Paragraph("Resumen por País", styles['Heading1']))
+            if not country_summary.empty:
+                data = [list(country_summary.columns)] + country_summary.reset_index().astype(str).values.tolist()
+                t = Table(data, repeatRows=1)
+                t.setStyle(TableStyle([
+                    ('BACKGROUND', (0,0), (-1,0), colors.grey),
+                    ('TEXTCOLOR', (0,0), (-1,0), colors.whitesmoke),
+                    ('ALIGN', (0,0), (-1,-1), 'LEFT'),
+                    ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
+                    ('BOTTOMPADDING', (0,0), (-1,0), 8),
+                    ('BACKGROUND', (0,1), (-1,-1), colors.beige),
+                    ('GRID', (0,0), (-1,-1), 0.5, colors.black),
+                ]))
+                elements.append(t)
+            else:
+                elements.append(Paragraph("Sin datos de resumen por país", styles['Normal']))
+            elements.append(PageBreak())
+            # Resumen por Rol
+            elements.append(Paragraph("Resumen por Rol", styles['Heading1']))
+            if not role_summary.empty:
+                data = [list(role_summary.columns)] + role_summary.reset_index().astype(str).values.tolist()
+                t = Table(data, repeatRows=1)
+                t.setStyle(TableStyle([
+                    ('BACKGROUND', (0,0), (-1,0), colors.grey),
+                    ('TEXTCOLOR', (0,0), (-1,0), colors.whitesmoke),
+                    ('ALIGN', (0,0), (-1,-1), 'LEFT'),
+                    ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
+                    ('BOTTOMPADDING', (0,0), (-1,0), 8),
+                    ('BACKGROUND', (0,1), (-1,-1), colors.beige),
+                    ('GRID', (0,0), (-1,-1), 0.5, colors.black),
+                ]))
+                elements.append(t)
+            else:
+                elements.append(Paragraph("Sin datos de resumen por rol", styles['Normal']))
+            doc.build(elements)
+            output.seek(0)
+            timestamp = datetime.now(pytz.timezone('America/Bogota')).strftime('%Y%m%d_%H%M%S')
+            filename = f"reporte_usuarios_{timestamp}.pdf"
+            return StreamingResponse(
+                output,
+                media_type="application/pdf",
+                headers={"Content-Disposition": f"attachment; filename={filename}"}
+            )
         else:
-            # Reporte general de relaciones
-            query = text("""
-                SELECT 
-                    u1.name || ' ' || u1.last_name as nombre_completo,
-                    u1.email as usuario_correo,
-                    u2.name || ' ' || u2.last_name as nombre_completo,
-                    u2.email as relacionado_correo,
-                    pv.value as tipo_relacion,
-                    os.name as estado_relacion,
-                    ur.created_at as fecha_creacion
-                FROM c_user_relationship ur
-                JOIN m_users u1 ON ur.user_id = u1.id
-                JOIN m_users u2 ON ur.user_relationship_id = u2.id
-                JOIN m_parameters_values pv ON ur.relationship_type_id = pv.id
-                JOIN m_object_states os ON ur.relationship_status_id = os.id
-                WHERE ur.deleted_at IS NULL
-                ORDER BY ur.created_at DESC
-            """)
-            result = await self.db_session.execute(query)
+            # Excel (comportamiento original)
+            output = BytesIO()
+            with pd.ExcelWriter(output, engine='openpyxl') as writer:
+                users_df.to_excel(writer, sheet_name='Usuarios', index=False)
+                relationships_df.to_excel(writer, sheet_name='Relaciones', index=False)
+                stats_df.to_excel(writer, sheet_name='Estadísticas', index=False)
+                if not country_summary.empty:
+                    country_summary.to_excel(writer, sheet_name='Resumen por País')
+                if not role_summary.empty:
+                    role_summary.to_excel(writer, sheet_name='Resumen por Rol')
+            output.seek(0)
+            timestamp = datetime.now(pytz.timezone('America/Bogota')).strftime('%Y%m%d_%H%M%S')
+            filename = f"reporte_usuarios_{timestamp}.xlsx"
+            return StreamingResponse(
+                output,
+                media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                headers={"Content-Disposition": f"attachment; filename={filename}"}
+            )
+
+    async def generate_user_relationships_report(self, user_id: Optional[int] = None, format: str = "excel") -> StreamingResponse:
+        """Genera un reporte específico de relaciones de usuarios en Excel o PDF"""
+        
+        if not user_id:
+            raise HTTPException(status_code=400, detail="el id del usuario es requerido")
+        
+        query = text("""
+            SELECT 
+                u1.name || ' ' || u1.last_name as usuario_nombre,
+                u1.email as usuario_correo,
+                u2.name || ' ' || u2.last_name as relacionado_nombre,
+                u2.email as relacionado_correo,
+                pv.value as tipo_relacion,
+                os.name as estado_relacion,
+                ur.created_at as fecha_creacion
+            FROM c_user_relationship ur
+            JOIN m_users u1 ON ur.user_id = u1.id
+            JOIN m_users u2 ON ur.user_relationship_id = u2.id
+            JOIN m_parameters_values pv ON ur.relationship_type_id = pv.id
+            JOIN m_object_states os ON ur.relationship_status_id = os.id
+            WHERE ur.deleted_at IS NULL 
+            AND (ur.user_id = :user_id OR ur.user_relationship_id = :user_id)
+            ORDER BY ur.created_at DESC
+        """)
+        result = await self.db_session.execute(query, {"user_id": user_id})
         
         # Convertir a DataFrame
         df = pd.DataFrame(result.fetchall(), columns=pd.Index(result.keys()))
         
-        # Convertir fechas con timezone a timezone-naive para Excel
+        # Convertir fechas con timezone a timezone-naive para Excel/PDF
         if not df.empty and 'fecha_creacion' in df.columns:
             df['fecha_creacion'] = pd.to_datetime(df['fecha_creacion']).dt.tz_localize(None)
         
-        # Crear archivo Excel
-        output = BytesIO()
-        
-        with pd.ExcelWriter(output, engine='openpyxl') as writer:
-            df.to_excel(writer, sheet_name='Relaciones de Usuarios', index=False)
-            
-                        # Resumen por tipo de relación
+        if format == "pdf":
+            output = BytesIO()
+            doc = SimpleDocTemplate(output, pagesize=landscape(letter))
+            elements = []
+            styles = getSampleStyleSheet()
+            # Tabla principal
+            elements.append(Paragraph("Relaciones de Usuarios", styles['Heading1']))
             if not df.empty:
-                relationship_summary = df.groupby('tipo_relacion').agg({
-                    'usuario_id': 'count'
-                })
-                relationship_summary.columns = ['Total Relaciones']
-                relationship_summary.to_excel(writer, sheet_name='Resumen por Tipo')
-                
-                # Resumen por estado
-                status_summary = df.groupby('estado_relacion').agg({
-                    'usuario_id': 'count'
-                })
-                status_summary.columns = ['Total Relaciones']
-                status_summary.to_excel(writer, sheet_name='Resumen por Estado')
-        
-        output.seek(0)
-        
-        # Generar nombre del archivo
-        timestamp = datetime.now(pytz.timezone('America/Bogota')).strftime('%Y%m%d_%H%M%S')
-        filename = f"reporte_relaciones_{timestamp}.xlsx"
-        
-        return StreamingResponse(
-            output,
-            media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            headers={"Content-Disposition": f"attachment; filename={filename}"}
-        ) 
+                data = [df.columns.tolist()] + df.astype(str).values.tolist()
+                col_widths = [max(60, min(200, max([len(str(x)) for x in [col] + df[col].astype(str).tolist()]) * 5)) for col in df.columns]
+                t = Table(data, repeatRows=1, colWidths=col_widths)
+                t.setStyle(TableStyle([
+                    ('FONTSIZE', (0,0), (-1,-1), 6),
+                    ('BACKGROUND', (0,0), (-1,0), colors.grey),
+                    ('TEXTCOLOR', (0,0), (-1,0), colors.whitesmoke),
+                    ('ALIGN', (0,0), (-1,-1), 'LEFT'),
+                    ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
+                    ('BOTTOMPADDING', (0,0), (-1,0), 5),
+                    ('BACKGROUND', (0,1), (-1,-1), colors.beige),
+                    ('GRID', (0,0), (-1,-1), 0.5, colors.black),
+                ]))
+                elements.append(t)
+            else:
+                elements.append(Paragraph("Sin datos de relaciones", styles['Normal']))
+            elements.append(PageBreak())
+            # Resumen por tipo de relación
+            if not df.empty and ('tipo_relacion' in df.columns):
+                relationship_summary = df.groupby('tipo_relacion').size().reset_index(name='Total Relaciones')
+                elements.append(Paragraph("Resumen por Tipo de Relación", styles['Heading1']))
+                data = [relationship_summary.columns.tolist()] + relationship_summary.astype(str).values.tolist()
+                t = Table(data, repeatRows=1)
+                t.setStyle(TableStyle([
+                    ('FONTSIZE', (0,0), (-1,-1), 7),
+                    ('BACKGROUND', (0,0), (-1,0), colors.grey),
+                    ('TEXTCOLOR', (0,0), (-1,0), colors.whitesmoke),
+                    ('ALIGN', (0,0), (-1,-1), 'LEFT'),
+                    ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
+                    ('BOTTOMPADDING', (0,0), (-1,0), 6),
+                    ('BACKGROUND', (0,1), (-1,-1), colors.beige),
+                    ('GRID', (0,0), (-1,-1), 0.5, colors.black),
+                ]))
+                elements.append(t)
+                elements.append(PageBreak())
+            # Resumen por estado
+            if not df.empty and ('estado_relacion' in df.columns):
+                status_summary = df.groupby('estado_relacion').size().reset_index(name='Total Relaciones')
+                elements.append(Paragraph("Resumen por Estado de Relación", styles['Heading1']))
+                data = [status_summary.columns.tolist()] + status_summary.astype(str).values.tolist()
+                t = Table(data, repeatRows=1)
+                t.setStyle(TableStyle([
+                    ('FONTSIZE', (0,0), (-1,-1), 7),
+                    ('BACKGROUND', (0,0), (-1,0), colors.grey),
+                    ('TEXTCOLOR', (0,0), (-1,0), colors.whitesmoke),
+                    ('ALIGN', (0,0), (-1,-1), 'LEFT'),
+                    ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
+                    ('BOTTOMPADDING', (0,0), (-1,0), 6),
+                    ('BACKGROUND', (0,1), (-1,-1), colors.beige),
+                    ('GRID', (0,0), (-1,-1), 0.5, colors.black),
+                ]))
+                elements.append(t)
+            doc.build(elements)
+            output.seek(0)
+            timestamp = datetime.now(pytz.timezone('America/Bogota')).strftime('%Y%m%d_%H%M%S')
+            filename = f"reporte_relaciones_{timestamp}.pdf"
+            return StreamingResponse(
+                output,
+                media_type="application/pdf",
+                headers={"Content-Disposition": f"attachment; filename={filename}"}
+            )
+        else:
+            # Excel (comportamiento original)
+            output = BytesIO()
+            with pd.ExcelWriter(output, engine='openpyxl') as writer:
+                df.to_excel(writer, sheet_name='Relaciones de Usuarios', index=False)
+                # Resumen por tipo de relación
+                if not df.empty:
+                    if 'tipo_relacion' in df.columns:
+                        relationship_summary = df.groupby('tipo_relacion').size().reset_index(name='Total Relaciones')
+                        relationship_summary.to_excel(writer, sheet_name='Resumen por Tipo', index=False)
+                    if 'estado_relacion' in df.columns:
+                        status_summary = df.groupby('estado_relacion').size().reset_index(name='Total Relaciones')
+                        status_summary.to_excel(writer, sheet_name='Resumen por Estado', index=False)
+            output.seek(0)
+            timestamp = datetime.now(pytz.timezone('America/Bogota')).strftime('%Y%m%d_%H%M%S')
+            filename = f"reporte_relaciones_{timestamp}.xlsx"
+            return StreamingResponse(
+                output,
+                media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                headers={"Content-Disposition": f"attachment; filename={filename}"}
+            ) 

@@ -36,3 +36,8 @@ aiosmtplib>=1.1.6
 # Excel report dependencies
 pandas>=2.0.0
 openpyxl>=3.1.0
+
+# PDF report dependencies
+reportlab>=4.0.0
+fpdf>=1.7.2
+matplotlib>=3.7.0
