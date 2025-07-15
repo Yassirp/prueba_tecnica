@@ -16,11 +16,37 @@ class ReportService:
     def __init__(self, db_session: AsyncSession):
         self.db_session = db_session
 
-    async def generate_users_report(self, format: str = "excel") -> StreamingResponse:
-        """Genera un reporte de usuarios en Excel o PDF según el parámetro 'format'"""
-        
-        # Consultas SQL (igual que antes)
-        users_query = text("""
+    async def generate_users_report(self, format: str = "excel", filters: dict = None) -> StreamingResponse:
+        """Genera un reporte de usuarios en Excel o PDF según el parámetro 'format' y aplica filtros opcionales"""
+        filters = filters or {}
+        where_clauses = ["u.deleted_at IS NULL"]
+        params = {}
+        if filters.get("role_id") is not None:
+            where_clauses.append("u.role_id = :role_id")
+            params["role_id"] = filters["role_id"]
+        if filters.get("department_id") is not None:
+            where_clauses.append("u.department_id = :department_id")
+            params["department_id"] = filters["department_id"]
+        if filters.get("municipality_id") is not None:
+            where_clauses.append("u.municipality_id = :municipality_id")
+            params["municipality_id"] = filters["municipality_id"]
+        if filters.get("country_id") is not None:
+            where_clauses.append("u.country_id = :country_id")
+            params["country_id"] = filters["country_id"]
+        if filters.get("is_active") is not None:
+            where_clauses.append("u.is_active = :is_active")
+            params["is_active"] = filters["is_active"]
+        if filters.get("state") is not None:
+            where_clauses.append("u.state = :state")
+            params["state"] = filters["state"]
+        if filters.get("created_at_from"):
+            where_clauses.append("u.created_at >= :created_at_from")
+            params["created_at_from"] = filters["created_at_from"]
+        if filters.get("created_at_to"):
+            where_clauses.append("u.created_at <= :created_at_to")
+            params["created_at_to"] = filters["created_at_to"]
+        where_sql = " AND ".join(where_clauses)
+        users_query = text(f"""
             SELECT 
                 CONCAT(u.name, ' ', u.last_name) as nombre_completo,
                 u.email as correo_electronico,
@@ -40,7 +66,7 @@ class ReportService:
             LEFT JOIN municipalities m ON u.municipality_id = m.id
             LEFT JOIN m_roles r ON u.role_id = r.id
             LEFT JOIN m_parameters_values pv ON u.document_type = pv.id
-            WHERE u.deleted_at IS NULL
+            WHERE {where_sql}
             ORDER BY u.id
         """)
         relationships_query = text("""
@@ -73,7 +99,7 @@ class ReportService:
         """)
         
         # Ejecutar consultas
-        users_result = await self.db_session.execute(users_query)
+        users_result = await self.db_session.execute(users_query, params)
         relationships_result = await self.db_session.execute(relationships_query)
         stats_result = await self.db_session.execute(stats_query)
         
@@ -251,9 +277,7 @@ class ReportService:
                 os.name as estado_relacion,
                 ur.created_at as fecha_creacion
             FROM c_user_relationship ur
-            JOIN m_users u1 ON ur.user_id = u1.id
-            JOIN m_users u2 ON ur.user_relationship_id = u2.id
-            JOIN m_parameters_values pv ON ur.relationship_type_id = pv.id
+            JOIN m_users u1 ON ur.user_id = u1.idiid
             JOIN m_object_states os ON ur.relationship_status_id = os.id
             WHERE ur.deleted_at IS NULL 
             AND (ur.user_id = :user_id OR ur.user_relationship_id = :user_id)
