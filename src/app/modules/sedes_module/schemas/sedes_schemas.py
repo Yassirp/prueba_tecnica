@@ -10,13 +10,13 @@ class SedeBase(BaseModel):
     code: Optional[str] = Field(None, description="Código de la sede.")
     type_id: Optional[int] = Field(None, description="Tipo de sede (id de parámetro)")
     department_id: Optional[int] = Field(None, description="Departamento (id de parámetro)")
-    city_id: Optional[int] = Field(None, description="Ciudad (id de parámetro)")
+    municipality_id: Optional[int] = Field(None, description="Ciudad (id de parámetro)")
     country_id: Optional[int] = Field(None, description="País (id de parámetro)")
     address: Optional[str] = Field(None, description="Dirección de la sede.")
     phone: Optional[str] = Field(None, description="Teléfono de la sede.")
     email: Optional[str] = Field(None, description="Email de la sede.")
     website: Optional[str] = Field(None, description="Sitio web de la sede.")
-    logo: Optional[str] = Field(None, description="Logo de la sede.")
+    #logo: Optional[str] = Field(None, description="Logo de la sede.")
     description: Optional[str] = Field(None, description="Descripción de la sede.")
     active: Optional[bool] = Field(True, description="Estado activo de la sede.")
 
@@ -28,7 +28,7 @@ class SedeUpdate(BaseModel):
     code: Optional[str] = None
     type_id: Optional[int] = None
     department_id: Optional[int] = None
-    city_id: Optional[int] = None
+    municipality_id: Optional[int] = None
     country_id: Optional[int] = None
     address: Optional[str] = None
     phone: Optional[str] = None

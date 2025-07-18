@@ -33,13 +33,13 @@ async def get_sede(sede_id: int, db: AsyncSession = Depends(get_db)):
 @router.post("/create", response_model=SedeOut, status_code=status.HTTP_201_CREATED)
 async def create_sede(data: SedeCreate, db: AsyncSession = Depends(get_db)):
     service = SedeService(db)
-    sede = await service.create(data.model_dump())
+    sede = await service.create(data)
     return http_response(message=SedeMessages.OK_CREATED, data={"sede": sede})
 
 @router.put("/{sede_id}", response_model=SedeOut, status_code=status.HTTP_200_OK)
 async def update_sede(sede_id: int, data: SedeUpdate, db: AsyncSession = Depends(get_db)):
     service = SedeService(db)
-    updated_sede = await service.update(sede_id, data.model_dump(exclude_unset=True))
+    updated_sede = await service.update(sede_id, data)
     if not updated_sede:
         raise HTTPException(status_code=404, detail=SedeMessages.ERROR_NOT_FOUND)
     return http_response(message=SedeMessages.OK_UPDATED, data={"sede": updated_sede})
