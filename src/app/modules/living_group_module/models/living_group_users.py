@@ -2,6 +2,7 @@ from sqlalchemy import Column, Integer, DateTime, String, Boolean, ForeignKey, J
 from src.app.shared.bases.base_model import BaseModel
 from datetime import datetime
 import pytz
+from sqlalchemy.orm import relationship
 
 class LivingGroupUser(BaseModel):
     __tablename__ = 'o_living_group_users'
@@ -16,3 +17,6 @@ class LivingGroupUser(BaseModel):
     created_at = Column(DateTime(timezone=True), default=datetime.now(pytz.timezone('America/Bogota')))
     updated_at = Column(DateTime(timezone=True), onupdate=datetime.now(pytz.timezone('America/Bogota')))
     deleted_at = Column(DateTime(timezone=True), nullable=True)
+    
+    getLivingGroup = relationship("LivingGroup", foreign_keys=[living_group_id], back_populates="getLivingGroupUsers")
+    getUser = relationship("User", foreign_keys=[user_id], back_populates="getLivingGroupUsers")

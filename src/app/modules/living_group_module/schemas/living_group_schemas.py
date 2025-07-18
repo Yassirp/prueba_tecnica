@@ -1,9 +1,10 @@
 # Archivo generado automáticamente para living_group - schemas
 
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 from datetime import datetime
-
+if TYPE_CHECKING:
+    from src.app.modules.sedes_module.schemas.sedes_schemas import SedeOut
 class LivingGroupBase(BaseModel):
     name: str = Field(..., description="Nombre del grupo.")
     description: Optional[str] = Field(None, description="Descripción del grupo.")
@@ -36,3 +37,5 @@ class LivingGroupOut(LivingGroupBase):
         "from_attributes": True
     }
 
+class LivingGroupOutRelations(LivingGroupOut):
+    getSede: Optional["SedeOut"]

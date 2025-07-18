@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, status, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Dict, Optional, List
 from src.app.config.database.session import get_db
-from src.app.modules.living_group_module.schemas.living_group_schemas import LivingGroupCreate, LivingGroupUpdate, LivingGroupOut
+from src.app.modules.living_group_module.schemas.living_group_schemas import LivingGroupCreate, LivingGroupUpdate, LivingGroupOut, LivingGroupOutRelations
 from src.app.modules.living_group_module.services.living_group_service import LivingGroupService
 from src.app.shared.utils.request_utils import get_filter_params, paginated_response, http_response
 from src.app.shared.constants.messages import GroupMessages
@@ -29,6 +29,20 @@ async def get_living_group(living_group_id: int, db: AsyncSession = Depends(get_
     if not living_group:
         raise HTTPException(status_code=404, detail=GroupMessages.ERROR_NOT_FOUND)
     return http_response(message=GroupMessages.OK_GET, data={"living_group": living_group})
+
+@router.get("/{living_group_id}/relationship", response_model=LivingGroupOutRelations, status_code=status.HTTP_200_OK)
+async def get_living_group_with_relations(living_group_id: int, db: AsyncSession = Depends(get_db)):
+    service = LivingGroupService(db)
+    living_group = await service.get_by_id_with_relations(living_group_id)
+    if not living_group:
+        raise HTTPException(status_code=404, detail=GroupMessages.ERROR_NOT_FOUND)
+    return http_response(message=GroupMessages.OK_GET, data={"living_group": living_group})
+
+@router.get("/all-relationship", response_model=List[LivingGroupOutRelations], status_code=status.HTTP_200_OK)
+async def get_living_groups_with_relations(db: AsyncSession = Depends(get_db)):
+    service = LivingGroupService(db)
+    living_groups = await service.get_all_with_relations()
+    return http_response(message=GroupMessages.OK_GET_ALL, data={"living_groups": living_groups})
 
 @router.post("/create", response_model=LivingGroupOut, status_code=status.HTTP_201_CREATED)
 async def create_living_group(data: LivingGroupCreate, db: AsyncSession = Depends(get_db)):

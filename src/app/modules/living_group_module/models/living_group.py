@@ -21,3 +21,6 @@ class LivingGroup(BaseModel):
     deleted_at = Column(DateTime(timezone=True), nullable=True)
     
     getSede = relationship("Sede", foreign_keys=[sede_id], back_populates="getLivingGroups")
+    
+    
+    getLivingGroupUsers = relationship("LivingGroupUser", back_populates="getLivingGroup")
