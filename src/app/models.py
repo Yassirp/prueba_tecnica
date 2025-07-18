@@ -27,5 +27,13 @@ from src.app.modules.flow_module.models.flow_object_states import FlowObjectStat
 from src.app.modules.user_module.models.users import User
 from src.app.modules.user_module.models.user_relationship import UserRelationship
 
+# Sedes
+from src.app.modules.sedes_module.models.sedes import Sede
+
+# Eventos
+from src.app.modules.event_module.models.groups import Group
+
+
+
 
 from src.app.shared.bases.base_model import BaseModel

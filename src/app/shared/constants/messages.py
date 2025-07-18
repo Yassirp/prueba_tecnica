@@ -102,3 +102,21 @@ class LoginMessages(GlobalMessages):
 class LogoutMessages(GlobalMessages):
     SUCCESS = "Cerrar session realizado correctamente"
     ERROR = "Cerrar session fallido"
+
+# Sedes
+class SedeMessages(GlobalMessages):
+    OK_GET_ALL = "Sedes obtenidas correctamente"
+    OK_GET = "Sede obtenida correctamente"
+    OK_CREATED = "Sede creada correctamente"
+    OK_UPDATED = "Sede actualizada correctamente"
+    OK_DELETED = "Sede eliminada correctamente"
+    ERROR_NOT_FOUND = "Sede no encontrada"
+
+# Grupos
+class GroupMessages(GlobalMessages):
+    OK_GET_ALL = "Grupos obtenidos correctamente"
+    OK_GET = "Grupo obtenido correctamente"
+    OK_CREATED = "Grupo creado correctamente"
+    OK_UPDATED = "Grupo actualizado correctamente"
+    OK_DELETED = "Grupo eliminado correctamente"
+    ERROR_NOT_FOUND = "Grupo no encontrado"

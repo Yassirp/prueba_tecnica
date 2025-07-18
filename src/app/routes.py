@@ -6,6 +6,9 @@ from src.app.modules.parameters_module.routes.parameters_routes import router as
 from src.app.modules.ubication_module.routes.contry_routes import router as country_routes
 from src.app.modules.permission_module.routes.role_routes import router as role_routes
 from src.app.modules.user_module.routes.report_routes import router as report_routes
+from src.app.modules.event_module.routes.group_routes import router as group_routes
+from src.app.modules.sedes_module.routes.sedes_routes import router as sedes_routes
+
 router = APIRouter()
 
 router.include_router(user_routes)
@@ -15,3 +18,5 @@ router.include_router(parameters_routes)
 router.include_router(country_routes)
 router.include_router(role_routes)
 router.include_router(report_routes)
+router.include_router(group_routes)
+router.include_router(sedes_routes)
