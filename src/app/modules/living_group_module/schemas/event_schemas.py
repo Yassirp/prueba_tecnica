@@ -7,7 +7,7 @@ class EventBase(BaseModel):
     living_group_id: Optional[int] = Field(None, description="ID del grupo de convivencia.")
     max_members: Optional[int] = Field(0, description="Máximo de miembros del evento.")
     min_members: Optional[int] = Field(0, description="Mínimo de miembros del evento.")
-    out: Optional[bool] = Field(False, description="¿Es un evento de salida?")
+    out: Optional[bool] = Field(False, description="¿Permite usuarios externos al living group?")
     start_date: Optional[datetime] = Field(None, description="Fecha de inicio del evento.")
     end_date: Optional[datetime] = Field(None, description="Fecha de fin del evento.")
     active: Optional[bool] = Field(True, description="Estado activo del evento.")

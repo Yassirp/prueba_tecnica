@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, status, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Dict, Optional, List
 from src.app.config.database.session import get_db
-from src.app.modules.sedes_module.schemas.sedes_schemas import SedeCreate, SedeUpdate, SedeOut
+from src.app.modules.sedes_module.schemas.sedes_schemas import SedeCreate, SedeUpdate, SedeOut, SedeOutRelations
 from src.app.modules.sedes_module.services.sedes_service import SedeService
 from src.app.shared.utils.request_utils import get_filter_params, paginated_response, http_response
 from src.app.shared.constants.messages import SedeMessages
@@ -21,6 +21,28 @@ async def get_sedes(
     sedes, total = await service.get_all(limit=limit, offset=offset, order_by=order_by, filters=filters)
     data = paginated_response(sedes, total, limit, offset)
     return http_response(message=SedeMessages.OK_GET_ALL, data=data)
+
+@router.get("/all-relationship", response_model=List[SedeOutRelations], status_code=status.HTTP_200_OK)
+async def get_sedes_with_relations(
+    db: AsyncSession = Depends(get_db),
+    limit: Optional[int] = Query(None, ge=1, le=100, description="Número de elementos por página"),
+    offset: Optional[int] = Query(None, ge=0, description="Número de elementos a omitir"),
+    order_by: Optional[str] = Query(None, description="Campo para ordenar (ej: 'id:asc' o 'name:desc')"),
+    filters: Dict[str, str] = Depends(get_filter_params)
+):
+    service = SedeService(db)
+    sedes, total = await service.get_all_with_relations(limit=limit, offset=offset, order_by=order_by, filters=filters)
+    data = paginated_response(sedes, total, limit, offset)
+    return http_response(message=SedeMessages.OK_GET_ALL, data=data)
+
+@router.get("/{sede_id}/relationship", response_model=SedeOutRelations, status_code=status.HTTP_200_OK)
+async def get_sede_with_relations(sede_id: int, db: AsyncSession = Depends(get_db)):
+    service = SedeService(db)
+    sede = await service.get_by_id_with_relations(sede_id)
+    if not sede:
+        raise HTTPException(status_code=404, detail=SedeMessages.ERROR_NOT_FOUND)
+    return http_response(message=SedeMessages.OK_GET, data={"sede": sede})
+
 
 @router.get("/{sede_id}", response_model=SedeOut, status_code=status.HTTP_200_OK)
 async def get_sede(sede_id: int, db: AsyncSession = Depends(get_db)):

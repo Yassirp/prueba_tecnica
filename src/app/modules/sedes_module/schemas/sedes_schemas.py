@@ -1,12 +1,12 @@
 # Archivo generado automáticamente para sedes - schemas
 
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime
 from src.app.modules.ubication_module.schemas.department_schemas import DepartmentOut
 from src.app.modules.ubication_module.schemas.minicipality_schemas import MunicipalityOut
 from src.app.modules.ubication_module.schemas.country_schemas import CountryOut
-
+from src.app.modules.living_group_module.schemas.living_group_schemas import LivingGroupOut
 class SedeBase(BaseModel):
     name: str = Field(..., description="Nombre de la sede.")
     code: Optional[str] = Field(None, description="Código de la sede.")
@@ -50,3 +50,9 @@ class SedeOut(SedeBase):
     model_config = {
         "from_attributes": True
     }
+
+class SedeOutRelations(SedeOut):
+    getDepartment: Optional[DepartmentOut]
+    getMunicipality: Optional[MunicipalityOut]
+    getCountry: Optional[CountryOut]
+    getLivingGroups: Optional[List[LivingGroupOut]]

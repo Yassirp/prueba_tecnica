@@ -3,6 +3,7 @@ from sqlalchemy import Column, Integer, DateTime, String, Boolean, ForeignKey, D
 from src.app.shared.bases.base_model import BaseModel
 from datetime import datetime
 import pytz
+from sqlalchemy.orm import relationship
 
 class LivingGroup(BaseModel):
     __tablename__ = 'o_living_groups'
@@ -18,3 +19,5 @@ class LivingGroup(BaseModel):
     created_at = Column(DateTime(timezone=True), default=datetime.now(pytz.timezone('America/Bogota')))
     updated_at = Column(DateTime(timezone=True), onupdate=datetime.now(pytz.timezone('America/Bogota')))
     deleted_at = Column(DateTime(timezone=True), nullable=True)
+    
+    getSede = relationship("Sede", foreign_keys=[sede_id], back_populates="getLivingGroups")

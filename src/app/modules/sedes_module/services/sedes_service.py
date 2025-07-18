@@ -14,7 +14,7 @@ from src.app.modules.ubication_module.repositories.municipality_repository impor
 from src.app.modules.ubication_module.repositories.country_repository import CountryRepository
 from src.app.modules.ubication_module.repositories.deparment_repository import DepartmentRepository
 from fastapi import HTTPException, status
-
+from typing import Optional, Dict
 
 class SedeService(BaseService[Sede, SedeOut]):
     def __init__(self, db_session: AsyncSession):
@@ -25,6 +25,13 @@ class SedeService(BaseService[Sede, SedeOut]):
             db_session=db_session,
             out_schema=SedeOut,
         )
+
+
+    async def get_all_with_relations(self, limit: Optional[int] = None, offset: Optional[int] = None, order_by: Optional[str] = None, filters: Optional[Dict[str, str]] = None):
+        return await self.repo.get_all_with_relationships(limit=limit, offset=offset, order_by=order_by, filters=filters)
+
+    async def get_by_id_with_relations(self, sede_id: int):
+        return await self.repo.get_by_id_with_relations(sede_id)
 
     async def _validate_foreign_keys(self, data: SedeCreate | SedeUpdate):
         if data.type_id:
