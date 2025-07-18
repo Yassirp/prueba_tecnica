@@ -31,9 +31,7 @@ from src.app.modules.user_module.models.user_relationship import UserRelationshi
 from src.app.modules.sedes_module.models.sedes import Sede
 
 # Eventos
-from src.app.modules.event_module.models.groups import Group
-
-
+from src.app.modules.living_group_module.models.living_group import LivingGroup
 
 
 from src.app.shared.bases.base_model import BaseModel
