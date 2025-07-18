@@ -43,6 +43,7 @@ class SedeOut(SedeBase):
     created_at: Optional[datetime]
     updated_at: Optional[datetime]
     deleted_at: Optional[datetime]
+
     
     model_config = {
         "from_attributes": True

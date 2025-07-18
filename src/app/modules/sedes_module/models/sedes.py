@@ -2,6 +2,7 @@
 from sqlalchemy import Column, Integer, Text, DateTime, String, Boolean, TIMESTAMP,func, ForeignKey
 from src.app.shared.bases.base_model import BaseModel
 from datetime import datetime
+from sqlalchemy.orm import relationship
 import pytz
 
 class Sede(BaseModel):
@@ -23,3 +24,4 @@ class Sede(BaseModel):
     created_at = Column(DateTime(timezone=True), default=datetime.now(pytz.timezone('America/Bogota')))
     updated_at = Column(DateTime(timezone=True), onupdate=datetime.now(pytz.timezone('America/Bogota')))
     deleted_at = Column(DateTime(timezone=True), nullable=True)
+

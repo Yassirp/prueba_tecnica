@@ -7,7 +7,7 @@ from src.app.shared.bases.base_repository import BaseRepository
 from src.app.shared.utils.query_utils import apply_filters, apply_order_by
 
 class CountryRepository(BaseRepository[Country]):
-    def __init__(self, db_session: AsyncSession, model: type[Country] = Country):
+    def __init__(self, model: type[Country], db_session: AsyncSession):
         super().__init__(model, db_session)
         
     async def get_all_with_relationships(self, limit: int, offset: int, order_by: str, filters: dict = {}) -> tuple:
