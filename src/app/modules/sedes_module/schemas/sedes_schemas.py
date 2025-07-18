@@ -45,9 +45,6 @@ class SedeOut(SedeBase):
     created_at: Optional[datetime]
     updated_at: Optional[datetime]
     deleted_at: Optional[datetime]
-    getDepartment: Optional[DepartmentOut]
-    getMunicipality: Optional[MunicipalityOut]
-    getCountry: Optional[CountryOut]
 
     
     model_config = {
