@@ -9,7 +9,7 @@ class LivingGroupBase(BaseModel):
     description: Optional[str] = Field(None, description="Descripción del grupo.")
     max_members: Optional[int] = Field(0, description="Máximo de miembros del grupo.")
     min_members: Optional[int] = Field(0, description="Mínimo de miembros del grupo.")
-    leader_id: Optional[int] = Field(None, description="ID del líder del grupo.")
+    #leader_id: Optional[int] = Field(None, description="ID del líder del grupo.")
     value: Optional[float] = Field(0, description="Valor del grupo.")
     sede_id: Optional[int] = Field(None, description="ID de la sede del grupo.")
     active: Optional[bool] = Field(True, description="Estado activo del grupo.")
@@ -22,7 +22,7 @@ class LivingGroupUpdate(BaseModel):
     description: Optional[str] = None
     max_members: Optional[int] = None
     min_members: Optional[int] = None
-    leader_id: Optional[int] = None
+    #leader_id: Optional[int] = None
     sede_id: Optional[int] = None
     active: Optional[bool] = None
 

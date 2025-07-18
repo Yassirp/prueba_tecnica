@@ -4,6 +4,9 @@ from src.app.shared.bases.base_model import BaseModel
 from datetime import datetime
 from sqlalchemy.orm import relationship
 import pytz
+from src.app.modules.ubication_module.models.departments import Department
+from src.app.modules.ubication_module.models.municipalities import Municipality
+from src.app.modules.ubication_module.models.countries import Country
 
 class Sede(BaseModel):
     __tablename__ = 'm_sedes'
@@ -25,3 +28,6 @@ class Sede(BaseModel):
     updated_at = Column(DateTime(timezone=True), onupdate=datetime.now(pytz.timezone('America/Bogota')))
     deleted_at = Column(DateTime(timezone=True), nullable=True)
 
+    getDepartment = relationship("Department", foreign_keys=[department_id])
+    getMunicipality = relationship("Municipality", foreign_keys=[municipality_id])
+    getCountry = relationship("Country", foreign_keys=[country_id])

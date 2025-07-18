@@ -3,7 +3,9 @@
 from pydantic import BaseModel, Field
 from typing import Optional
 from datetime import datetime
-from src.app.modules.parameters_module.schemas.parameter_values_schemas import ParameterValueOut
+from src.app.modules.ubication_module.schemas.department_schemas import DepartmentOut
+from src.app.modules.ubication_module.schemas.minicipality_schemas import MunicipalityOut
+from src.app.modules.ubication_module.schemas.country_schemas import CountryOut
 
 class SedeBase(BaseModel):
     name: str = Field(..., description="Nombre de la sede.")
@@ -43,6 +45,9 @@ class SedeOut(SedeBase):
     created_at: Optional[datetime]
     updated_at: Optional[datetime]
     deleted_at: Optional[datetime]
+    getDepartment: Optional[DepartmentOut]
+    getMunicipality: Optional[MunicipalityOut]
+    getCountry: Optional[CountryOut]
 
     
     model_config = {

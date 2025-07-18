@@ -34,7 +34,7 @@ async def get_living_group_user(user_id: int, db: AsyncSession = Depends(get_db)
 @router.post("/create", response_model=LivingGroupUserOut, status_code=status.HTTP_201_CREATED)
 async def create_living_group_user(data: LivingGroupUserCreate, db: AsyncSession = Depends(get_db)):
     service = LivingGroupUserService(db)
-    user = await service.create(data.model_dump())
+    user = await service.create(data)
     return http_response(message=LivingGroupUserMessages.OK_CREATED, data={"living_group_user": user})
 
 @router.post("/create-massive", response_model=List[LivingGroupUserOut], status_code=status.HTTP_201_CREATED)
@@ -42,13 +42,13 @@ async def create_living_group_user_massive(data: List[LivingGroupUserCreate], db
     service = LivingGroupUserService(db)
     users = []
     for user in data:  
-        users.append(await service.create(user.model_dump()))
+        users.append(await service.create(user))
     return http_response(message=LivingGroupUserMessages.OK_CREATED, data={"living_group_users": users})
 
 @router.put("/{user_id}", response_model=LivingGroupUserOut, status_code=status.HTTP_200_OK)
 async def update_living_group_user(user_id: int, data: LivingGroupUserUpdate, db: AsyncSession = Depends(get_db)):
     service = LivingGroupUserService(db)
-    updated_user = await service.update(user_id, data.model_dump(exclude_unset=True))
+    updated_user = await service.update(user_id, data)
     if not updated_user:
         raise HTTPException(status_code=404, detail=LivingGroupUserMessages.ERROR_NOT_FOUND)
     return http_response(message=LivingGroupUserMessages.OK_UPDATED, data={"living_group_user": updated_user})
