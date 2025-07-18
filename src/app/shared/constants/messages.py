@@ -129,3 +129,12 @@ class LivingGroupUserMessages(GlobalMessages):
     OK_UPDATED = "Usuario de grupo de convivencia actualizado correctamente"
     OK_DELETED = "Usuario de grupo de convivencia eliminado correctamente"
     ERROR_NOT_FOUND = "Usuario de grupo de convivencia no encontrado"
+
+# Eventos
+class EventMessages(GlobalMessages):
+    OK_GET_ALL = "Eventos obtenidos correctamente"
+    OK_GET = "Evento obtenido correctamente"
+    OK_CREATED = "Evento creado correctamente"
+    OK_UPDATED = "Evento actualizado correctamente"
+    OK_DELETED = "Evento eliminado correctamente"
+    ERROR_NOT_FOUND = "Evento no encontrado"

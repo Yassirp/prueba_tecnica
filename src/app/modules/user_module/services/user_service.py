@@ -26,7 +26,7 @@ class UserService(BaseService[User, UserOut]):
     def __init__(self, db_session: AsyncSession):
         self.repository = UserRepository(User, db_session)
         self.user_relationship_repository = UserRelationshipRepository(UserRelationship, db_session)
-        self.parameter_value_repository = ParameterValueRepository(ParameterValue, db_session)
+        self.parameter_value_repository = ParameterValueRepository(model=ParameterValue, db_session=db_session)
         self.object_state_repository = ObjectStateRepository(ObjectState, db_session)
         super().__init__(
             model=User,

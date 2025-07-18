@@ -6,7 +6,7 @@ from src.app.shared.bases.base_repository import BaseRepository
 
 
 class ParameterValueRepository(BaseRepository[ParameterValue]):
-    def __init__(self, db_session: AsyncSession, model: type[ParameterValue] = ParameterValue):
+    def __init__(self, model: type[ParameterValue], db_session: AsyncSession):
         super().__init__(model, db_session)
 
     async def get_by_parameter_name(self, name: str):
