@@ -1,8 +1,10 @@
 # Archivo generado automáticamente para living_group - schemas
 
 from pydantic import BaseModel, Field
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING, List
 from datetime import datetime
+from src.app.modules.living_group_module.schemas.living_group_user_schemas import LivingGroupUserOut
+
 if TYPE_CHECKING:
     from src.app.modules.sedes_module.schemas.sedes_schemas import SedeOut
 class LivingGroupBase(BaseModel):
@@ -39,3 +41,4 @@ class LivingGroupOut(LivingGroupBase):
 
 class LivingGroupOutRelations(LivingGroupOut):
     getSede: Optional["SedeOut"]
+    getLivingGroupUsers: Optional[List[LivingGroupUserOut]]

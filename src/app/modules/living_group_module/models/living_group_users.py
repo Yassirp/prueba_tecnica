@@ -19,4 +19,4 @@ class LivingGroupUser(BaseModel):
     deleted_at = Column(DateTime(timezone=True), nullable=True)
     
     getLivingGroup = relationship("LivingGroup", foreign_keys=[living_group_id], back_populates="getLivingGroupUsers")
-    getUser = relationship("User", foreign_keys=[user_id], back_populates="getLivingGroupUsers")
+    #getUser = relationship("User", foreign_keys=[user_id], back_populates="getLivingGroupUsers")

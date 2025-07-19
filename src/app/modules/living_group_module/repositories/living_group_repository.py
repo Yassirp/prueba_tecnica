@@ -45,6 +45,7 @@ class LivingGroupRepository(BaseRepository[LivingGroup]):
     
     def _load_relations(self, query):
         return query.options(
-                selectinload(self.model.getSede)
+                selectinload(self.model.getSede),
+                selectinload(self.model.getLivingGroupUsers)
             )
     
