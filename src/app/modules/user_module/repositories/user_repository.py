@@ -5,7 +5,7 @@ from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
 from src.app.shared.utils.query_utils import apply_filters, apply_order_by
 from sqlalchemy import and_
-
+from src.app.modules.living_group_module.models.living_group_users import LivingGroupUser
 
 class UserRepository(BaseRepository[User]):
     def __init__(self, model: type[User], db_session: AsyncSession):
@@ -62,5 +62,9 @@ class UserRepository(BaseRepository[User]):
                 selectinload(self.model.role),
                 selectinload(self.model.created_by_user),
                 selectinload(self.model.associated_documents),
-                selectinload(self.model.document_type_relationship)
+                selectinload(self.model.document_type_relationship),
+                selectinload(self.model.getLivingGroupUsers)
+                .selectinload(LivingGroupUser.getLivingGroup),
+                selectinload(self.model.getLivingGroupUsers)
+                .selectinload(LivingGroupUser.getType)
             )

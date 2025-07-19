@@ -5,7 +5,7 @@ from src.app.shared.bases.base_repository import BaseRepository
 from sqlalchemy import select, and_
 from src.app.shared.utils.query_utils import apply_filters, apply_order_by
 from sqlalchemy.orm import selectinload
-
+from src.app.modules.living_group_module.models.living_group_users import LivingGroupUser
 class LivingGroupRepository(BaseRepository[LivingGroup]):
     def __init__(self, model: type[LivingGroup], db_session: AsyncSession):
         super().__init__(model, db_session)
@@ -47,5 +47,6 @@ class LivingGroupRepository(BaseRepository[LivingGroup]):
         return query.options(
                 selectinload(self.model.getSede),
                 selectinload(self.model.getLivingGroupUsers)
+                .selectinload(LivingGroupUser.getUser)
             )
     

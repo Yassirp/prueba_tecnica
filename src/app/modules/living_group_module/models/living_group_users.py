@@ -18,5 +18,6 @@ class LivingGroupUser(BaseModel):
     updated_at = Column(DateTime(timezone=True), onupdate=datetime.now(pytz.timezone('America/Bogota')))
     deleted_at = Column(DateTime(timezone=True), nullable=True)
     
+    getType = relationship("ParameterValue", foreign_keys=[type_id], backref="getLivingGroupUsers")
     getLivingGroup = relationship("LivingGroup", foreign_keys=[living_group_id], back_populates="getLivingGroupUsers")
-    #getUser = relationship("User", foreign_keys=[user_id], back_populates="getLivingGroupUsers")
+    getUser = relationship("User", foreign_keys=[user_id], back_populates="getLivingGroupUsers")

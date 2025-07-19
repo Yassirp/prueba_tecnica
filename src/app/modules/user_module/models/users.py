@@ -55,7 +55,7 @@ class User(BaseModel):
     role = relationship("Role", backref="users", foreign_keys=[role_id])
     document_type_relationship = relationship("ParameterValue", backref="users", foreign_keys=[document_type])
     created_by_user = relationship("User", remote_side="User.id", backref="created_users")
-
+    getLivingGroupUsers = relationship("LivingGroupUser", back_populates="getUser")
     associated_documents = relationship(
         "Document",
         primaryjoin=lambda: and_(
