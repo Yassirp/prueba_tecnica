@@ -11,6 +11,8 @@ from src.app.modules.flow_module.repositories.object_state_repository import Obj
 from src.app.modules.flow_module.models.object_states import ObjectState
 from src.app.modules.user_module.repositories.user_relationship_repository import UserRelationshipRepository
 from src.app.modules.user_module.models.user_relationship import UserRelationship
+from src.app.modules.living_group_module.services.living_group_user_service import LivingGroupUserService
+from src.app.modules.living_group_module.schemas.living_group_user_schemas import LivingGroupUserCreate
 from passlib.context import CryptContext
 from fastapi import HTTPException, status
 import random
@@ -28,6 +30,7 @@ class UserService(BaseService[User, UserOut]):
         self.user_relationship_repository = UserRelationshipRepository(UserRelationship, db_session)
         self.parameter_value_repository = ParameterValueRepository(model=ParameterValue, db_session=db_session)
         self.object_state_repository = ObjectStateRepository(ObjectState, db_session)
+        self.living_group_user_service = LivingGroupUserService(db_session)
         super().__init__(
             model=User,
             repository_cls=UserRepository,
@@ -107,6 +110,18 @@ class UserService(BaseService[User, UserOut]):
 
         user = UserCreate(**data)
         new_user = await self.repository.create(user.model_dump())
+        if data.get("participated_in_living_group"):
+            living_group_user_data = LivingGroupUserCreate(
+                user_id=getattr(new_user, 'id'),
+                living_group_id=data["living_group_id"],
+                type_id=data["type_id"] if "type_id" in data else 1,
+                description=data["description"] if "description" in data else None,
+                data=data["data"] if "data" in data else None,
+                active=data["active"] if "active" in data else True
+            )
+            living_group_user = await self.living_group_user_service.create(living_group_user_data)
+
+
 
         return http_response(
             message="Usuario registrado correctamente",
@@ -139,6 +154,8 @@ class UserService(BaseService[User, UserOut]):
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Usuario no encontrado"
             )
+            
+            
     
         return http_response(
             message="Usuario actualizado correctamente",
@@ -167,7 +184,17 @@ class UserService(BaseService[User, UserOut]):
                 )
             
         new_user = await self.repository.create(user.model_dump())
-        
+        if data.get("participated_in_living_group"):
+            living_group_user_data = LivingGroupUserCreate(
+                user_id=getattr(new_user, 'id'),
+                living_group_id=data["living_group_id"],
+                type_id=data["type_id"] if "type_id" in data else 1,
+                description=data["description"] if "description" in data else None,
+                data=data["data"] if "data" in data else None,
+                active=data["active"] if "active" in data else True
+            )
+            await self.living_group_user_service.create(living_group_user_data)
+
         # 3. Enviar la contraseña por correo
         await send_email_token(data['email'], f"Su contraseña temporal es: {random_password}", subject="Contraseña temporal")
         

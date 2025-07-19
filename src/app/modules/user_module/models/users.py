@@ -41,7 +41,7 @@ class User(BaseModel):
     time = Column(String, nullable=True, comment="Tiempo que lleva en LivingRoom.")
     courses = Column(Text, nullable=True, comment="Cursos realizados por el usuario (lista separada por comas).")
     participated_in_living_group = Column(Integer, nullable=True, comment="1 si sí, 0 si no.")
-    living_group_name = Column(String, nullable=True, comment="Nombre del grupo (si aplica).")
+    #living_group_name = Column(String, nullable=True, comment="Nombre del grupo (si aplica).")
     did_camp = Column(Integer, nullable=True, comment="1 si sí, 0 si no.")
     
     
