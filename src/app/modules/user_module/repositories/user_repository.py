@@ -63,6 +63,7 @@ class UserRepository(BaseRepository[User]):
                 selectinload(self.model.created_by_user),
                 selectinload(self.model.associated_documents),
                 selectinload(self.model.document_type_relationship),
+                selectinload(self.model.getSede),
                 selectinload(self.model.getLivingGroupUsers)
                 .selectinload(LivingGroupUser.getLivingGroup),
                 selectinload(self.model.getLivingGroupUsers)

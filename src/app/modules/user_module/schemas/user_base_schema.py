@@ -17,7 +17,7 @@ class UserBase(BaseModel):
     created_by: Optional[int] = Field(default=None, description="ID del usuario que creó el usuario.")
     state: int = Field(default=1, description="Estado lógico del usuario.")
     code: Optional[str] = Field(default=None, description="Código de verificación del usuario.")
-    campus: Optional[str] = Field(default=None, description="Campus al que pertenece el usuario.")
+    campus: Optional[int] = Field(default=None, description="Campus al que pertenece el usuario.")
     time: Optional[str] = Field(default=None, description="Tiempo que lleva en LivingRoom.")
     courses: Optional[str] = Field(default=None, description="Cursos realizados por el usuario (lista separada por comas).")
     participated_in_living_group: Optional[int] = Field(default=None, description="1 si sí, 0 si no.")

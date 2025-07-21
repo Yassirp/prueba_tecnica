@@ -37,7 +37,7 @@ class User(BaseModel):
     deleted_at = Column(DateTime(timezone=True), nullable=True)
     
     
-    campus = Column(String, nullable=True, comment="Campus al que pertenece el usuario.")
+    campus = Column(Integer, ForeignKey("m_sedes.id"), nullable=True, comment="Campus al que pertenece el usuario.")
     time = Column(String, nullable=True, comment="Tiempo que lleva en LivingRoom.")
     courses = Column(Text, nullable=True, comment="Cursos realizados por el usuario (lista separada por comas).")
     participated_in_living_group = Column(Integer, nullable=True, comment="1 si sí, 0 si no.")
@@ -72,3 +72,5 @@ class User(BaseModel):
         back_populates="user",
         cascade="all, delete-orphan"
     )
+    
+    getSede = relationship("Sede", backref="getUsers")

@@ -1,20 +1,24 @@
-from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy.orm import DeclarativeBase, declared_attr
 from sqlalchemy import Column, DateTime
-from sqlalchemy.ext.declarative import declared_attr
-from sqlalchemy.orm import declarative_mixin
 from datetime import datetime
 
-class BaseModel(DeclarativeBase):
+# 1. Base declarativa limpia
+class Base(DeclarativeBase):
     pass
 
-
-
-@declarative_mixin
+# 2. Mixin para SoftDelete
 class SoftDeleteMixin:
     deleted_at = Column(DateTime(timezone=True), nullable=True)
 
-    @declared_attr
+    def soft_delete(self):
+        self.deleted_at = datetime.utcnow()
+
+    @declared_attr.directive
     def __mapper_args__(cls):
         return {
-            "eager_defaults": True
+            "confirm_deleted_rows": False
         }
+
+# 3. Modelo base que usarás para tus entidades
+class BaseModel(Base, SoftDeleteMixin):
+    __abstract__ = True
