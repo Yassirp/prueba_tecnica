@@ -9,7 +9,7 @@ from src.app.modules.user_module.routes.report_routes import router as report_ro
 from src.app.modules.sedes_module.routes.sedes_routes import router as sedes_routes
 from src.app.modules.living_group_module.routes.living_group_routes import router as living_group_routes
 from src.app.modules.living_group_module.routes.living_group_user_routes import router as living_group_user_routes
-
+from src.app.modules.payment_module.routes.mercadopago_routes import router as mercado_pago_routes
 router = APIRouter()
 
 router.include_router(user_routes)
@@ -22,3 +22,4 @@ router.include_router(report_routes)
 router.include_router(sedes_routes)
 router.include_router(living_group_routes)
 router.include_router(living_group_user_routes)
+router.include_router(mercado_pago_routes)
