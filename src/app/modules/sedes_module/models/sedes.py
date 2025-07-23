@@ -32,7 +32,7 @@ class Sede(BaseModel):
     getMunicipality = relationship("Municipality", foreign_keys=[municipality_id])
     getCountry = relationship("Country", foreign_keys=[country_id])
 
-    getSedesMembers = relationship("SedesMember", back_populates="getSede")
+    getSedesMembers = relationship("SedesMember", backref="getSede")
     
     getLivingGroups = relationship("LivingGroup", back_populates="getSede")
     

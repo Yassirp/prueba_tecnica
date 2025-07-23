@@ -19,5 +19,4 @@ class SedesMember(BaseModel):
     deleted_at = Column(DateTime(timezone=True), nullable=True)
     
     getType = relationship("ParameterValue", foreign_keys=[type_id], backref="getSedesMembers")
-    getSede = relationship("Sede", foreign_keys=[sede_id], backref="getSedesMembers")
     getUser = relationship("User", foreign_keys=[user_id], backref="getSedesMembers")
