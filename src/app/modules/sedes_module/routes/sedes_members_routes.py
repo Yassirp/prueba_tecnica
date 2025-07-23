@@ -34,7 +34,7 @@ async def get_sede_with_relations(sede_id: int, db: AsyncSession = Depends(get_d
 @router.post("/create", response_model=SedesMemberOut, status_code=status.HTTP_201_CREATED)
 async def create_sede_member(data: SedesMemberCreate, db: AsyncSession = Depends(get_db)):
     service = SedesMemberService(db)
-    sede_member = await service.create(data)
+    sede_member = await service.create(data.model_dump())
     return http_response(message=SedeMessages.OK_CREATED, data={"sede_member": sede_member})
 
 @router.post("/create-massive", response_model=List[SedesMemberOut], status_code=status.HTTP_201_CREATED)
@@ -42,14 +42,14 @@ async def create_sede_members(data: List[SedesMemberCreate], db: AsyncSession = 
     service = SedesMemberService(db)
     sede_members = []
     for member in data:
-        sede_member = await service.create(member)
+        sede_member = await service.create(member.model_dump())
         sede_members.append(sede_member)
     return http_response(message=SedeMessages.OK_CREATED, data={"sede_members": sede_members})
 
 @router.put("/{sede_member_id}", response_model=SedesMemberOut, status_code=status.HTTP_200_OK)
 async def update_sede_member(sede_member_id: int, data: SedesMemberUpdate, db: AsyncSession = Depends(get_db)):
     service = SedesMemberService(db)
-    updated_sede_member = await service.update(sede_member_id, data)
+    updated_sede_member = await service.update(sede_member_id, data.model_dump(exclude_unset=True))
     if not updated_sede_member:
         raise HTTPException(status_code=404, detail=SedeMessages.ERROR_NOT_FOUND)
     return http_response(message=SedeMessages.OK_UPDATED, data={"sede_member": updated_sede_member})
