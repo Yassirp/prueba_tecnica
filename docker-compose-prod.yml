@@ -1,0 +1,20 @@
+services:
+  micro_lvr_api:
+    container_name: micro_lvr_api
+    build: ./src/
+    env_file:
+      - ./src/.env
+    ports:
+      - '5007:8000'
+    volumes:
+      - .:/src
+    restart: always
+    networks:
+      - api_network
+
+networks:
+  api_network:
+    driver: bridge
+
+volumes:
+  db-micro-lvr-volume:
