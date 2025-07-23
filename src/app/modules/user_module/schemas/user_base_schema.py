@@ -21,6 +21,6 @@ class UserBase(BaseModel):
     time: Optional[str] = Field(default=None, description="Tiempo que lleva en LivingRoom.")
     courses: Optional[str] = Field(default=None, description="Cursos realizados por el usuario (lista separada por comas).")
     participated_in_living_group: Optional[int] = Field(default=None, description="1 si sí, 0 si no.")
-    living_group_name: Optional[str] = Field(default=None, description="Nombre del grupo (si aplica).")
+    #living_group_name: Optional[str] = Field(default=None, description="Nombre del grupo (si aplica).")
     did_camp: Optional[int] = Field(default=None, description="1 si sí, 0 si no.")
     data: Optional[dict] = Field(default=None, description="Datos complementarios del usuario.")

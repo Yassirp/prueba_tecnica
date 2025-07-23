@@ -11,6 +11,7 @@ from src.app.modules.user_module.seeders.user_seeder import UserSeeder
 from src.app.modules.parameters_module.seeders.attribute_seeder import AttributeSeeder
 from src.app.modules.parameters_module.seeders.parameter_values_seeder import parameters as parameter_values_parameters
 from src.app.modules.parameters_module.seeders.parameters_2025_07_09 import parameters as parameters_2025_07_09
+from src.app.modules.parameters_module.seeders.type_members import parameters as type_members_parameters
 from src.app.modules.flow_module.seeders.state_user_relationship_seed import StateUserRelationshipSeeder
 
 class Command(BaseCommandAsync):
@@ -36,6 +37,7 @@ class Command(BaseCommandAsync):
                 "StateUserRelationshipSeeder": StateUserRelationshipSeeder(),
                 "UserSeeder": UserSeeder(),
                 "ParameterValuesSeeder": AttributeSeeder(parameters_2025_07_09),
+                "TypeMembersSeeder": AttributeSeeder(type_members_parameters),
             }
 
             if class_seeder:

@@ -31,7 +31,8 @@ class Sede(BaseModel):
     getDepartment = relationship("Department", foreign_keys=[department_id])
     getMunicipality = relationship("Municipality", foreign_keys=[municipality_id])
     getCountry = relationship("Country", foreign_keys=[country_id])
-    
+
+    getSedesMembers = relationship("SedesMember", backref="getSede")
     
     getLivingGroups = relationship("LivingGroup", back_populates="getSede")
     

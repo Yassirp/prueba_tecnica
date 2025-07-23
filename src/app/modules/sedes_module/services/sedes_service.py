@@ -13,12 +13,17 @@ from src.app.modules.ubication_module.models.countries import Country
 from src.app.modules.ubication_module.repositories.municipality_repository import MunicipalityRepository
 from src.app.modules.ubication_module.repositories.country_repository import CountryRepository
 from src.app.modules.ubication_module.repositories.deparment_repository import DepartmentRepository
+from src.app.modules.user_module.services.user_service import UserService
+from src.app.modules.sedes_module.services.sedes_members_services import SedesMemberService
+from src.app.modules.sedes_module.schemas.sedes_members_schemas import SedesMemberCreate
 from fastapi import HTTPException, status
 from typing import Optional, Dict
 
 class SedeService(BaseService[Sede, SedeOut]):
     def __init__(self, db_session: AsyncSession):
         self.db_session = db_session
+        self.user_service = UserService(db_session=db_session)
+        self.sedes_member_service = SedesMemberService(db_session=db_session)
         super().__init__(
             model=Sede,
             repository_cls=SedeRepository,
