@@ -34,6 +34,8 @@ from src.app.modules.sedes_module.models.sedes import Sede
 from src.app.modules.living_group_module.models.living_group import LivingGroup
 from src.app.modules.living_group_module.models.living_group_users import LivingGroupUser
 
+# Pagos
+from src.app.modules.payment_module.models.payment import Payment
 
 
 from src.app.shared.bases.base_model import BaseModel
