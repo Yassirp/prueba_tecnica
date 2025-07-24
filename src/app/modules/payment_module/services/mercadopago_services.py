@@ -13,6 +13,12 @@ from src.app.modules.user_module.services.user_service import UserService
 from src.app.utils.domain_api import get_domain_api
 from src.app.modules.user_module.repositories.user_repository import UserRepository
 from src.app.modules.user_module.models.users import User
+import logging
+
+# Configurar logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 class MercadoPagoService:
     def __init__(self, db: AsyncSession):
         self.db = db
@@ -93,26 +99,32 @@ class MercadoPagoService:
         topic = query_params.get("topic")
         payment_id = query_params.get("id")
         password = query_params.get("password")
+        logger.info(f"Webhook recibido: {body}")
+        logger.info(f"Query params: {query_params}")
+        logger.info(f"Password: {password}")
         if password != Settings.MERCADO_PAGO_WEBHOOK_PASSWORD:
             raise HTTPException(status_code=403, detail="Acceso no autorizado")
         if topic != "payment":
             raise HTTPException(status_code=400, detail="Evento no válido")
 
         payment = self.sdk.payment().get(payment_id)
-
+        logger.info(f"Payment: {payment}")
         payment_status = payment["response"]["status"]
         external_reference = payment["response"].get("external_reference")
 
         if external_reference:
+            logger.info(f"External reference: {external_reference}")
             payment = await self.payment_repository.get_by_external_reference(external_reference)
-
+            logger.info(f"Payment: {payment}")
             if not payment:
                 raise HTTPException(status_code=404, detail="Grupo no encontrado")
 
             payment.payment_status = payment_status
+            logger.info(f"Payment status: {payment_status}")
             await self.payment_repository.update(payment)
-            
+            logger.info(f"Payment updated: {payment}")
             if payment_status == "approved":
                 user_service = UserService(self.db)
                 await user_service.register(payment.data)
+                logger.info(f"User registered: {payment.data}")
                 return {"message": "Pago aprobado"}
