@@ -47,9 +47,9 @@ class MercadoPagoService:
                     }
                 ],
                 "back_urls": {
-                    "success": "https://www.micro-lvr.com/success",
-                    "failure": "https://www.micro-lvr.com/failure",
-                    "pending": "https://www.micro-lvr.com/pending"
+                    "success": "https://www.lvr.naoweesuite.com/auth/login",
+                    "failure": "https://www.lvr.naoweesuite.com/auth/login",
+                    "pending": "https://www.lvr.naoweesuite.com/auth/login"
                 },
                 "auto_return": "approved",
                 "payment_method_id": {
