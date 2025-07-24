@@ -70,7 +70,9 @@ class MercadoPagoService:
     async def handle_webhook(self, body: dict, query_params: dict):
         topic = query_params.get("topic")
         payment_id = query_params.get("id")
-
+        password = query_params.get("password")
+        if password != Settings.MERCADO_PAGO_WEBHOOK_PASSWORD:
+            raise HTTPException(status_code=403, detail="Acceso no autorizado")
         if topic != "payment":
             raise HTTPException(status_code=400, detail="Evento no válido")
 
