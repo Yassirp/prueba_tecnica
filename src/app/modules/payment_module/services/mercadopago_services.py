@@ -96,21 +96,16 @@ class MercadoPagoService:
             raise HTTPException(status_code=500, detail=str(e))
 
     async def handle_webhook(self, body: dict, query_params: dict):
-        topic = query_params.get("topic")
-        payment_id = query_params.get("id")
+        topic = query_params.get("type")
+        payment_id = query_params.get("data").get("id")
         password = query_params.get("password")
         logger.info(f"Webhook recibido: {body}")
         logger.info(f"Query params: {query_params}")
         logger.info(f"Password: {password}")
-        if password != Settings.MERCADO_PAGO_WEBHOOK_PASSWORD:
-            raise HTTPException(status_code=403, detail="Acceso no autorizado")
-        if topic != "payment":
-            raise HTTPException(status_code=400, detail="Evento no válido")
-
-        payment = self.sdk.payment().get(payment_id)
-        logger.info(f"Payment: {payment}")
-        payment_status = payment["response"]["status"]
-        external_reference = payment["response"].get("external_reference")
+        payment_reposponse = self.sdk.payment().get(payment_id)
+        logger.info(f"Payment: {payment_reposponse}")
+        payment_status = payment_reposponse["response"]["status"]
+        external_reference = payment_reposponse["response"].get("external_reference")
 
         if external_reference:
             logger.info(f"External reference: {external_reference}")
