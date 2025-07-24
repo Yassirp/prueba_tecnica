@@ -6,7 +6,7 @@ class Payment(BaseModel):
     __tablename__ = 'm_payments'
 
     id = Column(Integer, primary_key=True)
-    living_group_id = Column(Integer, ForeignKey('m_living_groups.id'))
+    living_group_id = Column(Integer, ForeignKey('o_living_groups.id'))
     pasarela = Column(String, nullable=True)
     payment_id = Column(String, nullable=True)
     payment_status = Column(String)
