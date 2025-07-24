@@ -117,7 +117,7 @@ class MercadoPagoService:
 
                 payment.payment_status = payment_status
                 logger.info(f"Payment status: {payment_status}")
-                await self.payment_repository.update(payment)
+                await self.payment_repository.update(payment.id, {"payment_status": payment_status})
                 logger.info(f"Payment updated: {payment}")
                 if payment_status == "approved":
                     user_service = UserService(self.db)
