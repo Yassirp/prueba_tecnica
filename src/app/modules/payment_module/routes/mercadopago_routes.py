@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status, HTTPException
+from fastapi import APIRouter, Depends, status, HTTPException,Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.app.config.database.session import get_db
 from src.app.modules.ubication_module.schemas.country_schemas import CountryCreate, CountryUpdate
@@ -20,5 +20,19 @@ async def create_payment(
         service = MercadoPagoService()
         payment = await service.create_payment(data)
         return http_response(message="Payment created successfully", data=payment)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/webhook", status_code=200)
+async def mercado_pago_webhook(request: Request):
+    try:
+        body = await request.json()
+        query_params = dict(request.query_params)
+
+        service = MercadoPagoService()
+        await service.handle_webhook(body, query_params)
+
+        return {"message": "OK"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

@@ -12,6 +12,7 @@ class Payment(BaseModel):
     payment_status = Column(String)
     amount = Column(Float)
     data = Column(JSON)
+    external_reference = Column(String, nullable=True)
     created_at = Column(DateTime, default=datetime.now)
     updated_at = Column(DateTime, default=datetime.now)
     deleted_at = Column(DateTime, nullable=True)
