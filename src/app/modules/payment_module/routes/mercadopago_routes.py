@@ -14,10 +14,10 @@ router = APIRouter(prefix="/mercadopago", tags=["MercadoPago"])
 @router.post("/create-preference", status_code=status.HTTP_200_OK)
 async def create_payment(
     data: dict,
-
+    db: AsyncSession = Depends(get_db)
 ):
     try:
-        service = MercadoPagoService()
+        service = MercadoPagoService(db)
         payment = await service.create_payment(data)
         return http_response(message="Payment created successfully", data=payment)
     except Exception as e:
@@ -25,12 +25,12 @@ async def create_payment(
 
 
 @router.post("/webhook", status_code=200)
-async def mercado_pago_webhook(request: Request):
+async def mercado_pago_webhook(request: Request, db: AsyncSession = Depends(get_db)):
     try:
         body = await request.json()
         query_params = dict(request.query_params)
 
-        service = MercadoPagoService()
+        service = MercadoPagoService(db)
         await service.handle_webhook(body, query_params)
 
         return {"message": "OK"}

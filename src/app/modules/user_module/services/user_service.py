@@ -121,8 +121,6 @@ class UserService(BaseService[User, UserOut]):
             )
             living_group_user = await self.living_group_user_service.create(living_group_user_data)
 
-
-
         return http_response(
             message="Usuario registrado correctamente",
             data={"user": new_user, "validation_method": validation_method}
