@@ -96,31 +96,36 @@ class MercadoPagoService:
             raise HTTPException(status_code=500, detail=str(e))
 
     async def handle_webhook(self, body: dict, query_params: dict):
-        data = query_params.get("data")
-        if data:
-            payment_id = data.get("id")
+        try:
+            payment_id = body.get("data").get("id")
+            if not payment_id:
+                raise HTTPException(status_code=400, detail="No se encontró el ID de pago")
 
+            logger.info(f"Webhook recibido: {body}")
+            logger.info(f"Query params: {query_params}")
+            payment_reposponse = self.sdk.payment().get(payment_id)
+            logger.info(f"Payment: {payment_reposponse}")
+            payment_status = payment_reposponse["response"]["status"]
+            external_reference = payment_reposponse["response"].get("external_reference")
 
-        logger.info(f"Webhook recibido: {body}")
-        logger.info(f"Query params: {query_params}")
-        payment_reposponse = self.sdk.payment().get(payment_id)
-        logger.info(f"Payment: {payment_reposponse}")
-        payment_status = payment_reposponse["response"]["status"]
-        external_reference = payment_reposponse["response"].get("external_reference")
+            if external_reference:
+                logger.info(f"External reference: {external_reference}")
+                payment = await self.payment_repository.get_by_external_reference(external_reference)
+                logger.info(f"Payment: {payment}")
+                if not payment:
+                    raise HTTPException(status_code=404, detail="Grupo no encontrado")
 
-        if external_reference:
-            logger.info(f"External reference: {external_reference}")
-            payment = await self.payment_repository.get_by_external_reference(external_reference)
-            logger.info(f"Payment: {payment}")
-            if not payment:
-                raise HTTPException(status_code=404, detail="Grupo no encontrado")
-
-            payment.payment_status = payment_status
-            logger.info(f"Payment status: {payment_status}")
-            await self.payment_repository.update(payment)
-            logger.info(f"Payment updated: {payment}")
-            if payment_status == "approved":
-                user_service = UserService(self.db)
-                await user_service.register(payment.data)
-                logger.info(f"User registered: {payment.data}")
-                return {"message": "Pago aprobado"}
+                payment.payment_status = payment_status
+                logger.info(f"Payment status: {payment_status}")
+                await self.payment_repository.update(payment)
+                logger.info(f"Payment updated: {payment}")
+                if payment_status == "approved":
+                    user_service = UserService(self.db)
+                    await user_service.register(payment.data)
+                    logger.info(f"User registered: {payment.data}")
+                    return {"message": "Pago aprobado"}
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
+        finally:
+            return {"message": "Webhook recibido"}
+        
