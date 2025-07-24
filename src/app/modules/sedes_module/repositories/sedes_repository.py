@@ -5,6 +5,7 @@ from src.app.shared.bases.base_repository import BaseRepository
 from sqlalchemy import select, and_
 from src.app.shared.utils.query_utils import apply_filters, apply_order_by
 from sqlalchemy.orm import selectinload
+from src.app.modules.sedes_module.models.sedes_members import SedesMember
 
 class SedeRepository(BaseRepository[Sede]):
     def __init__(self, model: type[Sede], db_session: AsyncSession):
@@ -48,6 +49,8 @@ class SedeRepository(BaseRepository[Sede]):
         return query.options(
                 selectinload(self.model.getDepartment),
                 selectinload(self.model.getMunicipality),
-                selectinload(self.model.getLivingGroups)
+                selectinload(self.model.getLivingGroups),
+                selectinload(self.model.getSedesMembers).selectinload(SedesMember.getUser),
+                selectinload(self.model.getSedesMembers).selectinload(SedesMember.getType)
             )
     
