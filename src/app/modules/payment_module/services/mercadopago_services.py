@@ -96,12 +96,13 @@ class MercadoPagoService:
             raise HTTPException(status_code=500, detail=str(e))
 
     async def handle_webhook(self, body: dict, query_params: dict):
-        topic = query_params.get("type")
-        payment_id = query_params.get("data").get("id")
-        password = query_params.get("password")
+        data = query_params.get("data")
+        if data:
+            payment_id = data.get("id")
+
+
         logger.info(f"Webhook recibido: {body}")
         logger.info(f"Query params: {query_params}")
-        logger.info(f"Password: {password}")
         payment_reposponse = self.sdk.payment().get(payment_id)
         logger.info(f"Payment: {payment_reposponse}")
         payment_status = payment_reposponse["response"]["status"]
