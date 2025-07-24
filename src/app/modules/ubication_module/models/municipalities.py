@@ -8,10 +8,10 @@ class Municipality(BaseModel):
     __tablename__ = "municipalities"
 
     id = Column(BigInteger, primary_key=True, autoincrement=True)
-    department_id = Column(BigInteger, ForeignKey("departments.id"), nullable=False)
-    country_code = Column(String(255), nullable=False)
-    department_code = Column(String(255), nullable=False)
-    code = Column(String(255), nullable=False)
+    department_id = Column(BigInteger, ForeignKey("departments.id"), nullable=True)
+    country_code = Column(String(255), nullable=True)
+    department_code = Column(String(255), nullable=True)
+    code = Column(String(255), nullable=True)
     name = Column(String(255), nullable=False)
     created_at = Column(DateTime(timezone=True), default=datetime.now(pytz.timezone('America/Bogota')))
     updated_at = Column(DateTime(timezone=True), onupdate=datetime.now(pytz.timezone('America/Bogota')))

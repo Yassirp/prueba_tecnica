@@ -29,6 +29,7 @@ from src.app.modules.user_module.models.user_relationship import UserRelationshi
 
 # Sedes
 from src.app.modules.sedes_module.models.sedes import Sede
+from src.app.modules.sedes_module.models.sedes_members import SedesMember
 
 # Eventos
 from src.app.modules.living_group_module.models.living_group import LivingGroup
