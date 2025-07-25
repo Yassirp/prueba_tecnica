@@ -47,6 +47,8 @@ class LivingGroupRepository(BaseRepository[LivingGroup]):
         return query.options(
                 selectinload(self.model.getSede),
                 selectinload(self.model.getLivingGroupUsers)
-                .selectinload(LivingGroupUser.getUser)
+                .selectinload(LivingGroupUser.getUser),
+                selectinload(self.model.getLivingGroupUsers)
+                .selectinload(LivingGroupUser.getType)
             )
     
