@@ -10,7 +10,7 @@ class SedesMember(BaseModel):
     id = Column(Integer, primary_key=True)
     sede_id = Column(Integer, ForeignKey('m_sedes.id'))
     user_id = Column(Integer, ForeignKey('m_users.id'))
-    type_id = Column(Integer, ForeignKey('m_parameters_values.id'), nullable=True)
+    type_id = Column(Integer, ForeignKey('m_roles.id'), nullable=True)
     description = Column(String, nullable=True)
     data = Column(JSON, nullable=True)
     active = Column(Boolean, default=True)
@@ -18,5 +18,5 @@ class SedesMember(BaseModel):
     updated_at = Column(DateTime(timezone=True), onupdate=datetime.now(pytz.timezone('America/Bogota')))
     deleted_at = Column(DateTime(timezone=True), nullable=True)
     
-    getType = relationship("ParameterValue", foreign_keys=[type_id], backref="getSedesMembers")
+    getType = relationship("Role", foreign_keys=[type_id], backref="getSedesMembers")
     getUser = relationship("User", foreign_keys=[user_id], backref="getSedesMembers")

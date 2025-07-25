@@ -20,7 +20,7 @@ class User(BaseModel):
     last_name = Column(Text, nullable=False, comment="Apellido del usuario.")
     document_type = Column(Integer, ForeignKey("m_parameters_values.id"), nullable=True, comment="Tipo de documento del usuario.")
     document_number = Column(Text, nullable=False, comment="Número de documento del usuario.")
-    email = Column(Text, nullable=False, unique=True)
+    email = Column(Text, nullable=False)
     password = Column(String, nullable=False)
     phone = Column(Text, nullable=True, comment="Teléfono del usuario.")
     address = Column(Text, nullable=True, comment="Dirección del usuario.")

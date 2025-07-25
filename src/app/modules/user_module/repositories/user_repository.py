@@ -26,7 +26,7 @@ class UserRepository(BaseRepository[User]):
             conditions = [self.model.deleted_at.is_(None)]
             stmt = stmt.where(and_(*conditions))
             if filters:
-                stmt = apply_filters(stmt, self.model, filters)
+                stmt = self._filters_user(stmt, filters)
 
             if order_by:
                 stmt = apply_order_by(stmt, self.model, order_by)
@@ -69,3 +69,16 @@ class UserRepository(BaseRepository[User]):
                 selectinload(self.model.getLivingGroupUsers)
                 .selectinload(LivingGroupUser.getType)
             )
+        
+        
+    def _filters_user(self, stmt: select, filters: dict):
+        
+        roles_ids = filters.get("role_ids")
+        if roles_ids:
+            if isinstance(roles_ids, str):
+                roles_ids = [int(s.strip()) for s in roles_ids.split(',') if s.strip().isdigit()]
+            stmt = stmt.where(self.model.role_id.in_(roles_ids))
+            
+        stmt = apply_filters(stmt, self.model, filters)
+        
+        return stmt

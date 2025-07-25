@@ -40,3 +40,4 @@ class Settings:
     AWS_REGION= os.getenv("AWS_REGION", "")
     S3_BUCKET= os.getenv("S3_BUCKET_NAME", "")
     MERCADO_PAGO_TOKEN = os.getenv("MERCADO_PAGO_TOKEN", "test_token")
+    MERCADO_PAGO_WEBHOOK_PASSWORD = os.getenv("MERCADO_PAGO_WEBHOOK_PASSWORD", "test_password")

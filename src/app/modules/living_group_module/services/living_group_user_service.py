@@ -48,4 +48,22 @@ class LivingGroupUserService(BaseService[LivingGroupUser, LivingGroupUserOut]):
             parameter_value = await parameter_value_repository.get_by_id(data.type_id)
             if not parameter_value:
                 raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Tipo de usuario no encontrado")
+            
+        if data.living_group_id:
+            living_group_repository = LivingGroupRepository(model=LivingGroup, db_session=self.db_session)
+            living_group = await living_group_repository.get_by_id(data.living_group_id)  
+            if not living_group:
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Living group no encontrado")
+            
+"""         living_group_repository = LivingGroupRepository(model=LivingGroup, db_session=self.db_session)
+        living_group_users, total = await living_group_repository.get_all_with_relationships(filters={"living_group_id": data.living_group_id})
+        
+        if data.living_group_id:
+            if total + 1 > living_group_users.max_users:
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No se puede agregar mas usuarios a este grupo")
+         """
+        
+        
+            
+        
              

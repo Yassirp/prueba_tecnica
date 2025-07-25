@@ -10,7 +10,7 @@ class LivingGroupUser(BaseModel):
     id = Column(Integer, primary_key=True)
     living_group_id = Column(Integer, ForeignKey('o_living_groups.id'))
     user_id = Column(Integer, ForeignKey('m_users.id'))
-    type_id = Column(Integer, ForeignKey('m_parameters_values.id'), nullable=True)
+    type_id = Column(Integer, ForeignKey('m_roles.id'), nullable=True)
     description = Column(String, nullable=True)
     data = Column(JSON, nullable=True)
     active = Column(Boolean, default=True)
@@ -18,6 +18,6 @@ class LivingGroupUser(BaseModel):
     updated_at = Column(DateTime(timezone=True), onupdate=datetime.now(pytz.timezone('America/Bogota')))
     deleted_at = Column(DateTime(timezone=True), nullable=True)
     
-    getType = relationship("ParameterValue", foreign_keys=[type_id], backref="getLivingGroupUsers")
+    getType = relationship("Role", foreign_keys=[type_id], backref="getLivingGroupUsers")
     getLivingGroup = relationship("LivingGroup", foreign_keys=[living_group_id], back_populates="getLivingGroupUsers")
     getUser = relationship("User", foreign_keys=[user_id], back_populates="getLivingGroupUsers")
