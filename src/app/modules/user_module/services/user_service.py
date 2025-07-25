@@ -88,11 +88,6 @@ class UserService(BaseService[User, UserOut]):
         if existing_user:
             return http_response(status=400, message="El email ya está registrado")
         
-        data["state"] = 2  # Pendiente de aprobación
-        validation_method = data.get("validation_method")  # "mail" o "cellphone"
-        if not validation_method:
-            return http_response(status=400, message="El metodo de validacion es requerido")
-        
         # Generar código de 6 dígitos
         code = str(random.randint(100000, 999999))
         data["code"] = code
@@ -113,7 +108,7 @@ class UserService(BaseService[User, UserOut]):
 
         return http_response(
             message="Usuario registrado correctamente",
-            data={"user": new_user, "validation_method": validation_method}
+            data={"user": new_user}
         )
     
 
