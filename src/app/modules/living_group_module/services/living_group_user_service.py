@@ -59,11 +59,6 @@ class LivingGroupUserService(BaseService[LivingGroupUser, LivingGroupUserOut]):
         living_group_users, total = await living_group_repository.get_all_with_relationships(filters={"living_group_id": data.living_group_id})
         
         if data.living_group_id:
-            if data.user_id:
-                for living_group_user in living_group_users:
-                    if living_group_user.user_id == data.user_id:
-                        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="El usuario ya pertenece a este grupo")
-    
             if total + 1 > living_group.max_users:
                 raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No se puede agregar mas usuarios a este grupo")
         
