@@ -19,7 +19,7 @@ class Command(BaseCommandAsync):
 
     """
         Comando para correr seeder 
-            -- python3 src/app/command/db_seed.py --class=AttributeSeeder
+            -- python3 src/app/command/db_seed.py --class=UserSeeder
     """
     def add_arguments(self, parser):
         parser.add_argument('--class', type=str, help='Nombre del seeder específico a ejecutar')
