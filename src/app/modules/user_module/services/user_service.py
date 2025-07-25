@@ -98,16 +98,6 @@ class UserService(BaseService[User, UserOut]):
         data["code"] = code
         data["password"] = pwd_context.hash(data["password"])
 
-        if validation_method == "mail":
-            response = await send_email_token(data["email"],"su codigo de verificacion es: " + code)
-        elif validation_method == "cellphone":
-            response = await send_sms_token(data["phone"], code)
-        else:
-            return http_response(status=400, message="Método de validación inválido")
-
-        if response["status"] != "success":
-            return http_response(status=500, message=response["message"], data=response.get("details"))
-
         user = UserCreate(**data)
         new_user = await self.repository.create(user.model_dump())
         if data.get("participated_in_living_group"):
