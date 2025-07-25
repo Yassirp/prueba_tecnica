@@ -47,8 +47,8 @@ class MercadoPagoService:
                     }
                 ],
                 "back_urls": {
-                    "success": "https://www.lvr.naoweesuite.com/auth/login",
-                    "failure": "https://www.lvr.naoweesuite.com/auth/login",
+                    "success": "https://www.lvr.naoweesuite.com/success",
+                    "failure": "https://www.lvr.naoweesuite.com/error",
                     "pending": "https://www.lvr.naoweesuite.com/auth/login"
                 },
                 "auto_return": "approved",
