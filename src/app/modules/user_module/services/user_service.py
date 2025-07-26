@@ -126,10 +126,22 @@ class UserService(BaseService[User, UserOut]):
         }
         
         # Actualizar con datos reales del grupo si están disponibles
-        if group_info:
-            group_name, group_description, leader_name, leader_last_name = group_info
+        if group_info and len(group_info) > 0:
+            # Obtener el primer resultado para los datos del grupo (deberían ser iguales para todos)
+            first_result = group_info[0]
+            group_name, group_description, _, _ = first_result
+            
+            # Construir lista de nombres de líderes
+            leader_names = []
+            for _, _, leader_name, leader_last_name in group_info:
+                if leader_name and leader_last_name:
+                    leader_names.append(f"{leader_name} {leader_last_name}")
+            
+            # Unir todos los líderes con comas
+            leaders_text = ", ".join(leader_names) if leader_names else "No hay nombre del líder"
+            
             email_context.update({
-                "leader_name": f"{leader_name} {leader_last_name}" if leader_name and leader_last_name else "No hay nombre del líder",
+                "leader_name": leaders_text,
                 "group_name": group_name if group_name else "No hay nombre del grupo",
                 "description": group_description if group_description else "No hay descripción del grupo"
             })

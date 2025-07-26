@@ -11,7 +11,7 @@ class LivingGroupUserRepository(BaseRepository[LivingGroupUser]):
     
     async def get_group_and_leader_info(self, user_id: int, type_id: int = 4):
         """
-        Obtiene información del grupo de vida y líder para un usuario específico
+        Obtiene información del grupo de vida y líderes para un usuario específico
         basado en la consulta SQL proporcionada
         """
         query = select(
@@ -34,4 +34,4 @@ class LivingGroupUserRepository(BaseRepository[LivingGroupUser]):
         )
         
         result = await self.db_session.execute(query)
-        return result.fetchone()
+        return result.fetchall()
