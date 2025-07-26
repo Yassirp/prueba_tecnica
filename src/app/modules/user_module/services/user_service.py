@@ -95,7 +95,7 @@ class UserService(BaseService[User, UserOut]):
 
         user = UserCreate(**data)
         new_user = await self.repository.create(user.model_dump())
-        if data.get("participated_in_living_group"):
+        if data.get("living_group_id"):
             living_group_user_data = LivingGroupUserCreate(
                 user_id=getattr(new_user, 'id'),
                 living_group_id=data["living_group_id"],
@@ -171,7 +171,7 @@ class UserService(BaseService[User, UserOut]):
             living_group_user_data = LivingGroupUserCreate(
                 user_id=getattr(new_user, 'id'),
                 living_group_id=data["living_group_id"],
-                type_id=data["type_id"] if "type_id" in data else 1,
+                type_id=data["type_id"] if "type_id" in data else 2,
                 description=data["description"] if "description" in data else None,
                 data=data["data"] if "data" in data else None,
                 active=data["active"] if "active" in data else True
