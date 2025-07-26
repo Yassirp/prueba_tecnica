@@ -106,6 +106,7 @@ class UserService(BaseService[User, UserOut]):
                 active=data["active"] if "active" in data else True
             )
             living_group_user = await self.living_group_user_service.create(living_group_user_data)
+            
 
         # 3. Enviar la contraseña por correo
         await send_email(
@@ -115,8 +116,8 @@ class UserService(BaseService[User, UserOut]):
             context={
                 "user_name": f"{data['name']} {data['last_name']}",
                 "password": data["password"],
-                "leader_name": data["leader_name"],
-                "group_name": data["living_group_name"],
+                "leader_name": data["leader_name"] if "leader_name" in data else "No hay nombre del líder",
+                "group_name": data["living_group_name"] if "living_group_name" in data else "No hay nombre del grupo",
                 "description": data["description"] if "description" in data else "No hay descripción del grupo pero si un mensaje de ejemplo. Fecha: 30210"
             }
         )
