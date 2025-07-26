@@ -21,6 +21,7 @@ import string
 import asyncio
 from src.app.shared.utils.request_utils import http_response
 from src.app.shared.utils.service_token import send_email_token, send_sms_token
+from src.app.utils.mailer import send_email
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -105,10 +106,65 @@ class UserService(BaseService[User, UserOut]):
                 active=data["active"] if "active" in data else True
             )
             living_group_user = await self.living_group_user_service.create(living_group_user_data)
+            
+            group_info = None
+            # Obtener información del grupo y líder usando la consulta SQL
+            group_info = await self.living_group_user_service.get_group_and_leader_info(
+                living_group_id=int(data["living_group_id"]),  # Cambiado de user_id a living_group_id
+                type_id=4  # Tipo líder
+            )
+
+            
+
+        # Preparar datos para el correo
+        email_context = {
+            "user_name": f"{data['name']} {data['last_name']}",
+            "password": data["password"],
+            "leader_name": "No hay nombre del líder",
+            "group_name": "No hay nombre del grupo",
+            "description": "No hay descripción del grupo"
+        }
+        
+        # Actualizar con datos reales del grupo si están disponibles
+        if group_info and len(group_info) > 0:
+            # Obtener el primer resultado para los datos del grupo (deberían ser iguales para todos)
+            first_result = group_info[0]
+            group_name, group_description, _, _ = first_result
+            
+            # Construir lista de nombres de líderes
+            leader_names = []
+            for _, _, leader_name, leader_last_name in group_info:
+                if leader_name and leader_last_name:
+                    leader_names.append(f"{leader_name} {leader_last_name}")
+            
+            # Unir todos los líderes con comas
+            leaders_text = ", ".join(leader_names) if leader_names else "No hay nombre del líder"
+            
+            email_context.update({
+                "leader_name": leaders_text,
+                "group_name": group_name if group_name else "No hay nombre del grupo",
+                "description": group_description if group_description else "No hay descripción del grupo"
+            })
+        else:
+            # Usar datos proporcionados en la petición como fallback
+            email_context.update({
+                "leader_name": data.get("leader_name", "No hay nombre del líder"),
+                "group_name": data.get("living_group_name", "No hay nombre del grupo"),
+                "description": data.get("description", "No hay descripción del grupo")
+            })
+
+        # Enviar la contraseña por correo
+
+        await send_email(
+            to_email=data['email'],
+            subject="Bienvenido a LVR - Tu cuenta ha sido creada",
+            template_name="create-template-user.html",
+            context=email_context
+        )
 
         return http_response(
             message="Usuario registrado correctamente",
-            data={"user": new_user}
+            data={"user": new_user},
         )
     
 
@@ -179,7 +235,18 @@ class UserService(BaseService[User, UserOut]):
             await self.living_group_user_service.create(living_group_user_data)
 
         # 3. Enviar la contraseña por correo
-        await send_email_token(data['email'], f"Su contraseña temporal es: {random_password}", subject="Contraseña temporal")
+        await send_email(
+            to_email=data['email'],
+            subject="Bienvenido a LVR - Tu cuenta ha sido creada",
+            template_name="create-template-user.html",
+            context={
+                "user_name": f"{data['name']} {data['last_name']}",
+                "password": random_password,
+                "leader_name": data["leader_name"],
+                "group_name": data["living_group_name"],
+                "description": data["description"]
+            }
+        )
         
         # 4. Retornar respuesta
         return http_response(
