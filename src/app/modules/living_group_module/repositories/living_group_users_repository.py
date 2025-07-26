@@ -9,9 +9,9 @@ class LivingGroupUserRepository(BaseRepository[LivingGroupUser]):
     def __init__(self, model: type[LivingGroupUser], db_session: AsyncSession):
         super().__init__(model, db_session)
     
-    async def get_group_and_leader_info(self, user_id: int, type_id: int = 4):
+    async def get_group_and_leader_info(self, living_group_id: int, type_id: int = 4):
         """
-        Obtiene información del grupo de vida y líderes para un usuario específico
+        Obtiene información del grupo de vida y líderes para un grupo específico
         basado en la consulta SQL proporcionada
         """
         query = select(
@@ -29,7 +29,7 @@ class LivingGroupUserRepository(BaseRepository[LivingGroupUser]):
                 LivingGroupUser.user_id == User.id
             )
         ).where(
-            LivingGroupUser.user_id == user_id,
+            LivingGroupUser.living_group_id == living_group_id, 
             LivingGroupUser.type_id == type_id
         )
         
