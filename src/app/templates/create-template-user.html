@@ -6,6 +6,7 @@
     <title>Bienvenido a LivingRoom</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css');
         
         body {
             margin: 0;
@@ -149,6 +150,9 @@
             height: 32px;
             margin-right: 0;
             vertical-align: middle;
+            font-size: 24px;
+            text-align: center;
+            line-height: 32px;
         }
         
         .detail-label {
@@ -327,9 +331,7 @@
                 <table class="details-table">
                     <tr>
                         <td>
-                            <svg class="detail-icon" fill="#4CAF50" viewBox="0 0 24 24">
-                                <path d="M12 5.5A3.5 3.5 0 0 1 15.5 9A3.5 3.5 0 0 1 12 12.5A3.5 3.5 0 0 1 8.5 9A3.5 3.5 0 0 1 12 5.5M5 8C5.56 8 6.08 8.15 6.53 8.42C6.08 9.56 6.34 10.78 7.21 11.57L8.21 12.57C8.42 12.78 8.5 13.08 8.5 13.38V15.5C8.5 16.05 8.95 16.5 9.5 16.5H14.5C15.05 16.5 15.5 16.05 15.5 15.5V13.38C15.5 13.08 15.58 12.78 15.79 12.57L16.79 11.57C17.66 10.78 17.92 9.56 17.47 8.42C17.92 8.15 18.44 8 19 8C20.1 8 21 8.9 21 10C21 10.5 20.8 10.9 20.5 11.2C20.8 11.6 21 12.1 21 12.5C21 13.6 20.1 14.5 19 14.5H5C3.9 14.5 3 13.6 3 12.5C3 12.1 3.2 11.6 3.5 11.2C3.2 10.9 3 10.5 3 10C3 8.9 3.9 8 5 8M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2Z"/>
-                            </svg>
+                            <span class="detail-icon" style="color: #4CAF50; font-size: 24px;">👥</span>
                         </td>
                         <td class="detail-label">Nombre del grupo:</td>
                         <td class="detail-value">{{ group_name or '' }}</td>
@@ -337,18 +339,14 @@
                     
                     <tr>
                         <td>
-                            <svg class="detail-icon" fill="#FFD700" viewBox="0 0 24 24">
-                                <path d="M12 8L15 13.2L18 10.5L17.3 14H6.7L6 10.5L9 13.2L12 8M12 4L8.5 10L3 11.5L8.5 13L12 19L15.5 13L21 11.5L15.5 10L12 4Z"/>
-                            </svg>
+                            <span class="detail-icon" style="color: #FFD700; font-size: 24px;">⭐</span>
                         </td>
                         <td class="detail-label">Nombre del líder:</td>
                         <td class="detail-value">{{ leader_name or '' }}</td>
                     </tr>
                     <tr>
                         <td>
-                            <svg class="detail-icon" fill="#FFD700" viewBox="0 0 24 24">
-                                <path d="M3 17.25V21H6.75L17.81 9.94L14.06 6.19L3 17.25M20.71 7.04C21.1 6.65 21.1 6 20.71 5.63L18.37 3.29C18 2.9 17.35 2.9 16.96 3.29L15.12 5.12L18.87 8.87L20.71 7.04Z"/>
-                            </svg>
+                            <span class="detail-icon" style="color: #FFD700; font-size: 24px;">✏️</span>
                         </td>
                         <td class="detail-label">Descripción:</td>
                         <td class="detail-value">{{ description or '' }}</td>
