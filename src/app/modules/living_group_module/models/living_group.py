@@ -14,6 +14,9 @@ class LivingGroup(BaseModel):
     max_members = Column(Integer, nullable=True, default=0)
     min_members = Column(Integer, nullable=True, default=0)
     value = Column(DECIMAL(10, 2), nullable=True, default=0)
+    start_date = Column(DateTime(timezone=True), nullable=True)
+    start_time = Column(String, nullable=True)
+    host_name = Column(String, nullable=True)
     sede_id = Column(Integer, ForeignKey('m_sedes.id'), nullable=True)
     active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), default=datetime.now(pytz.timezone('America/Bogota')))
@@ -21,6 +24,4 @@ class LivingGroup(BaseModel):
     deleted_at = Column(DateTime(timezone=True), nullable=True)
     
     getSede = relationship("Sede", foreign_keys=[sede_id], back_populates="getLivingGroups")
-    
-    
     getLivingGroupUsers = relationship("LivingGroupUser", back_populates="getLivingGroup")

@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bienvenido a LivingRoom</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', Arial, sans-serif;
+            background-color: #f5f5f5;
+            line-height: 1.6;
+        }
+        
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+        }
+        
+        /* Header */
+        .header {
+            background-color: transparent;
+            padding: 0;
+            text-align: center;
+            overflow: hidden;
+        }
+        
+        .header-image {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        /* Main Content */
+        .content {
+            padding: 20px 30px 40px 30px;
+            text-align: center;
+        }
+        
+        .greeting {
+            color: #007EFF;
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 0px;
+            margin-top: 0;
+            font-family: 'Poppins', Arial, sans-serif;
+        }
+        
+        .user-name {
+            color: #2c3e50;
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            margin-top: 0;
+            font-family: 'Poppins', Arial, sans-serif;
+        }
+        
+        .welcome-title {
+            color: #2c3e50;
+            font-size: 20px;
+            font-weight: normal;
+            margin-bottom: 5px;
+            text-align: left;
+            font-family: 'Poppins', Arial, sans-serif;
+        }
+        
+        .welcome-message {
+            color: #2c3e50;
+            font-size: 16px;
+            margin-bottom: 30px;
+            text-align: left;
+            line-height: 1.4;
+            font-family: 'Poppins', Arial, sans-serif;
+        }
+        
+        .highlight-box {
+            background-color: #e3f2fd;
+            padding: 20px;
+            margin: 30px 0;
+            border-radius: 8px;
+            text-align: left;
+        }
+        
+        .highlight-text {
+            color: #2c3e50;
+            font-weight: bold;
+            font-size: 16px;
+            margin: 0;
+            font-family: 'Poppins', Arial, sans-serif;
+        }
+        
+        .details-intro {
+            color: #2c3e50;
+            font-size: 16px;
+            margin-bottom: 20px;
+            text-align: left;
+            font-family: 'Poppins', Arial, sans-serif;
+        }
+        
+        /* Group Details */
+        .group-details {
+            background-color: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 25px;
+            margin: 30px 0;
+            text-align: left;
+        }
+        
+        .details-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+        
+        .details-table tr {
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .details-table tr:last-child {
+            border-bottom: none;
+        }
+        
+        .details-table td {
+            padding: 15px 0;
+            vertical-align: middle;
+        }
+        
+        .details-table td:first-child {
+            width: 40px;
+            padding-right: 10px;
+        }
+        
+        .details-table td:nth-child(2) {
+            width: 140px;
+            padding-right: 15px;
+        }
+        
+        .details-table td:nth-child(3) {
+            width: auto;
+        }
+        
+        .detail-icon {
+            width: 32px;
+            height: 32px;
+            margin-right: 0;
+            vertical-align: middle;
+        }
+        
+        .detail-label {
+            color: #2c3e50;
+            font-weight: bold;
+            font-size: 14px;
+            padding-right: 0;
+            white-space: nowrap;
+            font-family: 'Poppins', Arial, sans-serif;
+        }
+        
+        .detail-value {
+            color: #2c3e50;
+            font-size: 14px;
+            word-break: break-word;
+            font-family: 'Poppins', Arial, sans-serif;
+        }
+        
+        /* Follow-up Section */
+        .follow-up {
+            text-align: left;
+            margin: 30px 0;
+        }
+        
+        .follow-up-title {
+            color: #2c3e50;
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            font-family: 'Poppins', Arial, sans-serif;
+        }
+        
+        .follow-up-text {
+            color: #2c3e50;
+            font-size: 14px;
+            margin-bottom: 15px;
+            line-height: 1.6;
+            font-family: 'Poppins', Arial, sans-serif;
+        }
+        
+        .support-text {
+            color: #2c3e50;
+            font-size: 14px;
+            margin-bottom: 15px;
+            font-family: 'Poppins', Arial, sans-serif;
+        }
+        
+        .closing {
+            text-align: right;
+            color: #007EFF;
+            font-size: 14px;
+            margin-top: 30px;
+            font-family: 'Poppins', Arial, sans-serif;
+        }
+        
+        /* Footer */
+        .footer {
+            background-color: transparent;
+            padding: 0;
+            text-align: center;
+            overflow: hidden;
+        }
+        
+        .footer-image {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        /* Responsive */
+        @media (max-width: 600px) {
+            .content {
+                padding: 20px 15px;
+            }
+            
+            .greeting {
+                font-size: 28px;
+            }
+            
+            .user-name {
+                font-size: 18px;
+            }
+            
+            .welcome-title {
+                font-size: 20px;
+            }
+            
+            .details-table {
+                display: block;
+            }
+            
+            .details-table tr {
+                display: block;
+                margin-bottom: 15px;
+                border-bottom: 1px solid #e0e0e0;
+                padding-bottom: 15px;
+            }
+            
+            .details-table tr:last-child {
+                border-bottom: none;
+                margin-bottom: 0;
+                padding-bottom: 0;
+            }
+            
+            .details-table td {
+                display: block;
+                padding: 8px 0;
+                width: 100%;
+            }
+            
+            .detail-icon {
+                display: inline-block;
+                margin-right: 10px;
+            }
+            
+            .detail-label {
+                font-size: 13px;
+                padding-right: 0;
+                margin-bottom: 5px;
+            }
+            
+            .detail-value {
+                font-size: 13px;
+                margin-bottom: 10px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .group-details {
+                padding: 20px 15px;
+            }
+            
+            .details-table tr {
+                padding-bottom: 12px;
+            }
+            
+            .detail-label {
+                font-size: 12px;
+            }
+            
+            .detail-value {
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <!-- Header -->
+        <div class="header">
+            <img src="https://naowee-utils.s3.us-east-2.amazonaws.com/statics-utils/lvr/1440+x+290+px+.jpg" alt="LivingRoom Header" class="header-image">
+        </div>
+        
+        <!-- Main Content -->
+        <div class="content">
+            <h1 class="greeting">¡Hola!</h1>
+            <p class="user-name">{{ user_name or '' }}</p>
+            
+            <h2 class="welcome-title">¡Bienvenido a <strong>{{ group_name or '' }}</strong>!</h2>
+            
+            <p class="welcome-message">
+                Gracias por dar este paso tan importante.<br>
+                Nos emociona saber que decidiste ser parte de algo que puede<br>
+                transformar tu vida. Este es solo el comienzo de un viaje donde vas a
+                crecer, sanar, conectar y descubrir todo lo que Dios quiere hacer en ti.
+            </p>
+            
+            <div class="highlight-box">
+                <p class="highlight-text">¡Qué alegría tenerte con nosotros!</p>
+            </div>
+            
+            <p class="details-intro">Aquí te compartimos los detalles del grupo al que te acabas de inscribir:</p>
+            
+            <!-- Group Details -->
+            <div class="group-details">
+                <table class="details-table">
+                    <tr>
+                        <td>
+                            <svg class="detail-icon" fill="#4CAF50" viewBox="0 0 24 24">
+                                <path d="M12 5.5A3.5 3.5 0 0 1 15.5 9A3.5 3.5 0 0 1 12 12.5A3.5 3.5 0 0 1 8.5 9A3.5 3.5 0 0 1 12 5.5M5 8C5.56 8 6.08 8.15 6.53 8.42C6.08 9.56 6.34 10.78 7.21 11.57L8.21 12.57C8.42 12.78 8.5 13.08 8.5 13.38V15.5C8.5 16.05 8.95 16.5 9.5 16.5H14.5C15.05 16.5 15.5 16.05 15.5 15.5V13.38C15.5 13.08 15.58 12.78 15.79 12.57L16.79 11.57C17.66 10.78 17.92 9.56 17.47 8.42C17.92 8.15 18.44 8 19 8C20.1 8 21 8.9 21 10C21 10.5 20.8 10.9 20.5 11.2C20.8 11.6 21 12.1 21 12.5C21 13.6 20.1 14.5 19 14.5H5C3.9 14.5 3 13.6 3 12.5C3 12.1 3.2 11.6 3.5 11.2C3.2 10.9 3 10.5 3 10C3 8.9 3.9 8 5 8M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2Z"/>
+                            </svg>
+                        </td>
+                        <td class="detail-label">Nombre del grupo:</td>
+                        <td class="detail-value">{{ group_name or '' }}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td>
+                            <svg class="detail-icon" fill="#FFD700" viewBox="0 0 24 24">
+                                <path d="M12 8L15 13.2L18 10.5L17.3 14H6.7L6 10.5L9 13.2L12 8M12 4L8.5 10L3 11.5L8.5 13L12 19L15.5 13L21 11.5L15.5 10L12 4Z"/>
+                            </svg>
+                        </td>
+                        <td class="detail-label">Nombre del líder:</td>
+                        <td class="detail-value">{{ leader_name or '' }}</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <svg class="detail-icon" fill="#FFD700" viewBox="0 0 24 24">
+                                <path d="M3 17.25V21H6.75L17.81 9.94L14.06 6.19L3 17.25M20.71 7.04C21.1 6.65 21.1 6 20.71 5.63L18.37 3.29C18 2.9 17.35 2.9 16.96 3.29L15.12 5.12L18.87 8.87L20.71 7.04Z"/>
+                            </svg>
+                        </td>
+                        <td class="detail-label">Descripción:</td>
+                        <td class="detail-value">{{ description or '' }}</td>
+                    </tr>
+                </table>
+            </div>
+            
+            <!-- Follow-up Section -->
+            <div class="follow-up">
+                <p class="follow-up-title">Muy pronto vas a conocer a tu líder.</p>
+                
+                <p class="follow-up-text">
+                    {{ leader_name or 'Tu líder' }} se estará comunicando contigo una semana antes
+                    del inicio para darte la bienvenida y contarte los siguientes pasos.
+                </p>
+                
+                <p class="support-text">
+                    Si tienes cualquier pregunta o necesitas ayuda antes de eso,
+                    escríbenos por nuestros canales oficiales.
+                </p>
+                
+                <p class="support-text">Estamos aquí para ti. Siempre.</p>
+            </div>
+            
+            <p class="closing">Con cariño,<br>Equipo Living Room</p>
+        </div>
+        
+        <!-- Footer -->
+        <div class="footer">
+            <img src="https://naowee-utils.s3.us-east-2.amazonaws.com/statics-utils/lvr/1440+x+110+px.jpg" alt="LivingRoom Footer" class="footer-image">
+        </div>
+    </div>
+</body>
+</html>

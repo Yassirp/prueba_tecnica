@@ -54,16 +54,10 @@ class LivingGroupUserService(BaseService[LivingGroupUser, LivingGroupUserOut]):
             living_group = await living_group_repository.get_by_id(data.living_group_id)  
             if not living_group:
                 raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Living group no encontrado")
-            
-"""         living_group_repository = LivingGroupRepository(model=LivingGroup, db_session=self.db_session)
-        living_group_users, total = await living_group_repository.get_all_with_relationships(filters={"living_group_id": data.living_group_id})
-        
-        if data.living_group_id:
-            if total + 1 > living_group_users.max_users:
-                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No se puede agregar mas usuarios a este grupo")
-         """
-        
-        
-            
-        
-             
+    
+    async def get_group_and_leader_info(self, user_id: int, type_id: int = 4):
+        """
+        Obtiene información del grupo de vida y líder para un usuario específico
+        """
+        repository = LivingGroupUserRepository(LivingGroupUser, self.db_session)
+        return await repository.get_group_and_leader_info(user_id, type_id)

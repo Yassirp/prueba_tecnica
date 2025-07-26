@@ -25,8 +25,8 @@ print("Conectando a:", DATABASE_URL)
 ENGINE_SEED = create_async_engine(
     DATABASE_URL, 
     echo=True,
-    pool_size=10,  # Máximo de conexiones en el pool
-    max_overflow=20,  # Conexiones adicionales si pool está lleno
+    pool_size=100,  # Máximo de conexiones en el pool
+    max_overflow=100,  # Conexiones adicionales si pool está lleno
     pool_timeout=30,  # Tiempo máximo (s) para esperar una conexión
     pool_recycle=1800,  # Recicla conexiones cada 30 min (evita idle)
 )

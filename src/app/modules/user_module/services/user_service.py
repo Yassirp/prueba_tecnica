@@ -21,6 +21,7 @@ import string
 import asyncio
 from src.app.shared.utils.request_utils import http_response
 from src.app.shared.utils.service_token import send_email_token, send_sms_token
+from src.app.utils.mailer import send_email
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -88,28 +89,16 @@ class UserService(BaseService[User, UserOut]):
         if existing_user:
             return http_response(status=400, message="El email ya está registrado")
         
-        data["state"] = 2  # Pendiente de aprobación
-        validation_method = data.get("validation_method")  # "mail" o "cellphone"
-        if not validation_method:
-            return http_response(status=400, message="El metodo de validacion es requerido")
-        
         # Generar código de 6 dígitos
         code = str(random.randint(100000, 999999))
         data["code"] = code
         data["password"] = pwd_context.hash(data["password"])
 
-        if validation_method == "mail":
-            response = await send_email_token(data["email"],"su codigo de verificacion es: " + code)
-        elif validation_method == "cellphone":
-            response = await send_sms_token(data["phone"], code)
-        else:
-            return http_response(status=400, message="Método de validación inválido")
-
-        if response["status"] != "success":
-            return http_response(status=500, message=response["message"], data=response.get("details"))
-
         user = UserCreate(**data)
         new_user = await self.repository.create(user.model_dump())
+        
+        # Obtener información del grupo y líder si el usuario participa en un grupo
+        group_info = None
         if data.get("participated_in_living_group"):
             living_group_user_data = LivingGroupUserCreate(
                 user_id=getattr(new_user, 'id'),
@@ -120,10 +109,49 @@ class UserService(BaseService[User, UserOut]):
                 active=data["active"] if "active" in data else True
             )
             living_group_user = await self.living_group_user_service.create(living_group_user_data)
+            
+            # Obtener información del grupo y líder usando la consulta SQL
+            group_info = await self.living_group_user_service.get_group_and_leader_info(
+                user_id=getattr(new_user, 'id'),
+                type_id=4  # Tipo líder
+            )
+
+        # Preparar datos para el correo
+        email_context = {
+            "user_name": f"{data['name']} {data['last_name']}",
+            "password": data["password"],
+            "leader_name": "No hay nombre del líder",
+            "group_name": "No hay nombre del grupo",
+            "description": "No hay descripción del grupo"
+        }
+        
+        # Actualizar con datos reales del grupo si están disponibles
+        if group_info:
+            group_name, group_description, leader_name, leader_last_name = group_info
+            email_context.update({
+                "leader_name": f"{leader_name} {leader_last_name}" if leader_name and leader_last_name else "No hay nombre del líder",
+                "group_name": group_name if group_name else "No hay nombre del grupo",
+                "description": group_description if group_description else "No hay descripción del grupo"
+            })
+        else:
+            # Usar datos proporcionados en la petición como fallback
+            email_context.update({
+                "leader_name": data.get("leader_name", "No hay nombre del líder"),
+                "group_name": data.get("living_group_name", "No hay nombre del grupo"),
+                "description": data.get("description", "No hay descripción del grupo")
+            })
+
+        # Enviar la contraseña por correo
+        await send_email(
+            to_email=data['email'],
+            subject="Bienvenido a LVR - Tu cuenta ha sido creada",
+            template_name="create-template-user.html",
+            context=email_context
+        )
 
         return http_response(
             message="Usuario registrado correctamente",
-            data={"user": new_user, "validation_method": validation_method}
+            data={"user": new_user}
         )
     
 
@@ -194,7 +222,18 @@ class UserService(BaseService[User, UserOut]):
             await self.living_group_user_service.create(living_group_user_data)
 
         # 3. Enviar la contraseña por correo
-        await send_email_token(data['email'], f"Su contraseña temporal es: {random_password}", subject="Contraseña temporal")
+        await send_email(
+            to_email=data['email'],
+            subject="Bienvenido a LVR - Tu cuenta ha sido creada",
+            template_name="create-template-user.html",
+            context={
+                "user_name": f"{data['name']} {data['last_name']}",
+                "password": random_password,
+                "leader_name": data["leader_name"],
+                "group_name": data["living_group_name"],
+                "description": data["description"]
+            }
+        )
         
         # 4. Retornar respuesta
         return http_response(

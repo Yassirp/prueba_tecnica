@@ -10,4 +10,6 @@ class PaymentRepository(BaseRepository[Payment]):
         super().__init__(model, db_session)
         
     async def get_by_external_reference(self, external_reference: str):
-        return await self.db_session.execute(select(self.model).where(self.model.external_reference == external_reference)).scalar_one_or_none()
+        stmt = select(self.model).where(self.model.external_reference == external_reference)
+        result = await self.db_session.execute(stmt)
+        return result.scalar_one_or_none()
