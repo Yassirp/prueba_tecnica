@@ -103,29 +103,40 @@ class MercadoPagoService:
 
             logger.info(f"Webhook recibido: {body}")
             logger.info(f"Query params: {query_params}")
-            payment_reposponse = self.sdk.payment().get(payment_id)
-            logger.info(f"Payment: {payment_reposponse}")
-            payment_status = payment_reposponse["response"]["status"]
-            external_reference = payment_reposponse["response"].get("external_reference")
 
-            if external_reference:
-                logger.info(f"External reference: {external_reference}")
-                payment = await self.payment_repository.get_by_external_reference(external_reference)
-                logger.info(f"Payment: {payment}")
-                if not payment:
-                    raise HTTPException(status_code=404, detail="Grupo no encontrado")
+            payment_response = self.sdk.payment().get(payment_id)
+            logger.info(f"Payment: {payment_response}")
 
-                payment.payment_status = payment_status
-                logger.info(f"Payment status: {payment_status}")
-                await self.payment_repository.update(payment.id, {"payment_status": payment_status})
-                logger.info(f"Payment updated: {payment}")
-                if payment_status == "approved":
-                    user_service = UserService(self.db)
-                    await user_service.register(payment.data)
-                    logger.info(f"User registered: {payment.data}")
-                    return {"message": "Pago aprobado"}
+            payment_data = payment_response["response"]
+            payment_status = payment_data.get("status")
+            external_reference = payment_data.get("external_reference")
+
+            if not external_reference:
+                raise HTTPException(status_code=400, detail="Falta external_reference")
+
+            logger.info(f"External reference: {external_reference}")
+
+            payment = await self.payment_repository.get_by_external_reference(external_reference)
+            if not payment:
+                raise HTTPException(status_code=404, detail="Pago no encontrado")
+
+            logger.info(f"Payment: {payment}")
+
+            payment.payment_status = payment_status
+            await self.payment_repository.update(payment.id, {"payment_status": payment_status})
+
+            logger.info(f"Payment status actualizado: {payment_status}")
+
+            if payment_status == "approved":
+                user_service = UserService(self.db)
+                await user_service.register(payment.data)
+                logger.info(f"Usuario registrado con data: {payment.data}")
+                return {"message": "Pago aprobado y usuario creado"}
+
+            return {"message": "Pago recibido, pero no aprobado"}
+
         except Exception as e:
+            logger.exception("Error procesando webhook")
             raise HTTPException(status_code=500, detail=str(e))
-        finally:
-            return {"message": "Webhook recibido"}
+
         

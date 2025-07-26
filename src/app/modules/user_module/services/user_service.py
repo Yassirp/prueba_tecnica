@@ -89,25 +89,10 @@ class UserService(BaseService[User, UserOut]):
         if existing_user:
             return http_response(status=400, message="El email ya está registrado")
         
-        data["state"] = 2  # Pendiente de aprobación
-        validation_method = data.get("validation_method")  # "mail" o "cellphone"
-        if not validation_method:
-            return http_response(status=400, message="El metodo de validacion es requerido")
-        
         # Generar código de 6 dígitos
         code = str(random.randint(100000, 999999))
         data["code"] = code
         data["password"] = pwd_context.hash(data["password"])
-
-        if validation_method == "mail":
-            response = await send_email_token(data["email"],"su codigo de verificacion es: " + code)
-        elif validation_method == "cellphone":
-            response = await send_sms_token(data["phone"], code)
-        else:
-            return http_response(status=400, message="Método de validación inválido")
-
-        if response["status"] != "success":
-            return http_response(status=500, message=response["message"], data=response.get("details"))
 
         user = UserCreate(**data)
         new_user = await self.repository.create(user.model_dump())
@@ -138,7 +123,7 @@ class UserService(BaseService[User, UserOut]):
 
         return http_response(
             message="Usuario registrado correctamente",
-            data={"user": new_user, "validation_method": validation_method}
+            data={"user": new_user}
         )
     
 
