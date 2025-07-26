@@ -33,7 +33,7 @@ class MercadoPagoService:
             if not living_group:
                 raise HTTPException(status_code=404, detail="Grupo de vida no encontrado")
             domain = get_domain_api()
-            external_reference = f"{living_group.id}_{datetime.now().timestamp()}_{uuid.uuid4()}"
+            external_reference = f"{living_group.id}_{uuid.uuid4()}"
             user = await self.user_repository.get_by_email(data.get("email"))
             if user:
                 raise HTTPException(status_code=400, detail="email registrado, por favor intente con otro email")
