@@ -97,7 +97,7 @@ class MercadoPagoService:
 
     async def handle_webhook(self, body: dict, query_params: dict):
         try:
-            payment_id = body.get("data", {}).get("id")
+            payment_id = body.get("data").get("id")
             if not payment_id:
                 raise HTTPException(status_code=400, detail="No se encontró el ID de pago")
 
