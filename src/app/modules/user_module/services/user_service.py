@@ -96,6 +96,9 @@ class UserService(BaseService[User, UserOut]):
 
         user = UserCreate(**data)
         new_user = await self.repository.create(user.model_dump())
+        
+        # Obtener información del grupo y líder si el usuario participa en un grupo
+        group_info = None
         if data.get("participated_in_living_group"):
             living_group_user_data = LivingGroupUserCreate(
                 user_id=getattr(new_user, 'id'),
@@ -107,19 +110,43 @@ class UserService(BaseService[User, UserOut]):
             )
             living_group_user = await self.living_group_user_service.create(living_group_user_data)
             
+            # Obtener información del grupo y líder usando la consulta SQL
+            group_info = await self.living_group_user_service.get_group_and_leader_info(
+                user_id=getattr(new_user, 'id'),
+                type_id=4  # Tipo líder
+            )
 
-        # 3. Enviar la contraseña por correo
+        # Preparar datos para el correo
+        email_context = {
+            "user_name": f"{data['name']} {data['last_name']}",
+            "password": data["password"],
+            "leader_name": "No hay nombre del líder",
+            "group_name": "No hay nombre del grupo",
+            "description": "No hay descripción del grupo"
+        }
+        
+        # Actualizar con datos reales del grupo si están disponibles
+        if group_info:
+            group_name, group_description, leader_name, leader_last_name = group_info
+            email_context.update({
+                "leader_name": f"{leader_name} {leader_last_name}" if leader_name and leader_last_name else "No hay nombre del líder",
+                "group_name": group_name if group_name else "No hay nombre del grupo",
+                "description": group_description if group_description else "No hay descripción del grupo"
+            })
+        else:
+            # Usar datos proporcionados en la petición como fallback
+            email_context.update({
+                "leader_name": data.get("leader_name", "No hay nombre del líder"),
+                "group_name": data.get("living_group_name", "No hay nombre del grupo"),
+                "description": data.get("description", "No hay descripción del grupo")
+            })
+
+        # Enviar la contraseña por correo
         await send_email(
             to_email=data['email'],
             subject="Bienvenido a LVR - Tu cuenta ha sido creada",
             template_name="create-template-user.html",
-            context={
-                "user_name": f"{data['name']} {data['last_name']}",
-                "password": data["password"],
-                "leader_name": data["leader_name"] if "leader_name" in data else "No hay nombre del líder",
-                "group_name": data["living_group_name"] if "living_group_name" in data else "No hay nombre del grupo",
-                "description": data["description"] if "description" in data else "No hay descripción del grupo pero si un mensaje de ejemplo. Fecha: 30210"
-            }
+            context=email_context
         )
 
         return http_response(
