@@ -55,9 +55,9 @@ class LivingGroupUserService(BaseService[LivingGroupUser, LivingGroupUserOut]):
             if not living_group:
                 raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Living group no encontrado")
     
-    async def get_group_and_leader_info(self, user_id: int, type_id: int = 4):
+    async def get_group_and_leader_info(self, living_group_id: int, type_id: int = 4):
         """
-        Obtiene información del grupo de vida y líder para un usuario específico
+        Obtiene información del grupo de vida y líder para un grupo específico
         """
         repository = LivingGroupUserRepository(LivingGroupUser, self.db_session)
-        return await repository.get_group_and_leader_info(user_id, type_id)
+        return await repository.get_group_and_leader_info(living_group_id, type_id)

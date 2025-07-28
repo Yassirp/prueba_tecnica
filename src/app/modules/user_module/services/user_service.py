@@ -96,10 +96,7 @@ class UserService(BaseService[User, UserOut]):
 
         user = UserCreate(**data)
         new_user = await self.repository.create(user.model_dump())
-        
-        # Obtener información del grupo y líder si el usuario participa en un grupo
-        group_info = None
-        if data.get("participated_in_living_group"):
+        if data.get("living_group_id"):
             living_group_user_data = LivingGroupUserCreate(
                 user_id=getattr(new_user, 'id'),
                 living_group_id=data["living_group_id"],
@@ -110,11 +107,14 @@ class UserService(BaseService[User, UserOut]):
             )
             living_group_user = await self.living_group_user_service.create(living_group_user_data)
             
+            group_info = None
             # Obtener información del grupo y líder usando la consulta SQL
             group_info = await self.living_group_user_service.get_group_and_leader_info(
-                user_id=getattr(new_user, 'id'),
+                living_group_id=int(data["living_group_id"]),  # Cambiado de user_id a living_group_id
                 type_id=4  # Tipo líder
             )
+
+            
 
         # Preparar datos para el correo
         email_context = {
@@ -154,6 +154,7 @@ class UserService(BaseService[User, UserOut]):
             })
 
         # Enviar la contraseña por correo
+
         await send_email(
             to_email=data['email'],
             subject="Bienvenido a LVR - Tu cuenta ha sido creada",
@@ -163,7 +164,7 @@ class UserService(BaseService[User, UserOut]):
 
         return http_response(
             message="Usuario registrado correctamente",
-            data={"user": new_user}
+            data={"user": new_user},
         )
     
 
@@ -222,11 +223,11 @@ class UserService(BaseService[User, UserOut]):
                 )
             
         new_user = await self.repository.create(user.model_dump())
-        if data.get("participated_in_living_group"):
+        if data.get("living_group_id"):
             living_group_user_data = LivingGroupUserCreate(
                 user_id=getattr(new_user, 'id'),
                 living_group_id=data["living_group_id"],
-                type_id=data["type_id"] if "type_id" in data else 1,
+                type_id=data["type_id"] if "type_id" in data else 2,
                 description=data["description"] if "description" in data else None,
                 data=data["data"] if "data" in data else None,
                 active=data["active"] if "active" in data else True
