@@ -29,9 +29,13 @@ class MercadoPagoService:
 
     async def create_payment(self, data: dict):
         try:
-            living_group = await self.living_group_repository.get_by_id(data.get("living_group_id"))
+            living_group = await self.living_group_repository.get_by_id_with_relations(data.get("living_group_id"))
             if not living_group:
                 raise HTTPException(status_code=404, detail="Grupo de vida no encontrado")
+            
+            if len(living_group.getLivingGroupUsers) >= living_group.max_members:
+                raise HTTPException(status_code=400, detail="Grupo de vida lleno")
+            
             domain = get_domain_api()
             external_reference = f"{living_group.id}_{uuid.uuid4()}"
             user = await self.user_repository.get_by_email(data.get("email"))
