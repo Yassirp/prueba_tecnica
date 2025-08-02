@@ -6,97 +6,68 @@
     <title>{{ app_name }}</title>
     <style>
         body {
-            margin: 0;
-            padding: 0;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, #f5f7fa 0%, #f1f1f1 100%);
-            font-family: 'Segoe UI', Arial, sans-serif;
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
         }
-
         .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
             text-align: center;
-            padding: 3rem 4rem;
-            background: white;
+        }
+        .info {
+            background-color: #e8f4fd;
+            padding: 15px;
             border-radius: 5px;
-            box-shadow: 0 0px 29px rgb(35 16 16 / 10%);
-            max-width: 450px;
-            width: 90%;
+            margin: 20px 0;
         }
-
-        .title {
-            color: #2C3E50;
-            margin-bottom: 1rem;
-            font-size: 1.7rem;
-            font-style: italic;
-            font-weight: 500;
-        }
-
-        .description {
-            color: #7e7e7e;
-            margin-bottom: 2rem;
-            line-height: 1.6;
-            font-size: 17px;
-        }
-
-        .doc-button {
-            display: inline-block;
-            padding: 1rem 2rem;
-            background: #4CAF50;
-            color: white;
-            text-decoration: none;
+        .endpoints {
+            background-color: #f0f8ff;
+            padding: 15px;
             border-radius: 5px;
-            font-weight: bold;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin: 20px 0;
         }
-
-        .doc-button:hover {
-            background: #388E3C;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 8px rgba(0,0,0,0.15);
-        }
-
-        .status-indicator {
-            margin: 2rem 0;
-        }
-
-        .version {
-            margin-top: 1.5rem;
-            color: #2C3E50;
-            font-size: 1.2rem;
-        }
-
-        .server-info {
-            margin-top: 1rem;
-            font-size: 0.8rem;
-            color: #2C3E50;
+        .endpoint {
+            margin: 5px 0;
+            font-family: monospace;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1 class="title">
-            {{ app_name }}
-        </h1>
-        <p class="description">
-            Bienvenido a la <b>{{ app_description }}</b>. Aquí puedes encontrar toda la documentación
-            y herramientas necesarias para interactuar con nuestros servicios.
-        </p>
+        <h1>{{ app_name }}</h1>
+        <p style="text-align: center; color: #666;">{{ app_description }}</p>
         
-        <div class="status-indicator">
-            <img src="/static/status.svg" alt="API Status" width="150">
+        <div class="info">
+            <h3>📋 Información del Proyecto</h3>
+            <p><strong>Versión:</strong> {{ version }}</p>
+            <p><strong>Estado:</strong> ✅ Funcionando correctamente</p>
         </div>
-
-        <a href="/docs" class="doc-button">
-            Ver Documentación
-        </a>
-
-        <div class="server-info">
-            <p class="version">Versión <b>{{ version }}</b></p>
+        
+        <div class="endpoints">
+            <h3>🔗 Endpoints Disponibles</h3>
+            <div class="endpoint">📚 <strong>Documentación API:</strong> <a href="/docs" target="_blank">/docs</a></div>
+            <div class="endpoint">📖 <strong>ReDoc:</strong> <a href="/redoc" target="_blank">/redoc</a></div>
+            <div class="endpoint">🔐 <strong>Autenticación:</strong> /auth/</div>
+            <div class="endpoint">📅 <strong>Reservas:</strong> /reservas/</div>
+            <div class="endpoint">👥 <strong>Roles:</strong> /roles/</div>
+            <div class="endpoint">⚽ <strong>Canchas:</strong> /soccer-fields/</div>
+            <div class="endpoint">📊 <strong>Dashboard:</strong> /dashboard/</div>
+        </div>
+        
+        <div class="info">
+            <h3>🚀 Cómo usar</h3>
+            <p>1. Ve a <a href="/docs" target="_blank">/docs</a> para ver la documentación interactiva</p>
+            <p>2. Registra un usuario en <code>/auth/registro</code></p>
+            <p>3. Inicia sesión en <code>/auth/login</code></p>
+            <p>4. Usa el token JWT para acceder a los otros endpoints</p>
         </div>
     </div>
 </body>

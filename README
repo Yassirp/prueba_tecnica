@@ -1,6 +1,6 @@
-## Microservicio Documentos
+## Microservicios Futbol
 
-Este es un microservicio para la Gestión Documental de todos los proyectos de Naowee
+Este proyecto implementa una arquitectura basada en **microservicios** usando **FastAPI**, **SQLAlchemy** y **PostgreSQL**, con autenticación JWT y manejo de datos de forma asíncrona.
 
 ## 🚀 Configuración del Proyecto
 
@@ -18,7 +18,7 @@ python3 src/app/command/delete_migrations.py
 docker compose up -d --build
 ```
 
-## 🧩 Crear Base de Datos: master-documents docker exec -it micro_lvr_api bash
+## 🧩 Crear Base de Datos: master-documents docker exec -it prueba_naowee_api bash
 
 - Ejecutar migracion inicial:
   Es necesario ejecutar el comando desde el contenedor del
@@ -106,7 +106,7 @@ python src/app/command/generate_module.py vehicles
 
 ## Ejecutar seeders
 
-## correr dentro de docker docker exec -it micro_lvr_api bash
+## correr dentro de docker docker exec -it prueba_naowee_api bash
 
 ```bash
 

@@ -1,7 +1,7 @@
 from fastapi import Depends, HTTPException, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import JWTError, jwt
-from src.app.shared.constants.settings import Settings
+from app.shared.constants.settings import Settings
 from fastapi import HTTPException, Depends, status
 
 

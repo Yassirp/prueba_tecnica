@@ -1,7 +1,7 @@
 import httpx
 import smtplib
 import base64
-from src.app.shared.constants.settings import Settings
+from app.shared.constants.settings import Settings
 from email.message import EmailMessage
 
 async def send_sms_token(phone_number: str, code: str) -> dict:

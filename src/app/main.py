@@ -4,11 +4,10 @@ from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from fastapi.exceptions import RequestValidationError
-from src.app.shared.constants.settings import Settings
-from src.app.routes import router as main_router
-from src.app.shared.utils.request_utils import http_response, get_errors_validations
-from src.app.shared.constants.messages import GlobalMessages
-from src.app.utils.email_preview import router as email_preview_router
+from app.shared.constants.settings import Settings
+from app.routes import router as main_router
+from app.shared.utils.request_utils import http_response, get_errors_validations
+from app.shared.constants.messages import GlobalMessages
 from fastapi.openapi.utils import get_openapi
 import os
 
@@ -44,10 +43,10 @@ def custom_openapi():
 app.openapi = custom_openapi
 
 # TEMPLATES
-templates = Jinja2Templates(directory="src/app/templates")
+templates = Jinja2Templates(directory="app/templates")
 
 # STATIC FILES
-app.mount("/static", StaticFiles(directory="src/app/static"), name="static")
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 # MAIN ROUTERS
 app.include_router(main_router)

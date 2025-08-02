@@ -1,22 +1,22 @@
 services:
-  micro_lvr_api:
-    container_name: micro_lvr_api
+  prueba_api:
+    container_name: prueba_api
     build: ./src/
     env_file:
       - ./src/.env
     ports:
       - '5001:8000'
     volumes:
-      - .:/src
+      - ./src:/app
     depends_on:
-      - micro_lvr_db
+      - prueba_db
     restart: always
     networks:
       - api_network
 
-  micro_lvr_db:
+  prueba_db:
     image: docker.io/bitnami/postgresql:16
-    container_name: micro_lvr_db
+    container_name: prueba_db
     ports:
       - '5434:5432'
     env_file:

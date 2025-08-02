@@ -12,9 +12,9 @@ from typing import (
 )
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update
-from src.app.shared.constants.project_enum import Setting
-from src.app.shared.utils.query_utils import apply_filters, apply_order_by
-from src.app.shared.bases.base_model import BaseModel
+from app.shared.constants.project_enum import Setting
+from app.shared.utils.query_utils import apply_filters, apply_order_by
+from app.shared.bases.base_model import BaseModel
 from datetime import datetime
 
 T = TypeVar("T", bound=BaseModel)

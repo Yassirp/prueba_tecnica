@@ -1,42 +1,20 @@
-# Módulos sin relaciones circulares
-from src.app.modules.parameters_module.models.parameters import Parameter 
-from src.app.modules.parameters_module.models.parameters_values import ParameterValue 
+#soccer_fields
+from app.modules.soccer_field_module.models.soccer_fields import SoccerField
 
-# Permisos y acciones — usa strings en los modelos
-from src.app.modules.permission_module.models.actions import Action 
-from src.app.modules.permission_module.models.module import Module
-from src.app.modules.permission_module.models.module_actions import ModuleAction
-from src.app.modules.permission_module.models.role import Role
-from src.app.modules.permission_module.models.permissions import Permission
+#dashboard_module
+from app.modules.dashboard_module.models.users import User
+from app.modules.dashboard_module.models.bookings import Booking
 
-# Ubicación
-from src.app.modules.ubication_module.models.countries import Country
-from src.app.modules.ubication_module.models.departments import Department
-from src.app.modules.ubication_module.models.municipalities import Municipality
+#microservicio_auth
+from app.modules.microservicio_auth.models.auth_models import Usuario, RolUsuario
 
-# Documentos
-from src.app.modules.document_module.models.documents import Document
+#reservas_services
+from app.modules.reservas_services.models.reserva_models import Reserva
 
-# Flujos
-from src.app.modules.flow_module.models.flows import Flow
-from src.app.modules.flow_module.models.object_states import ObjectState
-from src.app.modules.flow_module.models.flow_object_states import FlowObjectState
+#roles_service
+from app.modules.roles_service.models.rol_models import Rol, Permiso, RolPermiso
+
+#base_model
+from app.shared.bases.base_model import BaseModel
 
 
-# Finalmente: User (que depende de todo lo anterior)
-from src.app.modules.user_module.models.users import User
-from src.app.modules.user_module.models.user_relationship import UserRelationship
-
-# Sedes
-from src.app.modules.sedes_module.models.sedes import Sede
-from src.app.modules.sedes_module.models.sedes_members import SedesMember
-
-# Eventos
-from src.app.modules.living_group_module.models.living_group import LivingGroup
-from src.app.modules.living_group_module.models.living_group_users import LivingGroupUser
-
-# Pagos
-from src.app.modules.payment_module.models.payment import Payment
-
-
-from src.app.shared.bases.base_model import BaseModel

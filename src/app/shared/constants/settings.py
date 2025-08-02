@@ -1,4 +1,8 @@
 import os
+from dotenv import load_dotenv
+
+# Cargar variables de entorno desde el archivo .env
+load_dotenv()
 
 class Settings:
     """Environmental variables"""
@@ -8,11 +12,11 @@ class Settings:
     PORT = os.getenv("HOST_PORT")
     DEBUG = os.getenv("DEBUG", "False").lower() in ("true", "1", "yes")
 
-    DB_NAME = os.getenv("PG_NAME")
-    DB_HOST = os.getenv("PG_HOST")
-    DB_PORT = os.getenv("PG_PORT")
-    DB_USERNAME = os.getenv("PG_USER")
-    DB_PASSWORD = os.getenv("PG_PASSWORD")
+    DB_NAME = os.getenv("DB_NAME")
+    DB_HOST = os.getenv("DB_HOST")
+    DB_PORT = os.getenv("DB_PORT")
+    DB_USERNAME = os.getenv("DB_USER")
+    DB_PASSWORD = os.getenv("DB_PASSWORD")
 
     SECRET_KEY = os.getenv("SECRET_KEY", "secret")
     APP_KEY = os.getenv("APP_KEY", "")
@@ -31,8 +35,8 @@ class Settings:
     CELL_PASSWORD = os.getenv("CELL_PASSWORD", "")
     CELL_CODE = os.getenv("CELL_CODE", "")
     
-    APP_NAME = "Micro LVR API"
-    APP_DESCRIPTION = "API for LVR management"
+    APP_NAME = "Prueba Naowee"
+    APP_DESCRIPTION = "API para gestión de reservas de canchas de fútbol"
     APP_VERSION = "0.0.1"
 
     AWS_ACCESS_KEY_ID= os.getenv("AWS_ACCESS_KEY_ID", "")
